@@ -3,20 +3,27 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { createNote } from "@/repositories/note.repository";
 import { NoteForm } from "@/components/notes/NoteForm";
 import { NoteFormData } from "@/schemas/note.schema";
+import { useRouter } from "expo-router";
 import { View } from "react-native";
 
 import * as Crypto from 'expo-crypto';
 
 export default function CreateNoteScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+
   const queryClient = useQueryClient();
   const createNoteMutation = useMutation({
     mutationFn: createNote,
+
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["notes"]
       });
+
+      router.back();
     },
+
     onError: (error) => {
       console.error(error);
     }

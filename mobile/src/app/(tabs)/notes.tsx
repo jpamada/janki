@@ -1,7 +1,8 @@
 import { FlatList, Pressable, Text, View } from 'react-native';
-import { getNotes } from '@/repositories/note.repository';
-import { useQuery } from '@tanstack/react-query';
+import { deleteNote, getNotes } from '@/repositories/note.repository';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
+import { NoteItem } from '@/components/notes/NoteItem';
 
 export default function NotesScreen() {
   const {
@@ -12,6 +13,33 @@ export default function NotesScreen() {
     queryKey: ['notes'],
     queryFn: getNotes,
   });
+
+  const queryClient = useQueryClient();
+  const deleteNoteMutation = useMutation({
+    mutationFn: deleteNote,
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["notes"],
+      });
+    },
+
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
+  function handleDelete(id: string) {
+    deleteNoteMutation.mutate(id);
+  }
+
+  if (isLoading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (error) {
+    return <Text>Failed to load notes.</Text>;
+  }
 
   return (
     <View className="flex-1 bg-gray-50 p-4">
@@ -24,22 +52,13 @@ export default function NotesScreen() {
         keyExtractor={(item) => item.id}
         contentContainerClassName="gap-2"
         renderItem={({ item }) => (
-          <Pressable
-            onPress={() => router.push(`/notes/${item.id}`)}
-            className="bg-white rounded-lg p-4"
-          >
-            <Text className="text-gray-400 text-xs mb-2">
-              {item.createdAt.toLocaleString()}
-            </Text>
-
-            <Text className="font-semibold">
-              {item.title}
-            </Text>
-
-            <Text>
-              {item.content}
-            </Text>
-          </Pressable>
+          <NoteItem
+            id={item.id}
+            title={item.title}
+            content={item.content}
+            createdAt={item.createdAt}
+            onDelete={handleDelete}
+          />
         )}
       />
 
