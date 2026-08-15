@@ -35,7 +35,7 @@ export function SubjectItem({
     >
       <Pressable
           onPress={() => router.push(`/subjects/lessons/${id}`)}
-          className="bg-purple-600 rounded-lg p-4"
+          className="bg-gray-800 rounded-lg p-4"
       >
         <Text className="text-white text-xl font-bold">
           {title}

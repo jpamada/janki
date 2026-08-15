@@ -53,6 +53,7 @@ export default function LessonScreen() {
             <LessonItem
               id={item.id}
               title={item.title}
+              subjectId={subjectId}
               onDelete={handleDelete}
             />
           )}

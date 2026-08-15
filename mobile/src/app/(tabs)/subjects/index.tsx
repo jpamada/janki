@@ -64,7 +64,7 @@ export default function SubjectsScreen() {
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
         }}
       >
-        <Text className="text-3xl text-blue-500">+</Text>
+        <Text className="text-3xl">+</Text>
       </Pressable>
     </View>
   )

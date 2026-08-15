@@ -12,6 +12,6 @@ export const subjectSchema = z.object({
     .trim()
     .min(1, "Category is required")
     .max(50, "Category is too long"),
-})
+});
 
 export type SubjectFormData = z.infer<typeof subjectSchema>;
