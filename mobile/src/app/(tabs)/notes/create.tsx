@@ -9,10 +9,10 @@ import { View } from "react-native";
 import * as Crypto from 'expo-crypto';
 
 export default function CreateNoteScreen() {
+  const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const queryClient = useQueryClient();
   const createNoteMutation = useMutation({
     mutationFn: createNote,
 

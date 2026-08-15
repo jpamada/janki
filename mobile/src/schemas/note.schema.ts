@@ -7,7 +7,8 @@ export const noteSchema = z.object({
     .min(1, 'Title is required')
     .max(200, 'Title is too long'),
 
-  content: z.string(),
+  content: z
+    .string(),
 });
 
 export type NoteFormData = z.infer<typeof noteSchema>;

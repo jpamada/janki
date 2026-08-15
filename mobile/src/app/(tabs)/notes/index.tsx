@@ -1,17 +1,13 @@
-import { FlatList, Pressable, Text, View } from 'react-native';
-import { deleteNote, getNotes } from '@/repositories/note.repository';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
+import { deleteNote, getNotes } from '@/repositories/note.repository';
+import { FlatList, Pressable, Text, View } from 'react-native';
 import { NoteItem } from '@/components/notes/NoteItem';
+import { router } from 'expo-router';
 
 export default function NotesScreen() {
-  const {
-    data: notes = [],
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['notes'],
-    queryFn: getNotes,
+  const { data: notes = [], isLoading, error } = useQuery({
+    queryKey: ["notes"],
+    queryFn: getNotes
   });
 
   const queryClient = useQueryClient();
@@ -33,34 +29,35 @@ export default function NotesScreen() {
     deleteNoteMutation.mutate(id);
   }
 
-  if (isLoading) {
-    return <Text>Loading...</Text>;
-  }
-
-  if (error) {
-    return <Text>Failed to load notes.</Text>;
-  }
-
   return (
     <View className="flex-1 bg-gray-50 p-4">
       <Text className="text-gray-400 text-sm font-semibold mb-2">
         All Notes
       </Text>
 
-      <FlatList
-        data={notes}
-        keyExtractor={(item) => item.id}
-        contentContainerClassName="gap-2"
-        renderItem={({ item }) => (
-          <NoteItem
-            id={item.id}
-            title={item.title}
-            content={item.content}
-            createdAt={item.createdAt}
-            onDelete={handleDelete}
-          />
-        )}
-      />
+      {isLoading ? (
+        <Text>Loading...</Text>
+
+      ): error ? (
+        <Text>Failed to load notes.</Text>
+
+      ): notes?.length > 0 ? (
+        <FlatList
+          data={notes}
+          keyExtractor={(item) => item.id}
+          contentContainerClassName="gap-2"
+          renderItem={({ item }) => (
+            <NoteItem
+              id={item.id}
+              title={item.title}
+              content={item.content}
+              createdAt={item.createdAt}
+              onDelete={handleDelete}
+            />
+          )}
+        />
+        
+      ): (<Text>No notes found.</Text>)}
 
       <Pressable
         onPress={() => router.push('/notes/create')}

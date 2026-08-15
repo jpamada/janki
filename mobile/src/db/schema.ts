@@ -1,4 +1,4 @@
-import { foreignKey, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { foreignKey, index, integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
 export const folders = sqliteTable("folders", {
     id: text("id").primaryKey(),
@@ -55,4 +55,158 @@ export const notes = sqliteTable("notes", {
         foreignColumns: [folders.id],
         name: "folder_id_fk",
     }).onDelete("cascade")
+]);
+
+export const subjects = sqliteTable("subjects", {
+    id: text("id").primaryKey(),
+
+    title: text("title").notNull(),
+
+    category: text("category").notNull(),
+
+    createdAt: integer("created_at", {
+        mode: "timestamp_ms"
+    }).notNull(),
+
+    updatedAt: integer("updated_at", {
+        mode: "timestamp_ms"
+    }),
+
+    deletedAt: integer("deleted_at", {
+        mode: "timestamp_ms"
+    })
+});
+
+export const lessons = sqliteTable("lessons", {
+    id: text("id").primaryKey(),
+
+    subjectId: text("subject_id").notNull(),
+
+    title: text("title").notNull(),
+
+    createdAt: integer("created_at", {
+        mode: "timestamp_ms"
+    }).notNull(),
+
+    updatedAt: integer("updated_at", {
+        mode: "timestamp_ms"
+    }),
+
+    deletedAt: integer("deleted_at", {
+        mode: "timestamp_ms"
+    }),
+
+}, (table) => [
+    foreignKey({
+        columns: [table.subjectId],
+        foreignColumns: [subjects.id],
+        name: "subject_id_fk",
+    }).onDelete("restrict"),
+
+    index("lessons_subject_id_idx").on(
+        table.subjectId
+    )
+]);
+
+export const questions = sqliteTable("questions", {
+    id: text("id").primaryKey(),
+
+    lessonId: text("lesson_id").notNull(),
+
+    question: text("question").notNull(),
+
+    createdAt: integer("created_at", {
+        mode: "timestamp_ms"
+    }).notNull(),
+
+    updatedAt: integer("updated_at", {
+        mode: "timestamp_ms"
+    }),
+
+    deletedAt: integer("deleted_at", {
+        mode: "timestamp_ms"
+    }),
+
+}, (table) => [
+    foreignKey({
+        columns: [table.lessonId],
+        foreignColumns: [lessons.id],
+        name: "lesson_id_fk",
+    }).onDelete("restrict"),
+
+    index("questions_lesson_id_idx").on(
+        table.lessonId
+    )
+]);
+
+export const answers = sqliteTable("answers", {
+    id: text("id").primaryKey(),
+
+    lessonId: text("lesson_id").notNull(),
+
+    answer: text("answer").notNull(),
+
+    createdAt: integer("created_at", {
+        mode: "timestamp_ms"
+    }).notNull(),
+
+    updatedAt: integer("updated_at", {
+        mode: "timestamp_ms"
+    }),
+
+    deletedAt: integer("deleted_at", {
+        mode: "timestamp_ms"
+    }),
+
+}, (table) => [
+    foreignKey({
+        columns: [table.lessonId],
+        foreignColumns: [lessons.id],
+        name: "lesson_id_fk",
+    }).onDelete("restrict"),
+
+    index("answers_lesson_id_idx").on(
+        table.lessonId
+    )
+]);
+
+export const questionAnswers = sqliteTable("question_answers", {
+    id: text("id").primaryKey(),
+
+    questionId: text("question_id").notNull(),
+
+    answerId: text("answer_id").notNull(),
+
+    isCorrect: integer("is_correct", {
+        mode: "boolean"
+    }).notNull().default(false),
+
+    createdAt: integer("created_at", {
+        mode: "timestamp_ms"
+    }).notNull(),
+
+    updatedAt: integer("updated_at", {
+        mode: "timestamp_ms"
+    }),
+
+    deletedAt: integer("deleted_at", {
+        mode: "timestamp_ms"
+    }),
+
+}, (table) => [
+    unique("question_answer_unique").on(
+        table.questionId,
+        table.answerId
+    ),
+    foreignKey({
+        columns: [table.questionId],
+        foreignColumns: [questions.id],
+        name: "question_id_fk",
+    }).onDelete("restrict"),
+
+    foreignKey({
+        columns: [table.answerId],
+        foreignColumns: [answers.id],
+        name: "answer_id_fk",
+    }).onDelete("restrict"),
 ]);

@@ -1,7 +1,6 @@
 import { eq, isNull } from 'drizzle-orm';
-
-import { db } from '@/db/client';
 import { folders } from '@/db/schema';
+import { db } from '@/db/client';
 
 export async function getFolders() {
   return db.select().from(folders).where(isNull(folders.deletedAt));

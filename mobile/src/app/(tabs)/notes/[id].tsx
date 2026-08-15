@@ -12,13 +12,10 @@ export default function NoteScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const {
-    data: note,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: note, isLoading, error } = useQuery({
     queryKey: ["note", id],
     queryFn: () => getNoteById(id),
+    enabled: !!id
   });
 
   const updateNoteMutation = useMutation({
@@ -29,11 +26,9 @@ export default function NoteScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["notes"],
       });
-
       await queryClient.invalidateQueries({
         queryKey: ["note", id],
       });
-
       router.back();
     },
 
@@ -47,11 +42,11 @@ export default function NoteScreen() {
   };
 
   if (isLoading) {
-    return <Text>Loading note...</Text>;
+    return ;
   }
 
   if (error) {
-    return <Text>Failed to load note.</Text>;
+    return ;
   }
 
   if (!note) {
@@ -59,21 +54,30 @@ export default function NoteScreen() {
   }
 
   return (
-      <View 
-        className='flex-1 bg-white p-4 mb-4'
-        style={{ paddingBottom: insets.bottom }}
-      >
-        <Text className='text-gray-400 text-xs'>
-          {note.createdAt.toLocaleString()}
-        </Text>
+    <View 
+      className='flex-1 bg-white p-4 mb-4'
+      style={{ paddingBottom: insets.bottom }}
+    >
+      {isLoading ? (
+        <Text>Loading note...</Text>
 
-        <NoteForm
-          defaultValues={{
-            title: note.title,
-            content: note.content
-          }}
-          onSubmit={handleSubmit}
-        />
+      ): error ? (
+        <Text>Failed to load note.</Text>
+      ): (
+        <>
+          <Text className='text-gray-400 text-xs'>
+            {note.createdAt.toLocaleString()}
+          </Text>
+
+          <NoteForm
+            defaultValues={{
+              title: note.title,
+              content: note.content
+            }}
+            onSubmit={handleSubmit}
+          />
+        </>
+      )}
     </View>
   );
 }

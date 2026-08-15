@@ -1,7 +1,7 @@
-import { router } from "expo-router";
-import { Pressable, Text, View } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import { Pressable, Text } from "react-native";
 import { Trash2 } from "lucide-react-native";
+import { router } from "expo-router";
 
 type NoteItemProps = {
   id: string;
@@ -18,14 +18,13 @@ export function NoteItem({
   createdAt,
   onDelete,
 }: NoteItemProps) {
-  function renderRightActions() {
+  const renderRightActions = () => {
     return (
       <Pressable
         onPress={() => onDelete(id)}
         className="w-20 items-center justify-center bg-red-500"
       >
         <Trash2 size={24} color="white" />
-        <Text className="text-white">Delete</Text>
       </Pressable>
     );
   }
