@@ -11,7 +11,10 @@ import '../../global.css';
 export default function RootLayout() {
   const { success, error } = useMigrations(db, migrations);
 
-  if (error) throw error;
+  if (error) {
+    console.error(error.cause);
+    return error;
+  }
 
   if (!success) return null;
 

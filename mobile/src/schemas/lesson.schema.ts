@@ -9,6 +9,6 @@ export const lessonSchema = z.object({
   
   subjectId: z
     .string(),
-})
+});
 
 export type LessonFormData = z.infer<typeof lessonSchema>;

@@ -93,13 +93,14 @@ export async function createQuestion(
   });
 };
 
-export async function createQuestionWithAnswers(input: {
-  question: string;
-  lessonId: string;
-  answers: {
-    answer: string;
-    isCorrect: boolean;
-  }[];
+export async function createQuestionWithAnswers(
+  input: {
+    question: string;
+    lessonId: string;
+    answers: {
+      answer: string;
+      isCorrect: boolean;
+    }[];
 }): Promise<void> {
   await db.transaction(async (tx) => {
     const questionId = Crypto.randomUUID();

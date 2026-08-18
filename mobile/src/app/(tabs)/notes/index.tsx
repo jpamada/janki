@@ -50,7 +50,6 @@ export default function NotesScreen() {
             <NoteItem
               id={item.id}
               title={item.title}
-              content={item.content}
               createdAt={item.createdAt}
               onDelete={handleDelete}
             />

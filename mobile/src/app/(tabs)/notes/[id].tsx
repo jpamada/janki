@@ -4,7 +4,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { NoteFormData } from "@/schemas/note.schema";
 import { NoteForm } from "@/components/notes/NoteForm";
-import { Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
+import { getNoteSectionsByNoteId } from "@/repositories/note-section.repository";
 
 export default function NoteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -12,9 +13,15 @@ export default function NoteScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const { data: note, isLoading, error } = useQuery({
+  const { data: note, isLoading: notesIsLoading, error } = useQuery({
     queryKey: ["note", id],
     queryFn: () => getNoteById(id),
+    enabled: !!id
+  });
+
+  const { data: noteSections, isLoading: noteSectionsIsLoading } = useQuery({
+    queryKey: ["noteSections", id],
+    queryFn: () => getNoteSectionsByNoteId(id),
     enabled: !!id
   });
 
@@ -29,6 +36,9 @@ export default function NoteScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["note", id],
       });
+      await queryClient.invalidateQueries({
+        queryKey: ["noteSections", id]
+      })
       router.back();
     },
 
@@ -38,46 +48,41 @@ export default function NoteScreen() {
   });
 
   const handleSubmit = async (data: NoteFormData) => {
-    await updateNoteMutation.mutateAsync(data);
+     await updateNoteMutation.mutateAsync(data);
   };
-
-  if (isLoading) {
-    return ;
-  }
-
-  if (error) {
-    return ;
-  }
-
-  if (!note) {
-    return <Text>Note not found.</Text>;
-  }
 
   return (
     <View 
-      className='flex-1 bg-white p-4 mb-4'
+      className='flex-1 bg-white p-4'
       style={{ paddingBottom: insets.bottom }}
     >
-      {isLoading ? (
-        <Text>Loading note...</Text>
+        {notesIsLoading || noteSectionsIsLoading ? (
+          <Text>Loading note...</Text>
 
-      ): error ? (
-        <Text>Failed to load note.</Text>
-      ): (
-        <>
-          <Text className='text-gray-400 text-xs'>
-            {note.createdAt.toLocaleString()}
-          </Text>
+        ): error ? (
+          <Text>Failed to load note.</Text>
 
-          <NoteForm
-            defaultValues={{
-              title: note.title,
-              content: note.content
-            }}
-            onSubmit={handleSubmit}
-          />
-        </>
-      )}
+        ): !note ? (
+          <Text>Note not found.</Text>
+
+        ): (
+          <>
+            <Text className='text-gray-400 text-xs'>
+              {note.createdAt.toLocaleString()}
+            </Text>
+
+            <NoteForm
+              defaultValues={{
+                title: note.title,
+                noteSections: (noteSections ?? []).map((noteSection) => ({
+                  id: noteSection.id,
+                  title: noteSection.title
+                }))
+              }}
+              onSubmit={handleSubmit}
+            />
+          </>
+        )}
     </View>
   );
 }

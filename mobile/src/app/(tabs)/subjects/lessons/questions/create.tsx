@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { QuestionForm } from "@/components/questions/QuestionForm";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { QuestionFormData } from "@/schemas/question.schema";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { View } from "react-native";
 
 export default function CreateQuestionScreen() {
@@ -43,7 +43,7 @@ export default function CreateQuestionScreen() {
         defaultValues={{
           question: "",
           lessonId,
-         answers: [
+          answers: [
             { answer: '', isCorrect: false },
             { answer: '', isCorrect: false },
           ],

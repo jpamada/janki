@@ -19,7 +19,8 @@ export const questionSchema = z.object({
           .trim()
           .min(1, 'Answer is required'),
 
-        isCorrect: z.boolean(),
+        isCorrect: z
+          .boolean(),
       }),
     )
     .refine((answers) => answers.some((answer) => answer.isCorrect), {

@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import QuizResults from './results';
 
-type UserAnswer = {
+export type UserAnswer = {
   questionId: string;
   answerId: string;
   isCorrect: boolean;

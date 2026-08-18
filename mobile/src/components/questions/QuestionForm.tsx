@@ -1,11 +1,11 @@
 import { QuestionFormData, questionSchema } from '@/schemas/question.schema';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { Square, SquareCheck, Trash2 } from 'lucide-react-native';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { getLessons } from '@/repositories/lesson.repository';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Picker } from '@react-native-picker/picker';
 import { useQuery } from '@tanstack/react-query';
-import { Square, SquareCheck, Trash2 } from 'lucide-react-native';
 
 type QuestionFormProps = {
   onSubmit: (data: QuestionFormData) => Promise<void>;
@@ -21,12 +21,7 @@ export function QuestionForm({
   },
 }: QuestionFormProps) {
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<QuestionFormData>({
+  const { control, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
     defaultValues,
   });
@@ -60,7 +55,9 @@ export function QuestionForm({
         control={control}
         render={({ field: { onChange, value } }) => (
           <View>
-            <Text className='text-gray-400 text-sm font-semibold'>Lesson</Text>
+            <Text className='text-gray-400 text-sm font-semibold'>
+              Lesson
+            </Text>
 
             <Picker
               selectedValue={value}
@@ -180,13 +177,11 @@ export function QuestionForm({
         ))}
       </View>
 
-      <Pressable
-        onPress={() =>
-          append({
-            answer: '',
-            isCorrect: false,
-          })
-        }
+      <Pressable 
+        onPress={() => append({ 
+          answer: '', 
+          isCorrect: false 
+        })}
         className='mb-8'
       >
         <Text className='text-black text-center font-semibold bg-white border-2 border-gray-900 rounded-full px-2 py-2'>

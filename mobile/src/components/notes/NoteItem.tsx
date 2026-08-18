@@ -6,7 +6,6 @@ import { router } from "expo-router";
 type NoteItemProps = {
   id: string;
   title: string;
-  content: string;
   createdAt: Date;
   onDelete: (id: string) => void;
 };
@@ -14,7 +13,6 @@ type NoteItemProps = {
 export function NoteItem({
   id,
   title,
-  content,
   createdAt,
   onDelete,
 }: NoteItemProps) {
@@ -45,10 +43,6 @@ export function NoteItem({
 
         <Text className="font-semibold">
           {title}
-        </Text>
-
-        <Text>
-          {content}
         </Text>
       </Pressable>
     </Swipeable>

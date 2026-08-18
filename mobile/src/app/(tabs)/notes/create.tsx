@@ -4,9 +4,7 @@ import { createNote } from "@/repositories/note.repository";
 import { NoteForm } from "@/components/notes/NoteForm";
 import { NoteFormData } from "@/schemas/note.schema";
 import { useRouter } from "expo-router";
-import { View } from "react-native";
-
-import * as Crypto from 'expo-crypto';
+import { ScrollView, View } from "react-native";
 
 export default function CreateNoteScreen() {
   const queryClient = useQueryClient();
@@ -16,12 +14,14 @@ export default function CreateNoteScreen() {
   const createNoteMutation = useMutation({
     mutationFn: createNote,
 
-    onSuccess: async () => {
+    onSuccess: async (noteId) => {
       await queryClient.invalidateQueries({
         queryKey: ["notes"]
       });
-
-      router.back();
+      await queryClient.invalidateQueries({
+        queryKey: ["noteSections", noteId]
+      })
+      router.replace(`/notes/${noteId}`)
     },
 
     onError: (error) => {
@@ -31,18 +31,18 @@ export default function CreateNoteScreen() {
 
   const handleNoteSubmit = async (data: NoteFormData) => {
     await createNoteMutation.mutateAsync({
-      id: Crypto.randomUUID(),
       title: data.title,
-      content: data.content,
+      folderId: data.folderId,
+      noteSections: data.noteSections
     });
   }
 
   return (
     <View 
-        className='flex-1 bg-white p-4 mb-4'
+        className='flex-1 bg-white p-4'
         style={{ paddingBottom: insets.bottom }}
       >
-      <NoteForm onSubmit={handleNoteSubmit} />
+        <NoteForm onSubmit={handleNoteSubmit} />
     </View>
   )
 }

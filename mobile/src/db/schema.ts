@@ -24,9 +24,12 @@ export const folders = sqliteTable("folders", {
         columns: [table.parentId],
         foreignColumns: [table.id],
         name: "parent_id_fk",
-    }).onDelete("restrict")
-]);
+    }).onDelete("restrict"),
 
+    index("folders_folder_id_idx").on(
+        table.parentId
+    ),
+]);
 
 export const notes = sqliteTable("notes", {
     id: text("id").primaryKey(),
@@ -34,8 +37,6 @@ export const notes = sqliteTable("notes", {
     folderId: text("folder_id"),
 
     title: text("title").notNull(),
-
-    content: text("content").notNull().default(""),
 
     createdAt: integer("created_at", {
         mode: "timestamp_ms"
@@ -54,7 +55,61 @@ export const notes = sqliteTable("notes", {
         columns: [table.folderId],
         foreignColumns: [folders.id],
         name: "folder_id_fk",
-    }).onDelete("cascade")
+    }).onDelete("cascade"),
+
+    index("notes_folder_id_idx").on(
+        table.folderId
+    ),
+]);
+
+export const noteSections = sqliteTable("note_sections", {
+    id: text("id").primaryKey(),
+
+    noteId: text("note_id").notNull(),
+
+    title: text("title").notNull(),
+
+    position: integer("position"),
+
+}, (table) => [
+    foreignKey({
+        columns: [table.noteId],
+        foreignColumns: [notes.id],
+        name: "note_id_fk"
+    }).onDelete("cascade"),
+
+    index("note_sections_note_id_idx").on(
+        table.noteId
+    ),
+]);
+
+export const noteContents = sqliteTable("note_contents", {
+    id: text("id").primaryKey(),
+
+    noteSectionId: text("note_section_id").notNull(),
+
+    title: text("title"),
+
+    content: text("content").notNull(),
+
+    type: text("type").notNull(),
+
+    url: text("url"),
+
+    remarks: text("remarks"),
+
+    position: integer("position"),
+
+}, (table) => [
+    foreignKey({
+        columns: [table.noteSectionId],
+        foreignColumns: [noteSections.id],
+        name: "note_section_id_fk"
+    }).onDelete("cascade"),
+
+    index("note_contents_note_section_id_idx").on(
+        table.noteSectionId
+    ),
 ]);
 
 export const subjects = sqliteTable("subjects", {
@@ -74,7 +129,7 @@ export const subjects = sqliteTable("subjects", {
 
     deletedAt: integer("deleted_at", {
         mode: "timestamp_ms"
-    })
+    }),
 });
 
 export const lessons = sqliteTable("lessons", {

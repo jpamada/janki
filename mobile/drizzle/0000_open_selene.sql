@@ -9,6 +9,17 @@ CREATE TABLE `answers` (
 );
 --> statement-breakpoint
 CREATE INDEX `answers_lesson_id_idx` ON `answers` (`lesson_id`);--> statement-breakpoint
+CREATE TABLE `folders` (
+	`id` text PRIMARY KEY NOT NULL,
+	`parent_id` text,
+	`name` text NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer,
+	`deleted_at` integer,
+	FOREIGN KEY (`parent_id`) REFERENCES `folders`(`id`) ON UPDATE no action ON DELETE restrict
+);
+--> statement-breakpoint
+CREATE INDEX `folders_folder_id_idx` ON `folders` (`parent_id`);--> statement-breakpoint
 CREATE TABLE `lessons` (
 	`id` text PRIMARY KEY NOT NULL,
 	`subject_id` text NOT NULL,
@@ -20,6 +31,39 @@ CREATE TABLE `lessons` (
 );
 --> statement-breakpoint
 CREATE INDEX `lessons_subject_id_idx` ON `lessons` (`subject_id`);--> statement-breakpoint
+CREATE TABLE `note_contents` (
+	`id` text PRIMARY KEY NOT NULL,
+	`note_section_id` text NOT NULL,
+	`title` text,
+	`content` text NOT NULL,
+	`type` text NOT NULL,
+	`url` text,
+	`remarks` text,
+	`position` integer,
+	FOREIGN KEY (`note_section_id`) REFERENCES `note_sections`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `note_contents_note_section_id_idx` ON `note_contents` (`note_section_id`);--> statement-breakpoint
+CREATE TABLE `note_sections` (
+	`id` text PRIMARY KEY NOT NULL,
+	`note_id` text NOT NULL,
+	`title` text NOT NULL,
+	`position` integer,
+	FOREIGN KEY (`note_id`) REFERENCES `notes`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `note_sections_note_id_idx` ON `note_sections` (`note_id`);--> statement-breakpoint
+CREATE TABLE `notes` (
+	`id` text PRIMARY KEY NOT NULL,
+	`folder_id` text,
+	`title` text NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer,
+	`deleted_at` integer,
+	FOREIGN KEY (`folder_id`) REFERENCES `folders`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `notes_folder_id_idx` ON `notes` (`folder_id`);--> statement-breakpoint
 CREATE TABLE `question_answers` (
 	`id` text PRIMARY KEY NOT NULL,
 	`question_id` text NOT NULL,
@@ -52,20 +96,3 @@ CREATE TABLE `subjects` (
 	`updated_at` integer,
 	`deleted_at` integer
 );
---> statement-breakpoint
-PRAGMA foreign_keys=OFF;--> statement-breakpoint
-CREATE TABLE `__new_notes` (
-	`id` text PRIMARY KEY NOT NULL,
-	`folder_id` text,
-	`title` text NOT NULL,
-	`content` text DEFAULT '' NOT NULL,
-	`created_at` integer NOT NULL,
-	`updated_at` integer,
-	`deleted_at` integer,
-	FOREIGN KEY (`folder_id`) REFERENCES `folders`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-INSERT INTO `__new_notes`("id", "folder_id", "title", "content", "created_at", "updated_at", "deleted_at") SELECT "id", "folder_id", "title", "content", "created_at", "updated_at", "deleted_at" FROM `notes`;--> statement-breakpoint
-DROP TABLE `notes`;--> statement-breakpoint
-ALTER TABLE `__new_notes` RENAME TO `notes`;--> statement-breakpoint
-PRAGMA foreign_keys=ON;
