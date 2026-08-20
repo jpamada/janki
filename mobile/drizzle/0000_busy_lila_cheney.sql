@@ -34,7 +34,7 @@ CREATE INDEX `lessons_subject_id_idx` ON `lessons` (`subject_id`);--> statement-
 CREATE TABLE `note_contents` (
 	`id` text PRIMARY KEY NOT NULL,
 	`note_section_id` text NOT NULL,
-	`title` text,
+	`title` text NOT NULL,
 	`content` text NOT NULL,
 	`type` text NOT NULL,
 	`url` text,

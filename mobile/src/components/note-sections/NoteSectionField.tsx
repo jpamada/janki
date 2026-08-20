@@ -1,6 +1,7 @@
-import { Controller, type Control, type UseFieldArrayRemove } from "react-hook-form"
+import { Controller, useFieldArray, type Control, type UseFieldArrayRemove } from "react-hook-form"
+import NoteContentField from "../note-contents/NoteContentField";
+import { Pressable, Text, TextInput, View } from "react-native";
 import type { NoteFormData } from "@/schemas/note.schema";
-import { Text, TextInput, View } from "react-native";
 
 type NoteSectionFieldProps = {
   control: Control<NoteFormData>;
@@ -13,8 +14,14 @@ export default function NoteSectionField({
   index,
   remove,
 }: NoteSectionFieldProps) {
+
+  const { fields, append, remove: removeContent } = useFieldArray({
+    control,
+    name: `noteSections.${index}.noteContents`,
+  });
+
   return (
-    <View className="mb-4 rounded-lg bg-gray-100">
+    <View>
       <Controller
         name={`noteSections.${index}.title`}
         control={control}
@@ -28,7 +35,7 @@ export default function NoteSectionField({
               onBlur={onBlur}
               onChangeText={onChange}
               placeholder="Enter section title"
-              className="text-gray-800 text-lg font-bold bg-white rounded-lg py-2"
+              className="text-lg font-bold text-gray-800"
             />
 
             {error && (
@@ -39,6 +46,33 @@ export default function NoteSectionField({
           </View>
         )}
       />
+
+      <View>
+        {fields.map((field, contentIndex) => (
+          <NoteContentField
+            key={field.id}
+            control={control}
+            sectionIndex={index}
+            contentIndex={contentIndex}
+            remove={removeContent}
+          />
+        ))}
+      </View>
+
+      <Pressable
+        onPress={() =>
+          append({
+            title: "",
+            content: "",
+            type: "text",
+            position: fields.length,
+          })
+        }
+      >
+        <Text className="text-gray-300 text-sm text-center border-2 font-semibold border-gray-200 border-dashed py-2 mt-4">
+          New Content
+        </Text>
+      </Pressable>
     </View>
   );
 }

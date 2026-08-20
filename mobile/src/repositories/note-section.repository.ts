@@ -1,4 +1,4 @@
-import { noteSections } from '@/db/schema';
+import { noteContents, noteSections } from '@/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { db } from '@/db/client';
 
@@ -11,14 +11,30 @@ export async function getNoteSections() {
 }
 
 export async function getNoteSectionsByNoteId(noteId: string) {
-  const query = await db
-  .select()
-  .from(noteSections)
-  .where(
-    eq(noteSections.noteId, noteId)
+ const sections = await db
+    .select()
+    .from(noteSections)
+    .where(
+      eq(noteSections.noteId, noteId)
+    );
+
+  const result = await Promise.all(
+    sections.map(async (section) => {
+      const contents = await db
+        .select()
+        .from(noteContents)
+        .where(
+          eq(noteContents.noteSectionId, section.id)
+        );
+
+      return {
+        ...section,
+        noteContents: contents,
+      };
+    }),
   );
 
-  return query;
+  return result
 }
 
 export async function createNoteSection(

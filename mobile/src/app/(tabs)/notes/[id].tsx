@@ -1,11 +1,11 @@
+import { getNoteSectionsByNoteId } from "@/repositories/note-section.repository";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getNoteById, updateNote } from "@/repositories/note.repository";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { NoteFormData } from "@/schemas/note.schema";
 import { NoteForm } from "@/components/notes/NoteForm";
-import { ScrollView, Text, View } from "react-native";
-import { getNoteSectionsByNoteId } from "@/repositories/note-section.repository";
+import { Text, View } from "react-native";
 
 export default function NoteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -26,7 +26,7 @@ export default function NoteScreen() {
   });
 
   const updateNoteMutation = useMutation({
-    mutationFn: (data: NoteFormData) =>
+    mutationFn: (data: NoteFormData) => 
       updateNote(id, data),
 
     onSuccess: async () => {
@@ -66,7 +66,7 @@ export default function NoteScreen() {
           <Text>Note not found.</Text>
 
         ): (
-          <>
+          <View>
             <Text className='text-gray-400 text-xs'>
               {note.createdAt.toLocaleString()}
             </Text>
@@ -74,14 +74,26 @@ export default function NoteScreen() {
             <NoteForm
               defaultValues={{
                 title: note.title,
-                noteSections: (noteSections ?? []).map((noteSection) => ({
-                  id: noteSection.id,
-                  title: noteSection.title
+                
+                noteSections: (noteSections ?? []).map((section) => ({
+                  id: section.id,
+                  title: section.title,
+                  position: section.position ?? undefined,
+
+                  noteContents: section.noteContents.map((content) => ({
+                    id: content.id,
+                    title: content.title,
+                    content: content.content,
+                    type: content.type as "text" | "code",
+                    url: content.url ?? undefined,
+                    remarks: content.remarks ?? undefined,
+                    position: content.position ?? undefined,
+                  })),
                 }))
               }}
               onSubmit={handleSubmit}
             />
-          </>
+          </View>
         )}
     </View>
   );

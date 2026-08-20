@@ -1,6 +1,6 @@
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { noteSchema, type NoteFormData } from '@/schemas/note.schema';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import NoteSectionField from '../note-sections/NoteSectionField';
@@ -34,7 +34,11 @@ export function NoteForm({
 
   return (
     <View className='flex-1'>
-      <ScrollView className='flex-1'>
+      <ScrollView 
+        className="flex-1"
+        overScrollMode="always"
+        showsVerticalScrollIndicator={false}
+      >
         <Controller
           name="title"
           control={control}
@@ -77,6 +81,7 @@ export function NoteForm({
             append({
               title: "",
               position: fields.length,
+              noteContents: [],
             })
           }
           className="bg-white px-2 py-2 mt-2 mb-8"

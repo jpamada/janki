@@ -1,5 +1,5 @@
 import { and, eq, isNull } from 'drizzle-orm';
-import { notes, noteSections } from '@/db/schema';
+import { noteContents, notes, noteSections } from '@/db/schema';
 import { db } from '@/db/client';
 
 import * as Crypto from "expo-crypto";
@@ -56,6 +56,15 @@ export async function createNote(
     noteSections?: {
       title: string;
       position?: number;
+      noteContents?: {
+        id?: string;
+        title: string;
+        content: string;
+        type: string;
+        url?: string;
+        remarks?: string;
+        position?: number;
+      }[];
     }[];
 }): Promise<string> {
 
@@ -76,6 +85,20 @@ export async function createNote(
         title: noteSection.title,
         position: noteSection.position ?? null,
       });
+
+      for (const noteContent of noteSection.noteContents ?? []) {
+        const noteContentId = Crypto.randomUUID();
+        await tx.insert(noteContents).values({
+          id: noteContentId,
+          noteSectionId: noteSectionId,
+          title: noteContent.title,
+          content: noteContent.content,
+          type: noteContent.type,
+          url: noteContent.url ?? null,
+          remarks: noteContent.remarks ?? null,
+          position: noteContent.position ?? null,
+        });
+      }
     }
   });
 
@@ -86,51 +109,82 @@ export async function updateNote(
   id: string,
   input: {
     title: string;
-    folderId?: string | null,
+    folderId?: string | null;
     noteSections?: {
       id?: string;
       title: string;
       position?: number;
+      noteContents?: {
+        id?: string;
+        title: string;
+        content: string;
+        type: string;
+        url?: string;
+        remarks?: string;
+        position?: number;
+      }[];
     }[];
-}): Promise<void> {
+  }
+): Promise<void> {
+
   await db.transaction(async (tx) => {
     await tx.update(notes).set({
       title: input.title,
+      folderId: input.folderId ?? null,
       updatedAt: new Date(),
-    })
-    .where(
-      eq(notes.id, id)
-    );
+    }).where(eq(notes.id, id));
 
     for (const noteSection of input.noteSections ?? []) {
+      let noteSectionId: string;
+
       if (noteSection.id) {
+        noteSectionId = noteSection.id;
         await tx.update(noteSections).set({
           title: noteSection.title,
           position: noteSection.position ?? null,
-        })
-        .where(
-          eq(noteSections.id, noteSection.id)
-        );
+        }).where(eq(noteSections.id, noteSection.id));
 
       } else {
+        noteSectionId = Crypto.randomUUID();
         await tx.insert(noteSections).values({
-          id: Crypto.randomUUID(),
+          id: noteSectionId,
           noteId: id,
           title: noteSection.title,
           position: noteSection.position ?? null,
         });
       }
+
+      for (const noteContent of noteSection.noteContents ?? []) {
+        if (noteContent.id) {
+          await tx.update(noteContents).set({
+            title: noteContent.title,
+            content: noteContent.content,
+            type: noteContent.type,
+            url: noteContent.url ?? null,
+            remarks: noteContent.remarks ?? null,
+            position: noteContent.position ?? null,
+          }).where(eq(noteContents.id, noteContent.id));
+
+        } else {
+          await tx.insert(noteContents).values({
+            id: Crypto.randomUUID(),
+            noteSectionId,
+            title: noteContent.title,
+            content: noteContent.content,
+            type: noteContent.type,
+            url: noteContent.url ?? null,
+            remarks: noteContent.remarks ?? null,
+            position: noteContent.position ?? null,
+          });
+        }
+      }
     }
-  })
-};
+  });
+}
 
 export async function deleteNote(id: string) {
   await db
-  .update(notes)
-  .set({
-    deletedAt: new Date(),
-    updatedAt: new Date(),
-  })
+  .delete(notes)
   .where(
     eq(notes.id, id)
   );

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SubjectItem } from "@/components/subjects/SubjectItem";
 import { FlatList, Pressable, Text, View } from "react-native";
 import { router } from "expo-router";
+import { SearchX } from "lucide-react-native";
 
 export default function SubjectsScreen() {
   const { data: subjects = [], isLoading, error } = useQuery({
@@ -32,7 +33,7 @@ export default function SubjectsScreen() {
   return (
     <View className="flex-1 bg-gray-50 p-4">
       <Text className="text-gray-400 text-sm font-semibold mb-2">
-        Subjects
+        All Subjects
       </Text>
       
       {isLoading ? (
@@ -55,7 +56,12 @@ export default function SubjectsScreen() {
           )}
         />
 
-      ): (<Text>No subjects found.</Text>)}
+      ): (
+        <View className='flex-1 justify-center items-center'>
+          <SearchX size={64} color="#9ca3af" />
+          <Text className='text-gray-400'>No subjects found.</Text>
+        </View>
+      )}
 
       <Pressable
         onPress={() => router.push('/subjects/create')}
@@ -64,7 +70,7 @@ export default function SubjectsScreen() {
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
         }}
       >
-        <Text className="text-3xl">+</Text>
+        <Text className="text-3xl text-gray-600">+</Text>
       </Pressable>
     </View>
   )

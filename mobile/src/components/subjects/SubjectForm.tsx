@@ -15,11 +15,8 @@ export function SubjectForm({
     category: '',
   },
 }: SubjectFormProps) {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<SubjectFormData>({
+  
+  const { control, handleSubmit, formState: { errors, isSubmitting }} = useForm<SubjectFormData>({
     resolver: zodResolver(subjectSchema),
     defaultValues,
   });
@@ -56,8 +53,12 @@ export function SubjectForm({
               onBlur={onBlur}
               className="px-0"
               onChangeText={onChange}
-              placeholder="Enter subject category"
+              placeholder="Enter category"
             />
+
+            {errors.category && (
+              <Text className="text-red-400">{errors.category.message}</Text>
+            )}
           </View>
         )}
       />

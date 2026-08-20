@@ -78,11 +78,7 @@ export async function updateLesson(
 
 export async function deleteLesson(id: string) {
   await db
-  .update(lessons)
-  .set({
-    deletedAt: new Date(),
-    updatedAt: new Date(),
-  })
+  .delete(lessons)
   .where(
     eq(lessons.id, id)
   );

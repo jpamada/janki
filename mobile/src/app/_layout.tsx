@@ -11,16 +11,14 @@ import '../../global.css';
 export default function RootLayout() {
   const { success, error } = useMigrations(db, migrations);
 
-  if (error) {
-    console.error(error.cause);
-    return error;
-  }
+  if (error) return error;
 
   if (!success) return null;
 
   return (
     <GestureHandlerRootView>
-      <QueryClientProvider client={queryClient}>
+      <QueryClientProvider 
+        client={queryClient}>
         <Stack>
           <Stack.Screen
             name="(tabs)"

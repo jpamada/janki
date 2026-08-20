@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "bf116eda-ac9f-485c-b41d-a918e8af5e8e",
+  "id": "1279e7c1-f44e-4f19-8ddb-067c69114eb8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "answers": {
@@ -247,7 +247,7 @@
           "name": "title",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "content": {

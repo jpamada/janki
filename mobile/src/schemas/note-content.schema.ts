@@ -1,11 +1,15 @@
 import z from "zod";
 
 export const noteContentSchema = z.object({
+  id: z
+    .string()
+    .trim()
+    .optional(),
+
   title: z
     .string()
     .trim()
-    .max(50, "Title is too long")
-    .optional(),
+    .max(50, "Title is too long"),
 
   content: z
     .string()

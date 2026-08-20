@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FlatList, Pressable, Text, View } from "react-native";
 import { LessonItem } from "@/components/lessons/LessonItem";
 import { router, useLocalSearchParams } from "expo-router";
+import { SearchX } from "lucide-react-native";
 
 export default function LessonScreen() {
   const { subjectId } = useLocalSearchParams<{ subjectId: string }>();
@@ -35,7 +36,7 @@ export default function LessonScreen() {
   return (
     <View className="flex-1 bg-gray-50 p-4">
       <Text className="text-gray-400 text-sm font-semibold mb-2">
-        Lessons
+        All Lessons
       </Text>
       
       {isLoading ? (
@@ -59,7 +60,12 @@ export default function LessonScreen() {
           )}
         />
 
-      ): (<Text>No lesson found.</Text>)}
+      ): (
+        <View className='flex-1 justify-center items-center'>
+          <SearchX size={64} color="#9ca3af" />
+          <Text className='text-gray-400'>No lessons found.</Text>
+        </View>
+      )}
 
       <Pressable
         onPress={() => router.push('/subjects/lessons/create')}
@@ -68,7 +74,7 @@ export default function LessonScreen() {
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
         }}
       >
-        <Text className="text-3xl text-blue-500">+</Text>
+        <Text className="text-3xl text-gray-600">+</Text>
       </Pressable>
     </View>
   )

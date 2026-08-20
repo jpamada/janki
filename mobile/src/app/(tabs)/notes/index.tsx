@@ -3,14 +3,16 @@ import { deleteNote, getNotes } from '@/repositories/note.repository';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { NoteItem } from '@/components/notes/NoteItem';
 import { router } from 'expo-router';
+import { SearchX } from 'lucide-react-native';
 
 export default function NotesScreen() {
+  const queryClient = useQueryClient();
+
   const { data: notes = [], isLoading, error } = useQuery({
     queryKey: ["notes"],
     queryFn: getNotes
   });
 
-  const queryClient = useQueryClient();
   const deleteNoteMutation = useMutation({
     mutationFn: deleteNote,
 
@@ -25,8 +27,8 @@ export default function NotesScreen() {
     },
   });
 
-  function handleDelete(id: string) {
-    deleteNoteMutation.mutate(id);
+  const handleDelete = async (id: string) => {
+    await deleteNoteMutation.mutateAsync(id);
   }
 
   return (
@@ -56,7 +58,12 @@ export default function NotesScreen() {
           )}
         />
         
-      ): (<Text>No notes found.</Text>)}
+      ): (
+        <View className='flex-1 justify-center items-center'>
+          <SearchX size={64} color="#9ca3af" />
+          <Text className='text-gray-400'>No notes found.</Text>
+        </View>
+      )}
 
       <Pressable
         onPress={() => router.push('/notes/create')}
@@ -65,7 +72,7 @@ export default function NotesScreen() {
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
         }}
       >
-        <Text className="text-3xl text-blue-500">+</Text>
+        <Text className="text-3xl text-gray-600">+</Text>
       </Pressable>
     </View>
   );

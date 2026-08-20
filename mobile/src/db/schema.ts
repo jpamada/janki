@@ -88,7 +88,7 @@ export const noteContents = sqliteTable("note_contents", {
 
     noteSectionId: text("note_section_id").notNull(),
 
-    title: text("title"),
+    title: text("title").notNull(),
 
     content: text("content").notNull(),
 

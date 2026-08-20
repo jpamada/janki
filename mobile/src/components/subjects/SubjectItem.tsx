@@ -20,9 +20,9 @@ export function SubjectItem({
     return (
       <Pressable
         onPress={() => onDelete(id)}
-        className="w-20 items-center justify-center bg-red-500"
+        className="w-20 items-center justify-center"
       >
-        <Trash2 size={24} color="white" />
+        <Trash2 size={24} color="black" />
       </Pressable>
     )
   }

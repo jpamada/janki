@@ -64,11 +64,7 @@ export async function updateSubject(
 
 export async function deleteSubject(id: string) {
   await db
-  .update(subjects)
-  .set({
-    deletedAt: new Date(),
-    updatedAt: new Date(),
-  })
+  .delete(subjects)
   .where(
     eq(subjects.id, id)
   );
