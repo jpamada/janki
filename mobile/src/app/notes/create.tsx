@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { createNote } from "@/repositories/note.repository";
 import { NoteForm } from "@/components/notes/NoteForm";
 import { NoteFormData } from "@/schemas/note.schema";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { View } from "react-native";
 
 export default function CreateNoteScreen() {
@@ -39,13 +39,17 @@ export default function CreateNoteScreen() {
 
   return (
     <View 
-        className='flex-1 bg-white p-4'
-        style={{ paddingBottom: insets.bottom }}
-      >
-        <NoteForm 
-          defaultValues={{ title: "Untitled" }} 
-          onSubmit={handleNoteSubmit} 
-        />
+      className='flex-1 bg-white'
+      style={{ 
+        paddingBottom: insets.bottom 
+      }}
+    >
+      <NoteForm 
+        defaultValues={{ 
+          title: "Untitled" 
+        }} 
+        onSubmit={handleNoteSubmit} 
+      />
     </View>
   )
 }

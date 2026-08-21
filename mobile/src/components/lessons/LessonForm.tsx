@@ -5,6 +5,9 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Picker } from '@react-native-picker/picker';
 import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft } from 'lucide-react-native';
+import Header from '../shared/Header';
+import { router } from 'expo-router';
 
 type LessonFormProps = {
   onSubmit: (data: LessonFormData) => Promise<void>;
@@ -18,11 +21,7 @@ export function LessonForm({
     subjectId: '',
   },
 }: LessonFormProps) {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<LessonFormData>({
+  const { control, handleSubmit, formState: { errors, isSubmitting }} = useForm<LessonFormData>({
     resolver: zodResolver(lessonSchema),
     defaultValues,
   });
@@ -34,69 +33,91 @@ export function LessonForm({
 
   return (
     <View className="flex-1">
-      <Controller
-        name="title"
-        control={control}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <View>
-            <TextInput
-              value={value}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              placeholder="Enter lesson title"
-              className="px-0 text-2xl font-semibold"
-            />
-
-            {errors.title && (
-              <Text className="text-red-400">{errors.title.message}</Text>
-            )}
-          </View>
-        )}
+      <Header
+        title="Lesson"
+        back={
+          <Pressable onPress={() => router.back()}>
+            <ArrowLeft />
+          </Pressable>
+        }
+        right={
+          <Pressable
+            disabled={isSubmitting}
+            onPress={handleSubmit(onSubmit)}
+            className="active:opacity-70 disabled:bg-gray-400"
+          >
+            <Text className="text-center font-semibold">
+              SAVE
+            </Text>
+          </Pressable>
+        }
       />
 
-      <Controller
-        name="subjectId"
-        control={control}
-        render={({ field: { onChange, value } }) => (
-          <View>
-            <Text>Subject</Text>
-
-            <Picker
-              selectedValue={value}
-              onValueChange={onChange}
-            >
-              <Picker.Item
-                label="Select a subject"
-                value=""
+      <View className='flex-1 p-4'>
+        <Controller
+          name="title"
+          control={control}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <View>
+              <TextInput
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                placeholder="Enter lesson title"
+                className="px-0 text-2xl font-semibold"
               />
 
-              {subjects.map((subject) => (
-                <Picker.Item
-                  key={subject.id}
-                  label={subject.title}
-                  value={subject.id}
-                />
-              ))}
-            </Picker>
+              {errors.title && (
+                <Text className="text-red-400">{errors.title.message}</Text>
+              )}
+            </View>
+          )}
+        />
 
-            {errors.subjectId && (
-              <Text className="text-red-400">
-                {errors.subjectId.message}
-              </Text>
-            )}
-          </View>
-        )}
-      />
-      
-      <Pressable
-        disabled={isSubmitting}
-        onPress={handleSubmit(onSubmit)}
-        className="mt-auto rounded-lg bg-black px-4 py-3 active:opacity-70 disabled:bg-gray-400"
-      >
-        <Text className="text-center font-semibold text-white">
-          {isSubmitting ? 'Saving...' : 'Save Lesson'}
-        </Text>
-      </Pressable>
+        <Controller
+          name="subjectId"
+          control={control}
+          render={({ field: { onChange, value } }) => (
+            <View>
+              <Text>Subject</Text>
+
+              <Picker
+                selectedValue={value}
+                onValueChange={onChange}
+              >
+                <Picker.Item
+                  label="Select a subject"
+                  value=""
+                />
+
+                {subjects.map((subject) => (
+                  <Picker.Item
+                    key={subject.id}
+                    label={subject.title}
+                    value={subject.id}
+                  />
+                ))}
+              </Picker>
+
+              {errors.subjectId && (
+                <Text className="text-red-400">
+                  {errors.subjectId.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
+        
+        <Pressable
+          disabled={isSubmitting}
+          onPress={handleSubmit(onSubmit)}
+          className="mt-auto rounded-lg bg-black px-4 py-3 active:opacity-70 disabled:bg-gray-400"
+        >
+          <Text className="text-center font-semibold text-white">
+            {isSubmitting ? 'Saving...' : 'Save Lesson'}
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 }

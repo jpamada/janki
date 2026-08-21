@@ -5,10 +5,7 @@ import { db } from "@/db/client";
 export async function getAnswers() {
   const query = await db
   .select()
-  .from(answers)
-  .where(
-    isNull(answers.deletedAt)
-  );
+  .from(answers);
 
   return query;
 }
@@ -18,10 +15,7 @@ export async function getAnswersByLessonId(lessonId: string) {
   .select()
   .from(answers)
   .where(
-    and(
-      eq(answers.lessonId, lessonId), 
-      isNull(answers.deletedAt)
-    )
+    eq(answers.lessonId, lessonId), 
   );
 
   return query;
@@ -32,10 +26,7 @@ export async function getAnswerById(id: string) {
   .select()
   .from(answers)
   .where(
-    and(
-      eq(answers.id, id), 
-      isNull(answers.deletedAt)
-    )
+    eq(answers.id, id), 
   )
   .limit(1);
 
@@ -78,11 +69,7 @@ export async function updateAnswer(
 
 export async function deleteAnswer(id: string) {
   await db
-  .update(answers)
-  .set({
-    deletedAt: new Date(),
-    updatedAt: new Date(),
-  })
+  .delete(answers)
   .where(
     eq(answers.id, id)
   );

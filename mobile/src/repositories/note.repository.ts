@@ -25,10 +25,7 @@ export async function getNotesByFolderId(folderId: string) {
   .select()
   .from(notes)
   .where(
-    and(
-      eq(notes.folderId, folderId), 
-      isNull(notes.deletedAt)
-    )
+    eq(notes.folderId, folderId), 
   );
 
   return query;
@@ -39,10 +36,7 @@ export async function getNoteById(id: string) {
   .select()
   .from(notes)
   .where(
-    and(
-      eq(notes.id, id),
-      isNull(notes.deletedAt)
-    )
+    eq(notes.id, id)
   )
   .limit(1);
 

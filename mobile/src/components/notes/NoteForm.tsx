@@ -1,9 +1,12 @@
+import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { noteSchema, type NoteFormData } from '@/schemas/note.schema';
-import { Controller, useFieldArray, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-
 import NoteSectionField from '../note-sections/NoteSectionField';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ArrowLeft } from 'lucide-react-native';
+import { router } from 'expo-router';
+
+import Header from '../shared/Header';
 
 type NoteFormProps = {
   onSubmit: (data: NoteFormData) => Promise<void>;
@@ -28,16 +31,41 @@ export function NoteForm({
     name: "noteSections",
   });
 
+  const title = useWatch({
+    control,
+    name: "title",
+  });
+
   const handleFormSubmit = async (data: NoteFormData) => {
     await onSubmit(data);
   };
 
   return (
     <View className='flex-1'>
+      <Header 
+        title={title}
+        back={
+          <Pressable onPress={() => router.back()}>
+            <ArrowLeft />
+          </Pressable>
+        }
+        right={
+          <Pressable
+            disabled={isSubmitting}
+            onPress={handleSubmit(handleFormSubmit)}
+            className="active:opacity-70 disabled:bg-gray-400"
+          >
+            <Text className="text-center font-semibold">
+              SAVE
+            </Text>
+          </Pressable>
+        }
+      />
+
       <ScrollView 
-        className="flex-1"
         overScrollMode="always"
         showsVerticalScrollIndicator={false}
+        contentContainerClassName="p-4 pb-8"
       >
         <Controller
           name="title"
@@ -91,16 +119,6 @@ export function NoteForm({
           </Text>
         </Pressable>
       </ScrollView>
-
-      <Pressable
-        disabled={isSubmitting}
-        onPress={handleSubmit(handleFormSubmit)}
-        className="mt-auto rounded-lg bg-black px-4 py-3 active:opacity-70 disabled:bg-gray-400"
-      >
-        <Text className="text-center font-semibold text-white">
-          {isSubmitting ? 'Saving...' : 'Save Note'}
-        </Text>
-      </Pressable>
     </View>
   );
 }

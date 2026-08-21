@@ -1,10 +1,11 @@
-import { getQuestionsByLessonIdWithAnswers } from '@/repositories/question.repository';
 import { ActivityIndicator, Animated, Modal, Pressable, Text, View } from 'react-native';
+import { getQuestionsByLessonIdWithAnswers } from '@/repositories/question.repository';
 import { mapQuestionsWithAnswers } from '@/mappers/question.mapper';
-import { useLocalSearchParams } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-
+import { useQuery } from '@tanstack/react-query';
+import { X } from 'lucide-react-native';
 import QuizResults from './results';
 
 export type UserAnswer = {
@@ -16,6 +17,7 @@ export type UserAnswer = {
 
 export default function QuizScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
+  const insets = useSafeAreaInsets();
 
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -119,10 +121,23 @@ export default function QuizScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white p-4">
-      <View className="mb-8">
-        <View className="h-3 overflow-hidden rounded-full bg-gray-200">
-          <View className="h-full bg-purple-800" style={{ width: `${progress}%` }} />
+    <View 
+      className="flex-1 bg-white p-4"
+      style={{
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom
+      }}
+    >
+      <View className="flex-row items-center gap-2 mt-4">
+        <Pressable onPress={() => router.back()}>
+          <X strokeWidth={4} color="#6b21a8" />
+        </Pressable>
+
+        <View className="ml-2 h-3 flex-1 overflow-hidden rounded-full bg-gray-200">
+          <View
+            className="h-full bg-purple-800"
+            style={{ width: `${progress}%` }}
+          />
         </View>
       </View>
 
@@ -158,7 +173,6 @@ export default function QuizScreen() {
         })}
       </View>
 
-      {/* Feedback sheet: plain Modal + Animated, no native module involved */}
       <Modal visible={showFeedback} transparent animationType="none" onRequestClose={handleContinue}>
         <View className="flex-1 justify-end bg-black/40">
           <Animated.View

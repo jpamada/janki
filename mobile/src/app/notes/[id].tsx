@@ -53,48 +53,46 @@ export default function NoteScreen() {
 
   return (
     <View 
-      className='flex-1 bg-white p-4'
-      style={{ paddingBottom: insets.bottom }}
+      className='flex-1 bg-white'
+      style={{ 
+        paddingBottom: insets.bottom 
+      }}
     >
-        {notesIsLoading || noteSectionsIsLoading ? (
-          <Text>Loading note...</Text>
+      {notesIsLoading || noteSectionsIsLoading ? (
+        <Text>Loading note...</Text>
 
-        ): error ? (
-          <Text>Failed to load note.</Text>
+      ): error ? (
+        <Text>Failed to load note.</Text>
 
-        ): !note ? (
-          <Text>Note not found.</Text>
+      ): !note ? (
+        <Text>Note not found.</Text>
 
-        ): (
-          <View>
-            <Text className='text-gray-400 text-xs'>
-              {note.createdAt.toLocaleString()}
-            </Text>
+      ): (
+        <View className="flex-1">
+          <NoteForm
+            defaultValues={{
+              title: note.title,
+              
+              noteSections: (noteSections ?? []).map((section) => ({
+                id: section.id,
+                title: section.title,
+                position: section.position ?? undefined,
 
-            <NoteForm
-              defaultValues={{
-                title: note.title,
-                
-                noteSections: (noteSections ?? []).map((section) => ({
-                  id: section.id,
-                  title: section.title,
-                  position: section.position ?? undefined,
-
-                  noteContents: section.noteContents.map((content) => ({
-                    id: content.id,
-                    title: content.title,
-                    content: content.content,
-                    type: content.type as "text" | "code",
-                    url: content.url ?? undefined,
-                    remarks: content.remarks ?? undefined,
-                    position: content.position ?? undefined,
-                  })),
-                }))
-              }}
-              onSubmit={handleSubmit}
-            />
-          </View>
-        )}
+                noteContents: section.noteContents.map((content) => ({
+                  id: content.id,
+                  title: content.title,
+                  content: content.content,
+                  type: content.type as "text" | "code",
+                  url: content.url ?? undefined,
+                  remarks: content.remarks ?? undefined,
+                  position: content.position ?? undefined,
+                })),
+              }))
+            }}
+            onSubmit={handleSubmit}
+          />
+        </View>
+      )}
     </View>
   );
 }

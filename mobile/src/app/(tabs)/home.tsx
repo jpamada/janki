@@ -1,12 +1,15 @@
-import { router } from 'expo-router';
-import { Lightbulb, NotepadText } from 'lucide-react-native';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Lightbulb, NotepadText } from 'lucide-react-native';
+import Header from '@/components/shared/Header';
+import { router } from 'expo-router';
 
 export default function HomeScreen() {
   return (
     <View className='flex-1 bg-gray-50'>
+      <Header title="Home" />
+
       <ScrollView 
-        className="flex-1 p-4"
+        className="flex-1 px-6 py-4"
         overScrollMode="always"
         showsVerticalScrollIndicator={false}
       >

@@ -54,9 +54,9 @@ export function LessonItem({
           pathname: `/subjects/lessons/quiz/play`,
           params: { lessonId: id }
         })}
-        className="bg-gray-900 rounded-lg p-4"
+        className="bg-white rounded-lg p-4"
       >
-        <Text className="text-white text-xl font-bold">
+        <Text className="text-gray-600 text-xl font-bold">
           {title}
         </Text>
       </Pressable>

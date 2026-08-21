@@ -38,7 +38,7 @@ export default function CreateLessonScreen() {
 
   return (
     <View
-      className="mb-4 flex-1 bg-white p-4"
+      className="flex-1 bg-white"
       style={{ paddingBottom: insets.bottom }}
     >
       <LessonForm onSubmit={handleLessonSubmit} />

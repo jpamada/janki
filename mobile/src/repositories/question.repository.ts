@@ -20,10 +20,7 @@ export async function getQuestionsByLessonId(lessonId: string) {
   .select()
   .from(questions)
   .where(
-    and(
-      eq(questions.lessonId, lessonId), 
-      isNull(questions.deletedAt)
-    )
+    eq(questions.lessonId, lessonId)
   );
 
   return query;
@@ -33,31 +30,26 @@ export async function getQuestionsByLessonIdWithAnswers(
   lessonId: string,
 ) {
   const result = await db
-    .select({
-      questionId: questions.id,
-      question: questions.question,
+  .select({
+    questionId: questions.id,
+    question: questions.question,
 
-      answerId: answers.id,
-      answer: answers.answer,
-      isCorrect: questionAnswers.isCorrect,
-    })
-    .from(questions)
-    .innerJoin(
-      questionAnswers,
-      eq(questionAnswers.questionId, questions.id),
-    )
-    .innerJoin(
-      answers,
-      eq(questionAnswers.answerId, answers.id),
-    )
-    .where(
-      and(
-        eq(questions.lessonId, lessonId),
-        isNull(questions.deletedAt),
-        isNull(questionAnswers.deletedAt),
-        isNull(answers.deletedAt),
-      ),
-    );
+    answerId: answers.id,
+    answer: answers.answer,
+    isCorrect: questionAnswers.isCorrect,
+  })
+  .from(questions)
+  .innerJoin(
+    questionAnswers,
+    eq(questionAnswers.questionId, questions.id),
+  )
+  .innerJoin(
+    answers,
+    eq(questionAnswers.answerId, answers.id),
+  )
+  .where(
+    eq(questions.lessonId, lessonId)
+  );
 
   return result;
 }
@@ -67,10 +59,7 @@ export async function getQuestionById(id: string) {
   .select()
   .from(questions)
   .where(
-    and(
-      eq(questions.id, id), 
-      isNull(questions.deletedAt)
-    )
+    eq(questions.id, id)
   )
   .limit(1);
 
@@ -153,11 +142,7 @@ export async function updateQuestion(
 
 export async function deleteQuestion(id: string) {
   await db
-  .update(questions)
-  .set({
-    deletedAt: new Date(),
-    updatedAt: new Date(),
-  })
+  .delete(questions)
   .where(
     eq(questions.id, id)
   );

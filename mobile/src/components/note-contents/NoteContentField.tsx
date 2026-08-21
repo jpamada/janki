@@ -57,7 +57,7 @@ export default function NoteContentField({
               placeholder="Write your content..."
               multiline
               textAlignVertical="top"
-              className="bg-gray-100 rounded-xl px-2 min-h-24"
+              className="bg-gray-50 rounded-xl px-2 min-h-24"
             />
 
             {error && (

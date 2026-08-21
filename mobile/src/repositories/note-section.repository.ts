@@ -12,20 +12,20 @@ export async function getNoteSections() {
 
 export async function getNoteSectionsByNoteId(noteId: string) {
  const sections = await db
-    .select()
-    .from(noteSections)
-    .where(
-      eq(noteSections.noteId, noteId)
-    );
+  .select()
+  .from(noteSections)
+  .where(
+    eq(noteSections.noteId, noteId)
+  );
 
-  const result = await Promise.all(
+  const query = await Promise.all(
     sections.map(async (section) => {
       const contents = await db
-        .select()
-        .from(noteContents)
-        .where(
-          eq(noteContents.noteSectionId, section.id)
-        );
+      .select()
+      .from(noteContents)
+      .where(
+        eq(noteContents.noteSectionId, section.id)
+      );
 
       return {
         ...section,
@@ -34,7 +34,7 @@ export async function getNoteSectionsByNoteId(noteId: string) {
     }),
   );
 
-  return result
+  return query;
 }
 
 export async function createNoteSection(

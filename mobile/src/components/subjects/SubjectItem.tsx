@@ -34,10 +34,10 @@ export function SubjectItem({
       renderRightActions={renderRightActions}
     >
       <Pressable
-          onPress={() => router.push(`/subjects/lessons/${id}`)}
-          className="bg-gray-800 rounded-lg p-4"
+        onPress={() => router.push(`/subjects/lessons/${id}`)}
+        className="bg-white rounded-lg p-4"
       >
-        <Text className="text-white text-xl font-bold">
+        <Text className="text-gray-600 text-xl font-bold">
           {title}
         </Text>
       </Pressable>

@@ -5,10 +5,7 @@ import { db } from "@/db/client";
 export async function getSubjects() {
   const query = await db
   .select()
-  .from(subjects)
-  .where(
-    isNull(subjects.deletedAt)
-  );
+  .from(subjects);
 
   return query;
 }
@@ -18,10 +15,7 @@ export async function getSubjectById(id: string) {
   .select()
   .from(subjects)
   .where(
-    and(
-      eq(subjects.id, id), 
-      isNull(subjects.deletedAt)
-    )
+    eq(subjects.id, id)
   )
   .limit(1);
 

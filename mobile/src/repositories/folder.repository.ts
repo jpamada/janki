@@ -3,17 +3,23 @@ import { folders } from '@/db/schema';
 import { db } from '@/db/client';
 
 export async function getFolders() {
-  return db.select().from(folders).where(isNull(folders.deletedAt));
+  const query = await db
+  .select()
+  .from(folders);
+
+  return query;
 }
 
 export async function getFolderById(id: string) {
-  const result = await db
-    .select()
-    .from(folders)
-    .where(eq(folders.id, id))
-    .limit(1);
+  const query = await db
+  .select()
+  .from(folders)
+  .where(
+    eq(folders.id, id)
+  )
+  .limit(1);
 
-  return result[0] ?? null;
+  return query[0] ?? null;
 }
 
 export async function createFolder(input: {
@@ -21,17 +27,14 @@ export async function createFolder(input: {
   name: string;
   parentId?: string | null;
 }) {
-  const [folder] = await db
-    .insert(folders)
-    .values({
-      id: input.id,
-      name: input.name,
-      parentId: input.parentId ?? null,
-      createdAt: new Date(),
-    })
-    .returning();
-
-  return folder;
+  await db
+  .insert(folders)
+  .values({
+    id: input.id,
+    name: input.name,
+    parentId: input.parentId ?? null,
+    createdAt: new Date(),
+  });
 }
 
 export async function updateFolder(
@@ -40,29 +43,21 @@ export async function updateFolder(
     name: string;
   },
 ) {
-  const [folder] = await db
-    .update(folders)
-    .set({
-      name: input.name,
-      updatedAt: new Date(),
-    })
-    .where(eq(folders.id, id))
-    .returning();
-
-  return folder;
+  await db
+  .update(folders)
+  .set({
+    name: input.name,
+    updatedAt: new Date(),
+  })
+  .where(
+    eq(folders.id, id)
+  );
 }
 
 export async function deleteFolder(id: string) {
-  const now = new Date();
-
-  const [folder] = await db
-    .update(folders)
-    .set({
-      deletedAt: now,
-      updatedAt: now,
-    })
-    .where(eq(folders.id, id))
-    .returning();
-
-  return folder;
+  await db
+  .delete(folders)
+  .where(
+    eq(folders.id, id)
+  );
 }
