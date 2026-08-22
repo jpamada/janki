@@ -1,10 +1,12 @@
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { noteSchema, type NoteFormData } from '@/schemas/note.schema';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import NoteSectionField from '../note-sections/NoteSectionField';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react-native';
 import { router } from 'expo-router';
+import { useState } from 'react';
 
 import Header from '../shared/Header';
 
@@ -13,6 +15,11 @@ type NoteFormProps = {
   defaultValues?: NoteFormData;
 };
 
+type ActiveContent = {
+  sectionIndex: number;
+  contentIndex: number;
+} | null;
+
 export function NoteForm({
   onSubmit,
   defaultValues = {
@@ -20,6 +27,8 @@ export function NoteForm({
     noteSections: [],
   },
 }: NoteFormProps) {
+
+  const [activeContent, setActiveContent] = useState<ActiveContent>(null);
 
   const { control, handleSubmit, formState: { errors, isSubmitting }} = useForm<NoteFormData>({
     resolver: zodResolver(noteSchema),
@@ -100,6 +109,10 @@ export function NoteForm({
               control={control}
               index={index}
               remove={remove}
+              onContentFocus={(contentIndex) => {
+                setActiveContent({ sectionIndex: index, contentIndex });
+              }}
+              onContentBlur={() => setActiveContent(null)}
             />
           ))}
         </View>
@@ -119,6 +132,13 @@ export function NoteForm({
           </Text>
         </Pressable>
       </ScrollView>
+
+      {activeContent && (
+        <KeyboardStickyView>
+          <View className="h-12 flex-row items-center border-t border-gray-200 bg-white px-4">
+          </View>
+        </KeyboardStickyView>
+      )}
     </View>
   );
 }

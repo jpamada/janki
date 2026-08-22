@@ -7,12 +7,16 @@ type NoteSectionFieldProps = {
   control: Control<NoteFormData>;
   index: number;
   remove: UseFieldArrayRemove;
+  onContentFocus: (contentIndex: number) => void;
+  onContentBlur: () => void;
 };
 
 export default function NoteSectionField({
   control,
   index,
   remove,
+  onContentFocus,
+  onContentBlur,
 }: NoteSectionFieldProps) {
 
   const { fields, append, remove: removeContent } = useFieldArray({
@@ -55,6 +59,10 @@ export default function NoteSectionField({
             sectionIndex={index}
             contentIndex={contentIndex}
             remove={removeContent}
+            onContentFocus={() => {
+              onContentFocus(contentIndex);
+            }}
+            onContentBlur={onContentBlur}
           />
         ))}
       </View>

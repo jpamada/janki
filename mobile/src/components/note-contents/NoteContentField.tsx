@@ -7,6 +7,8 @@ type NoteContentFieldProps = {
   sectionIndex: number;
   contentIndex: number;
   remove: UseFieldArrayRemove;
+  onContentFocus: () => void;
+  onContentBlur: () => void;
 };
 
 export default function NoteContentField({
@@ -14,9 +16,12 @@ export default function NoteContentField({
   sectionIndex,
   contentIndex,
   remove,
+  onContentFocus,
+  onContentBlur
 }: NoteContentFieldProps) {
+  
   return (
-    <View>
+    <View className="bg-gray-50 rounded-xl p-2">
       <Controller
         name={`noteSections.${sectionIndex}.noteContents.${contentIndex}.title`}
         control={control}
@@ -52,12 +57,16 @@ export default function NoteContentField({
           <View>
             <TextInput
               value={value}
-              onBlur={onBlur}
+              onFocus={onContentFocus}
+              onBlur={() => {
+                onBlur();
+                onContentBlur();
+              }}
               onChangeText={onChange}
               placeholder="Write your content..."
               multiline
               textAlignVertical="top"
-              className="bg-gray-50 rounded-xl px-2 min-h-24"
+              className="text-gray-400"
             />
 
             {error && (
