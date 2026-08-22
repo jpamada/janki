@@ -38,7 +38,7 @@ export default function LessonScreen() {
 
   return (
     <View 
-      className="flex-1 bg-gray-50"
+      className="flex-1 bg-white"
       style={{
         paddingBottom: insets.bottom
       }}

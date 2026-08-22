@@ -1,17 +1,24 @@
 import { Home, Lightbulb, NotepadText } from 'lucide-react-native';
 import { Tabs } from 'expo-router';
+import { Pressable } from 'react-native';
+import { BottomTabBarButtonProps } from 'expo-router/build/react-navigation/bottom-tabs';
+
 
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false
+        headerShown: false,
+        tabBarActiveTintColor: "#3d3d4a",
+        tabBarShowLabel: false,
+        tabBarButton: ({ ref, ...rest }: BottomTabBarButtonProps) => (
+          <Pressable {...rest} android_ripple={{ color: 'transparent' }} />
+        ),
       }}
     >
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Home',
           tabBarIcon: ({ color, size }) => (
             <Home color={color} size={size} />
           ),
@@ -21,7 +28,6 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="notes"
         options={{
-          title: 'Notes',
           tabBarIcon: ({ color, size }) => (
             <NotepadText color={color} size={size} />
           ),
@@ -31,7 +37,6 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="subjects"
         options={{
-          title: 'Quiz',
           tabBarIcon: ({ color, size }) => (
             <Lightbulb color={color} size={size} />
           ),

@@ -51,7 +51,7 @@ export default function NoteSectionField({
         )}
       />
 
-      <View>
+      <View className="flex gap-4">
         {fields.map((field, contentIndex) => (
           <NoteContentField
             key={field.id}

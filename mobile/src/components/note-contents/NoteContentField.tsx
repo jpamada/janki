@@ -35,7 +35,7 @@ export default function NoteContentField({
               onBlur={onBlur}
               onChangeText={onChange}
               placeholder="Content title"
-              className="font-semibold"
+              className="text-gray-600 font-semibold"
             />
 
             {error && (

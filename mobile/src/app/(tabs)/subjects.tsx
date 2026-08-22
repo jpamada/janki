@@ -33,7 +33,7 @@ export default function SubjectsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-white">
       <Header title="Subjects" />
 
       <View className="flex-1 px-6 py-4">

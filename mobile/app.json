@@ -36,8 +36,7 @@
         }
       ],
       "expo-sqlite",
-      "expo-image",
-      "react-native-keyboard-controller"
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,

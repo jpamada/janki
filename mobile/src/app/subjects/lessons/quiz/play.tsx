@@ -130,12 +130,12 @@ export default function QuizScreen() {
     >
       <View className="flex-row items-center gap-2 mt-4">
         <Pressable onPress={() => router.back()}>
-          <X strokeWidth={4} color="#6b21a8" />
+          <X strokeWidth={4} color="#1f2937" />
         </Pressable>
 
         <View className="ml-2 h-3 flex-1 overflow-hidden rounded-full bg-gray-200">
           <View
-            className="h-full bg-purple-800"
+            className="h-full bg-gray-800"
             style={{ width: `${progress}%` }}
           />
         </View>
@@ -146,31 +146,16 @@ export default function QuizScreen() {
       </View>
 
       <View className="mt-auto gap-4">
-        {currentQuestion.answers.map((answer) => {
-          const isSelected = answer.id === selectedAnswerId;
-          let backgroundClass = 'bg-purple-800';
-
-          if (showFeedback) {
-            if (isSelected && isCorrect) {
-              backgroundClass = 'bg-green-600';
-            } else if (isSelected && !isCorrect) {
-              backgroundClass = 'bg-red-600';
-            } else {
-              backgroundClass = 'bg-gray-300';
-            }
-          }
-
-          return (
+        {currentQuestion.answers.map((answer) => (
             <Pressable
               key={answer.id}
               disabled={showFeedback}
               onPress={() => handleSelectAnswer(answer.id)}
-              className={`rounded-lg p-5 ${backgroundClass}`}
+              className={`bg-gray-800 rounded-xl p-4`}
             >
               <Text className="text-center text-lg font-semibold text-white">{answer.answer}</Text>
             </Pressable>
-          );
-        })}
+        ))}
       </View>
 
       <Modal visible={showFeedback} transparent animationType="none" onRequestClose={handleContinue}>
@@ -179,13 +164,13 @@ export default function QuizScreen() {
             style={{ transform: [{ translateY }] }}
             className="rounded-t-3xl bg-white p-6"
           >
-            <Text className={`text-3xl font-bold ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-              {isCorrect ? 'Correct!' : 'Incorrect'}
+            <Text className="text-gray-800 text-3xl font-bold">
+              {isCorrect ? "Correct!" : "Incorrect"}
             </Text>
 
             {!isCorrect && (
               <View className="mt-6">
-                <Text className="text-lg font-bold text-red-600">Correct Answer</Text>
+                <Text className="text-lg font-semibold text-gray-400">Correct Answer</Text>
                 <Text className="mt-2 text-lg font-semibold">
                   {currentQuestion.answers.find((answer) => answer.isCorrect)?.answer}
                 </Text>
@@ -194,7 +179,7 @@ export default function QuizScreen() {
 
             <Pressable
               onPress={handleContinue}
-              className={`mt-8 rounded-lg p-4 ${isCorrect ? 'bg-green-600' : 'bg-red-600'}`}
+              className={`mt-8 rounded-lg p-4 bg-gray-800`}
             >
               <Text className="text-center text-lg font-semibold text-white">
                 {currentQuestionIndex < questions.length - 1 ? 'Continue' : 'Finish'}

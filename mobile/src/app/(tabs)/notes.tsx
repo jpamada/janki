@@ -33,7 +33,7 @@ export default function NotesScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-white">
       <Header title="Notes" />
 
       <View className='flex-1 px-6 py-4'>
