@@ -2,7 +2,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View } from "react-native";
 
 type HeaderProps = {
-  title: string;
+  title?: string;
   back?: React.ReactNode;
   right?: React.ReactNode;
 };
@@ -19,7 +19,7 @@ export default function Header({
     <View 
       className={`
         flex flex-row justify-between items-center
-        px-4 mt-6
+        px-4 py-2 mt-4 
       `}
       style={{
         paddingTop: insets.top

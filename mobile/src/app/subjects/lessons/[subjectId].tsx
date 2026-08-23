@@ -8,7 +8,11 @@ import { ArrowLeft, SearchX } from "lucide-react-native";
 import Header from "@/components/shared/Header";
 
 export default function LessonScreen() {
-  const { subjectId } = useLocalSearchParams<{ subjectId: string }>();
+  const { subjectId, subjectName } = useLocalSearchParams<{ 
+    subjectId: string, 
+    subjectName: string 
+  }>();
+
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
 
@@ -44,7 +48,7 @@ export default function LessonScreen() {
       }}
     >
       <Header
-        title="Lessons"
+        title={subjectName}
         back={
           <Pressable onPress={() => router.back()}>
             <ArrowLeft />

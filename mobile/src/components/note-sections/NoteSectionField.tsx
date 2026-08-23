@@ -35,6 +35,7 @@ export default function NoteSectionField({
         }) => (
           <View>
             <TextInput
+              multiline
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}

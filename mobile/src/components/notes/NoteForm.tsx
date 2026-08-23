@@ -1,10 +1,10 @@
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { noteSchema, type NoteFormData } from '@/schemas/note.schema';
-import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { KeyboardAvoidingView, KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import NoteSectionField from '../note-sections/NoteSectionField';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft } from 'lucide-react-native';
+import { ArrowLeft, Plus } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
 
@@ -40,11 +40,6 @@ export function NoteForm({
     name: "noteSections",
   });
 
-  const title = useWatch({
-    control,
-    name: "title",
-  });
-
   const handleFormSubmit = async (data: NoteFormData) => {
     await onSubmit(data);
   };
@@ -52,7 +47,6 @@ export function NoteForm({
   return (
     <View className='flex-1'>
       <Header 
-        title={title}
         back={
           <Pressable onPress={() => router.back()}>
             <ArrowLeft />
@@ -71,10 +65,11 @@ export function NoteForm({
         }
       />
 
-      <ScrollView 
-        overScrollMode="always"
+      <KeyboardAwareScrollView
+        bottomOffset={80}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="p-4 pb-8"
+        contentContainerClassName="p-4 pb-24"
       >
         <Controller
           name="title"
@@ -82,6 +77,7 @@ export function NoteForm({
           render={({ field: { onChange, onBlur, value } }) => (
             <View>
               <TextInput
+                multiline
                 value={value}
                 onBlur={onBlur}
                 onChangeText={onChange}
@@ -96,7 +92,7 @@ export function NoteForm({
           )}
         />
 
-        <View>
+        <View className='flex flex-col gap-4'>
           {errors.noteSections?.root?.message && (
             <Text className="mb-2 text-red-400">
               {errors.noteSections.root.message}
@@ -116,22 +112,7 @@ export function NoteForm({
             />
           ))}
         </View>
-
-        <Pressable
-          onPress={() =>
-            append({
-              title: "",
-              position: fields.length,
-              noteContents: [],
-            })
-          }
-          className="bg-white px-2 py-2 mt-2 mb-8"
-        >
-          <Text className="text-center font-semibold text-gray-400">
-            Add New Section
-          </Text>
-        </Pressable>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {activeContent && (
         <KeyboardStickyView>
@@ -139,6 +120,26 @@ export function NoteForm({
           </View>
         </KeyboardStickyView>
       )}
+
+      <View
+        className="absolute bottom-6 left-0 right-0 mx-8 h-14 items-center justify-center rounded-full bg-white"
+        style={{
+          boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
+        }}
+      >
+        <Pressable
+           onPress={() =>
+            append({
+              title: "",
+              position: fields.length,
+              noteContents: [],
+            })
+          }
+          className='px-4 py-2'
+        >
+          <Plus />
+        </Pressable>
+      </View>
     </View>
   );
 }

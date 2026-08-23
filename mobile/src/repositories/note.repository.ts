@@ -4,6 +4,7 @@ import { db } from '@/db/client';
 
 import * as Crypto from "expo-crypto";
 import { noteSchema } from '@/schemas/note.schema';
+import { getNoteSectionsByNoteId } from './note-section.repository';
 
 export async function getNotes() {
   const query = await db
@@ -183,3 +184,22 @@ export async function deleteNote(id: string) {
     eq(notes.id, id)
   );
 };
+
+export async function getAllNotesForBackup() {
+  const noteRows = await db
+    .select()
+    .from(notes);
+
+  const result = await Promise.all(
+    noteRows.map(async (note) => {
+      const sections = await getNoteSectionsByNoteId(note.id);
+
+      return {
+        ...note,
+        noteSections: sections,
+      };
+    })
+  );
+
+  return result;
+}

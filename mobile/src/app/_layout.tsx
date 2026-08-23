@@ -17,32 +17,32 @@ export default function RootLayout() {
   if (!success) return null;
 
   return (
-    <KeyboardProvider>
-      <GestureHandlerRootView>
-        <QueryClientProvider 
-          client={queryClient}>
-          <Stack>
-            <Stack.Screen
-              name="(tabs)"
-              options={{
-                headerShown: false
-              }}
-            />
-            <Stack.Screen
-              name="notes"
-              options={{ 
-                headerShown: false 
-              }}
-            />
-            <Stack.Screen
-              name="subjects"
-              options={{ 
-                headerShown: false 
-              }}
-            />
-          </Stack>
-        </QueryClientProvider>
-      </GestureHandlerRootView>
-    </KeyboardProvider>
+      <KeyboardProvider>
+        <GestureHandlerRootView>
+          <QueryClientProvider 
+            client={queryClient}>
+            <Stack>
+              <Stack.Screen
+                name="(tabs)"
+                options={{
+                  headerShown: false
+                }}
+              />
+              <Stack.Screen
+                name="notes"
+                options={{ 
+                  headerShown: false 
+                }}
+              />
+              <Stack.Screen
+                name="subjects"
+                options={{ 
+                  headerShown: false 
+                }}
+              />
+            </Stack>
+          </QueryClientProvider>
+        </GestureHandlerRootView>
+      </KeyboardProvider>
   );
 }

@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { NoteFormData } from "@/schemas/note.schema";
 import { NoteForm } from "@/components/notes/NoteForm";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 export default function NoteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

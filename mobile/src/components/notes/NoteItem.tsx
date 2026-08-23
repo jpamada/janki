@@ -16,6 +16,7 @@ export function NoteItem({
   createdAt,
   onDelete,
 }: NoteItemProps) {
+  
   const renderRightActions = () => {
     return (
       <Pressable
