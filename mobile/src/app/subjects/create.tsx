@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createSubject } from '@/repositories/subject.repository';
-import { SubjectForm } from '@/components/subjects/SubjectForm';
 import { SubjectFormData } from '@/schemas/subject.schema';
 import { useRouter } from 'expo-router';
 import { View } from 'react-native';
 
+import SubjectForm from '@/components/subjects/SubjectForm';
 import * as Crypto from 'expo-crypto';
 
 export default function CreateSubjectScreen() {

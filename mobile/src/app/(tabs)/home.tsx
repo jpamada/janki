@@ -1,7 +1,8 @@
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Lightbulb, NotepadText } from 'lucide-react-native';
-import Header from '@/components/shared/Header';
 import { router } from 'expo-router';
+
+import Header from '@/components/shared/Header';
 
 export default function HomeScreen() {
   return (

@@ -16,7 +16,7 @@ export type QuestionWithAnswerRow = {
   isCorrect: boolean;
 };
 
-export function mapQuestionsWithAnswers(
+export default function mapQuestionsWithAnswers(
   rows: QuestionWithAnswerRow[],
 ): QuizQuestion[] {
   const questions = new Map<string, QuizQuestion>();

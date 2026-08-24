@@ -15,7 +15,7 @@ export async function getNotes() {
   })
   .from(notes)
   .where(
-    isNull(notes.deletedAt)
+    isNull(notes.folderId)
   );
 
   return query;

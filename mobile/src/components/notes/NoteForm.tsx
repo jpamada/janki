@@ -1,13 +1,13 @@
-import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
-import { Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { noteSchema, type NoteFormData } from '@/schemas/note.schema';
-import { KeyboardAvoidingView, KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
-import NoteSectionField from '../note-sections/NoteSectionField';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Plus } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
 
+import NoteSectionField from '../note-sections/NoteSectionField';
 import Header from '../shared/Header';
 
 type NoteFormProps = {
@@ -20,10 +20,11 @@ type ActiveContent = {
   contentIndex: number;
 } | null;
 
-export function NoteForm({
+export default function NoteForm({
   onSubmit,
   defaultValues = {
     title: '',
+    folderId: '',
     noteSections: [],
   },
 }: NoteFormProps) {

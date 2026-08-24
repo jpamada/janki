@@ -1,11 +1,12 @@
 import { ActivityIndicator, Animated, Modal, Pressable, Text, View } from 'react-native';
 import { getQuestionsByLessonIdWithAnswers } from '@/repositories/question.repository';
-import { mapQuestionsWithAnswers } from '@/mappers/question.mapper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { X } from 'lucide-react-native';
+
+import mapQuestionsWithAnswers from '@/mappers/question.mapper';
 import QuizResults from './results';
 
 export type UserAnswer = {

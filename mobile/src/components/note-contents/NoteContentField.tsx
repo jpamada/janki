@@ -1,6 +1,6 @@
 import { Control, Controller, UseFieldArrayRemove } from "react-hook-form";
-import { NoteFormData } from "@/schemas/note.schema"
 import { Pressable, Text, TextInput, View } from "react-native";
+import { NoteFormData } from "@/schemas/note.schema"
 import { Trash2 } from "lucide-react-native";
 
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
@@ -36,13 +36,13 @@ export default function NoteContentField({
 
   return (
     <Swipeable
-    friction={1}
-    rightThreshold={40}
-    overshootRight={false}
-    renderRightActions={renderRightActions}
-    containerStyle={{
-      width: "100%",
-    }}
+      friction={1}
+      rightThreshold={40}
+      overshootRight={false}
+      renderRightActions={renderRightActions}
+      containerStyle={{
+        width: "100%",
+      }}
     >
       <View className="bg-gray-50 rounded-xl p-2">
         <Controller

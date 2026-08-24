@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createLesson } from '@/repositories/lesson.repository';
-import { LessonForm } from '@/components/lessons/LessonForm';
 import { LessonFormData } from '@/schemas/lesson.schema';
 import { useRouter } from 'expo-router';
 import { View } from 'react-native';
 
+import LessonForm from '@/components/lessons/LessonForm';
 import * as Crypto from 'expo-crypto';
 
 export default function CreateLessonScreen() {

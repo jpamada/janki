@@ -6,15 +6,16 @@ import { getLessons } from '@/repositories/lesson.repository';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Picker } from '@react-native-picker/picker';
 import { useQuery } from '@tanstack/react-query';
-import Header from '../shared/Header';
 import { router } from 'expo-router';
+
+import Header from '../shared/Header';
 
 type QuestionFormProps = {
   onSubmit: (data: QuestionFormData) => Promise<void>;
   defaultValues?: QuestionFormData;
 };
 
-export function QuestionForm({
+export default function QuestionForm({
   onSubmit,
   defaultValues = {
     question: '',

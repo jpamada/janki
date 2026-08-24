@@ -1,9 +1,9 @@
-import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
-
 import { Settings, Trash2 } from "lucide-react-native";
 import { Pressable } from "react-native";
 import { Text } from "react-native";
 import { router } from "expo-router";
+
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 
 type LessonItem = {
   id: string;
@@ -12,7 +12,7 @@ type LessonItem = {
   onDelete: (id: string) => void;
 };
 
-export function LessonItem({
+export default function LessonItem({
   id,
   title,
   subjectId,

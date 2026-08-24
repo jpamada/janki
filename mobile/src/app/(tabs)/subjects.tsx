@@ -1,10 +1,11 @@
 import { deleteSubject, getSubjects } from "@/repositories/subject.repository";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SubjectItem } from "@/components/subjects/SubjectItem";
 import { FlatList, Pressable, Text, View } from "react-native";
-import Header from "@/components/shared/Header";
 import { SearchX } from "lucide-react-native";
 import { router } from "expo-router";
+
+import SubjectItem from "@/components/subjects/SubjectItem";
+import Header from "@/components/shared/Header";
 
 export default function SubjectsScreen() {
   const queryClient = useQueryClient();

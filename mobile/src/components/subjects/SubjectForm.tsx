@@ -3,15 +3,16 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react-native';
-import Header from '../shared/Header';
 import { router } from 'expo-router';
+
+import Header from '../shared/Header';
 
 type SubjectFormProps = {
   onSubmit: (data: SubjectFormData) => Promise<void>;
   defaultValues?: SubjectFormData;
 };
 
-export function SubjectForm({
+export default function SubjectForm({
   onSubmit,
   defaultValues = {
     title: '',

@@ -1,7 +1,8 @@
 import { Controller, useFieldArray, type Control, type UseFieldArrayRemove } from "react-hook-form"
-import NoteContentField from "../note-contents/NoteContentField";
 import { Pressable, Text, TextInput, View } from "react-native";
-import type { NoteFormData } from "@/schemas/note.schema";
+import { type NoteFormData } from "@/schemas/note.schema";
+
+import NoteContentField from "../note-contents/NoteContentField";
 
 type NoteSectionFieldProps = {
   control: Control<NoteFormData>;

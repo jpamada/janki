@@ -1,7 +1,5 @@
-import { getAllNotesForBackup } from "@/repositories/note.repository";
 import { noteBackupSchema } from "@/schemas/note-backup.schema";
-import { Directory, File, Paths } from "expo-file-system";
-import * as Sharing from "expo-sharing";
+import { Directory } from "expo-file-system";
 
 export async function exportNotesBackup(data: unknown) {
   const result = noteBackupSchema.safeParse(data);
@@ -12,7 +10,6 @@ export async function exportNotesBackup(data: unknown) {
 
   const json = JSON.stringify(result.data, null, 2);
 
-  // Let the user choose where to save the backup
   const directory = await Directory.pickDirectoryAsync();
 
   if (!directory) {

@@ -6,15 +6,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Picker } from '@react-native-picker/picker';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react-native';
-import Header from '../shared/Header';
 import { router } from 'expo-router';
+
+import Header from '../shared/Header';
 
 type LessonFormProps = {
   onSubmit: (data: LessonFormData) => Promise<void>;
   defaultValues?: LessonFormData;
 };
 
-export function LessonForm({
+export default function LessonForm({
   onSubmit,
   defaultValues = {
     title: '',

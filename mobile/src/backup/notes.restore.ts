@@ -23,6 +23,7 @@ export async function importNotesBackup() {
 
   try {
     data = JSON.parse(json);
+    
   } catch {
     throw new Error("The selected file is not valid JSON");
   }

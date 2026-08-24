@@ -3,12 +3,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getNoteById, updateNote } from "@/repositories/note.repository";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import type { NoteFormData } from "@/schemas/note.schema";
-import { NoteForm } from "@/components/notes/NoteForm";
-import { Pressable, Text, View } from "react-native";
+import { type NoteFormData } from "@/schemas/note.schema";
+import { Text, View } from "react-native";
+
+import NoteForm from "@/components/notes/NoteForm";
 
 export default function NoteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -72,7 +74,8 @@ export default function NoteScreen() {
           <NoteForm
             defaultValues={{
               title: note.title,
-              
+              folderId: note.folderId ?? undefined,
+
               noteSections: (noteSections ?? []).map((section) => ({
                 id: section.id,
                 title: section.title,

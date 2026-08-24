@@ -2,7 +2,9 @@ import { eq, isNull } from 'drizzle-orm';
 import { folders } from '@/db/schema';
 import { db } from '@/db/client';
 
-export async function getFolders() {
+import * as Crypto from "expo-crypto";
+
+export async function getNoteFolders() {
   const query = await db
   .select()
   .from(folders);
@@ -10,7 +12,7 @@ export async function getFolders() {
   return query;
 }
 
-export async function getFolderById(id: string) {
+export async function getNoteFolderById(id: string) {
   const query = await db
   .select()
   .from(folders)
@@ -22,31 +24,35 @@ export async function getFolderById(id: string) {
   return query[0] ?? null;
 }
 
-export async function createFolder(input: {
-  id: string;
-  name: string;
-  parentId?: string | null;
+export async function createNoteFolder(
+  input: {
+    name: string;
+    parentId?: string;
 }) {
+
+  const noteFolderId = Crypto.randomUUID();
   await db
   .insert(folders)
   .values({
-    id: input.id,
+    id: noteFolderId,
     name: input.name,
     parentId: input.parentId ?? null,
     createdAt: new Date(),
   });
 }
 
-export async function updateFolder(
+export async function updateNoteFolder(
   id: string,
   input: {
     name: string;
+    parentId?: string;
   },
 ) {
   await db
   .update(folders)
   .set({
     name: input.name,
+    parentId: input.parentId,
     updatedAt: new Date(),
   })
   .where(
@@ -54,7 +60,7 @@ export async function updateFolder(
   );
 }
 
-export async function deleteFolder(id: string) {
+export async function deleteNoteFolder(id: string) {
   await db
   .delete(folders)
   .where(

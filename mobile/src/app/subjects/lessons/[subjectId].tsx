@@ -2,9 +2,10 @@ import { deleteLesson, getLessonsBySubjectId } from "@/repositories/lesson.repos
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlatList, Pressable, Text, View } from "react-native";
-import { LessonItem } from "@/components/lessons/LessonItem";
 import { router, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, SearchX } from "lucide-react-native";
+
+import LessonItem from "@/components/lessons/LessonItem";
 import Header from "@/components/shared/Header";
 
 export default function LessonScreen() {

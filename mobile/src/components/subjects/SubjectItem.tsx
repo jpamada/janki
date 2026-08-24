@@ -11,7 +11,7 @@ type SubjectItem = {
   onDelete: (id: string) => void;
 };
 
-export function SubjectItem({
+export default function SubjectItem({
   id,
   title,
   onDelete,
