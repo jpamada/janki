@@ -7,6 +7,11 @@ export const noteSchema = z.object({
     .trim()
     .optional(),
 
+  subfolderId: z
+    .string()
+    .trim()
+    .optional(),
+
   title: z
     .string()
     .trim()

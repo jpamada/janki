@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { createNote } from "@/repositories/note.repository";
 import { NoteFormData } from "@/schemas/note.schema";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import { View } from "react-native";
 
 import NoteForm from "@/components/notes/NoteForm";

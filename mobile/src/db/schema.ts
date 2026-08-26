@@ -1,9 +1,15 @@
 import { foreignKey, index, integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
+export const categories = sqliteTable("categories", {
+    id: text("id").primaryKey(),
+
+    name: text("name").notNull(),
+});
+
 export const folders = sqliteTable("folders", {
     id: text("id").primaryKey(),
 
-    parentId: text("parent_id"),
+    categoryId: text("category_id").notNull(),
 
     name: text("name").notNull(),
 
@@ -21,13 +27,44 @@ export const folders = sqliteTable("folders", {
 
 }, (table) => [
     foreignKey({
-        columns: [table.parentId],
-        foreignColumns: [table.id],
-        name: "parent_id_fk",
+        columns: [table.categoryId],
+        foreignColumns: [categories.id],
+        name: "category_id_fk"
     }).onDelete("restrict"),
 
-    index("folders_folder_id_idx").on(
-        table.parentId
+    index("folders_category_id_idx").on(
+        table.categoryId
+    ),
+]);
+
+export const subfolders = sqliteTable("subfolders", {
+    id: text("id").primaryKey(),
+
+    folderId: text("folder_id").notNull(),
+
+    name: text("name").notNull(),
+
+    createdAt: integer("created_at", {
+        mode: "timestamp_ms"
+    }).notNull(),
+
+    updatedAt: integer("updated_at", {
+        mode: "timestamp_ms"
+    }),
+
+    deletedAt: integer("deleted_at", {
+        mode: "timestamp_ms"
+    }),
+
+}, (table) => [
+    foreignKey({
+        columns: [table.folderId],
+        foreignColumns: [folders.id],
+        name: "folder_id_fk"
+    }).onDelete("restrict"),
+
+    index("subfolders_folder_id_idx").on(
+        table.folderId
     ),
 ]);
 
@@ -35,6 +72,8 @@ export const notes = sqliteTable("notes", {
     id: text("id").primaryKey(),
 
     folderId: text("folder_id"),
+
+    subfolderId: text("subfolder_id"),
 
     title: text("title").notNull(),
 
@@ -57,8 +96,18 @@ export const notes = sqliteTable("notes", {
         name: "folder_id_fk",
     }).onDelete("cascade"),
 
+    foreignKey({
+        columns: [table.subfolderId],
+        foreignColumns: [subfolders.id],
+        name: "subfolder_id_fk",
+    }).onDelete("cascade"),
+
     index("notes_folder_id_idx").on(
         table.folderId
+    ),
+
+    index("notes_subfolder_id_idx").on(
+        table.subfolderId
     ),
 ]);
 

@@ -39,8 +39,9 @@ export default function NoteFolderItem({
           setNotesVisible((prev) => !prev)
         }}
         className={`
-          flex flex-row items-center gap-2 bg-gray-50 rounded-lg 
-          px-4 pt-4 ${!notesVisible && "pb-4"}
+          flex flex-row items-center gap-2 
+          bg-gray-50 rounded-lg 
+          px-4 py-4 
         `}
       >
         <FolderClosed size={16} />

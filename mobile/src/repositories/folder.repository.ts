@@ -1,5 +1,5 @@
-import { eq, isNull } from 'drizzle-orm';
 import { folders } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 import { db } from '@/db/client';
 
 import * as Crypto from "expo-crypto";
@@ -8,6 +8,19 @@ export async function getNoteFolders() {
   const query = await db
   .select()
   .from(folders);
+
+  return query;
+}
+
+export async function getNoteFoldersByCategory(
+  categoryId?: string | null
+) {
+  const query = await db
+  .select()
+  .from(folders)
+  .where(
+    eq(folders.categoryId, categoryId ?? "")
+  );
 
   return query;
 }
@@ -27,16 +40,15 @@ export async function getNoteFolderById(id: string) {
 export async function createNoteFolder(
   input: {
     name: string;
-    parentId?: string;
+    categoryId: string;
 }) {
-
   const noteFolderId = Crypto.randomUUID();
   await db
   .insert(folders)
   .values({
     id: noteFolderId,
     name: input.name,
-    parentId: input.parentId ?? null,
+    categoryId: input.categoryId,
     createdAt: new Date(),
   });
 }
@@ -45,14 +57,13 @@ export async function updateNoteFolder(
   id: string,
   input: {
     name: string;
-    parentId?: string;
-  },
-) {
+    categoryId?: string;
+}) {
   await db
   .update(folders)
   .set({
     name: input.name,
-    parentId: input.parentId,
+    categoryId: input.categoryId,
     updatedAt: new Date(),
   })
   .where(

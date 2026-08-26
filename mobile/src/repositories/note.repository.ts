@@ -3,7 +3,6 @@ import { noteContents, notes, noteSections } from '@/db/schema';
 import { db } from '@/db/client';
 
 import * as Crypto from "expo-crypto";
-import { noteSchema } from '@/schemas/note.schema';
 import { getNoteSectionsByNoteId } from './note-section.repository';
 
 export async function getNotes() {
@@ -27,6 +26,17 @@ export async function getNotesByFolderId(folderId: string) {
   .from(notes)
   .where(
     eq(notes.folderId, folderId), 
+  );
+
+  return query;
+}
+
+export async function getNotesBySubfolderId(subfolderId: string) {
+  const query = await db
+  .select()
+  .from(notes)
+  .where(
+    eq(notes.subfolderId, subfolderId), 
   );
 
   return query;
