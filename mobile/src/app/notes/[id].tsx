@@ -4,9 +4,10 @@ import { getNoteById, updateNote } from "@/repositories/note.repository";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { type NoteFormData } from "@/schemas/note.schema";
-import { Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 
 import NoteForm from "@/components/notes/NoteForm";
+import { SearchX } from "lucide-react-native";
 
 export default function NoteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -32,6 +33,9 @@ export default function NoteScreen() {
       updateNote(id, data),
 
     onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["folders"],
+      });
       await queryClient.invalidateQueries({
         queryKey: ["notes"],
       });
@@ -61,13 +65,20 @@ export default function NoteScreen() {
       }}
     >
       {notesIsLoading || noteSectionsIsLoading ? (
-        <Text>Loading note...</Text>
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="small" color="#4b5563" />
+        </View>
 
       ): error ? (
-        <Text>Failed to load note.</Text>
+        <View className="flex-1 items-center justify-center">
+          <Text>Failed to load note.</Text>
+        </View>
 
       ): !note ? (
-        <Text>Note not found.</Text>
+        <View className="flex-1 items-center justify-center">
+          <SearchX size={64} color="#9ca3af" />
+          <Text className="text-gray-400 font-semibold">Note not found</Text>
+        </View>
 
       ): (
         <View className="flex-1">

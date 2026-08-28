@@ -25,6 +25,7 @@ export default function NoteForm({
   defaultValues = {
     title: '',
     folderId: '',
+    subfolderId: '',
     noteSections: [],
   },
 }: NoteFormProps) {

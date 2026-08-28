@@ -1,6 +1,8 @@
-import { Pressable, Text, View } from "react-native";
-import { Calendar } from "lucide-react-native";
+import { Pressable, Text } from "react-native";
+import { FileText } from "lucide-react-native";
 import { router } from "expo-router";
+
+import * as Haptics from 'expo-haptics';
 
 type NoteItemProps = {
   id: string;
@@ -19,18 +21,16 @@ export default function NoteItem({
   return (
     <Pressable
       delayLongPress={500}
-      onLongPress={() => onLongPress(id)}
+      onLongPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onLongPress(id);
+      }}
       onPress={() => router.push(`/notes/${id}`)}
-      className="bg-gray-50 rounded-lg p-4"
+      className="bg-gray-50 rounded-xl flex-row items-center gap-2 px-4 py-4"
     >
-      <View className="flex flex-row items-center gap-1">
-        <Calendar size={12} color="#b4b4b4" />
-        <Text className="text-gray-400 text-xs">
-          {createdAt.toLocaleString()}
-        </Text>
-      </View>
+      <FileText size={18} />
 
-      <Text className="text-gray-600 font-semibold">
+      <Text className="flex-1 font-semibold text-gray-700">
         {title}
       </Text>
     </Pressable>

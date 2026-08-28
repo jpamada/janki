@@ -1,4 +1,4 @@
-import { FolderFormData, noteFolderSchema } from '@/schemas/folder.schema';
+import { FolderFormData, folderSchema } from '@/schemas/folder.schema';
 import { getCategories } from '@/repositories/category.repository';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,29 +6,29 @@ import { Controller, useForm } from 'react-hook-form';
 import { Picker } from '@react-native-picker/picker';
 import { useQuery } from '@tanstack/react-query';
 
-type NoteFolderProps = {
+type FolderProps = {
   onSubmit: (data: FolderFormData) => Promise<void>;
   isEditing: boolean;
   defaultValues?: FolderFormData;
 };
 
-export default function NoteFolderForm({
+export default function FolderForm({
   onSubmit,
   isEditing,
   defaultValues = {
     name: '',
     categoryId: '',
   },
-}: NoteFolderProps) {
-  
+}: FolderProps) {
+
   const { control, handleSubmit, formState: { errors, isSubmitting }} = useForm<FolderFormData>({
-    resolver: zodResolver(noteFolderSchema),
+    resolver: zodResolver(folderSchema),
     defaultValues,
   });
 
   const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    queryFn: getCategories
+    queryKey: ['categories'],
+    queryFn: getCategories,
   });
 
   const handleFormSubmit = async (data: FolderFormData) => {
@@ -46,9 +46,7 @@ export default function NoteFolderForm({
         control={control}
         render={({ field: { onChange, onBlur, value } }) => (
           <View className="flex flex-col gap-2">
-            <Text className="text-gray-400 font-semibold">
-              Title
-            </Text>
+            <Text className="text-gray-400 font-semibold">Title</Text>
 
             <TextInput
               multiline
@@ -69,17 +67,12 @@ export default function NoteFolderForm({
       <Controller
         name="categoryId"
         control={control}
-        render={({ field: { onChange, onBlur, value }}) => (
+        render={({ field: { onChange, onBlur, value } }) => (
           <View className="flex flex-col gap-2">
-            <Text className="text-gray-400 font-semibold">
-              Category
-            </Text>
+            <Text className="text-gray-400 font-semibold">Category</Text>
 
             <View className="bg-white rounded-xl border border-gray-200">
-              <Picker
-                selectedValue={value}
-                onValueChange={onChange}
-              >
+              <Picker selectedValue={value} onValueChange={onChange}>
                 {categories.map((category) => (
                   <Picker.Item
                     key={category.id}
@@ -91,9 +84,7 @@ export default function NoteFolderForm({
             </View>
 
             {errors.categoryId && (
-              <Text className="text-red-400">
-                {errors.categoryId.message}
-              </Text>
+              <Text className="text-red-400">{errors.categoryId.message}</Text>
             )}
           </View>
         )}

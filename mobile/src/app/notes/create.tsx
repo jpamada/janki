@@ -8,8 +8,11 @@ import { View } from "react-native";
 import NoteForm from "@/components/notes/NoteForm";
 
 export default function CreateNoteScreen() {
-  const { folderId } = useLocalSearchParams<{ folderId: string }>()
-  
+  const { folderId, subfolderId } = useLocalSearchParams<{ 
+    folderId: string; 
+    subfolderId: string 
+  }>();
+  console.log(subfolderId)
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -18,6 +21,9 @@ export default function CreateNoteScreen() {
     mutationFn: createNote,
 
     onSuccess: async (noteId) => {
+      await queryClient.invalidateQueries({
+        queryKey: ["folders"]
+      });
       await queryClient.invalidateQueries({
         queryKey: ["notes"]
       });
@@ -36,6 +42,7 @@ export default function CreateNoteScreen() {
     await createNoteMutation.mutateAsync({
       title: data.title,
       folderId: data.folderId,
+      subfolderId: data.subfolderId,
       noteSections: data.noteSections
     });
   }
@@ -50,7 +57,8 @@ export default function CreateNoteScreen() {
       <NoteForm 
         defaultValues={{ 
           title: "Untitled",
-          folderId: folderId
+          folderId: folderId,
+          subfolderId: subfolderId,
         }} 
         onSubmit={handleNoteSubmit} 
       />

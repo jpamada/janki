@@ -1,4 +1,4 @@
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, isNull, or } from 'drizzle-orm';
 import { noteContents, notes, noteSections } from '@/db/schema';
 import { db } from '@/db/client';
 
@@ -14,7 +14,10 @@ export async function getNotes() {
   })
   .from(notes)
   .where(
-    isNull(notes.folderId)
+    and(
+      isNull(notes.folderId),
+      isNull(notes.subfolderId)
+    )
   );
 
   return query;
@@ -58,6 +61,7 @@ export async function createNote(
   input: {
     title: string;
     folderId?: string | null;
+    subfolderId?: string | null;
     noteSections?: {
       title: string;
       position?: number;
@@ -79,6 +83,7 @@ export async function createNote(
       id: noteId,
       title: input.title,
       folderId: input.folderId ?? null,
+      subfolderId: input.subfolderId ?? null,
       createdAt: new Date(),
     });
 

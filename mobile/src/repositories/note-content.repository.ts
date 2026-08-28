@@ -1,7 +1,7 @@
+import { NoteContentType } from '@/constants/note-content';
 import { noteContents } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db/client';
-import { NoteContentType } from '@/constants/note-content';
 
 export async function getNoteContents() {
   const query = await db

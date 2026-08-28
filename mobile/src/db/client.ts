@@ -1,5 +1,15 @@
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import { openDatabaseSync } from 'expo-sqlite';
 
+import * as schema from './schema';
+import * as relations from './relations';
+
 const expoDb = openDatabaseSync('janki.db');
-export const db = drizzle(expoDb);
+
+
+export const db = drizzle(expoDb, {
+  schema: {
+    ...schema,
+    ...relations,
+  },
+});

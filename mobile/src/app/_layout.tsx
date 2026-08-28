@@ -8,12 +8,15 @@ import { db } from '@/db/client';
 
 import migrations from '../../drizzle/migrations';
 import '../../global.css';
+import { useEffect } from 'react';
+import { getNotes } from '@/repositories/note.repository';
+import { getFolders } from '@/repositories/folder.repository';
+import { getCategories } from '@/repositories/category.repository';
 
 export default function RootLayout() {
   const { success, error } = useMigrations(db, migrations);
 
   if (error) return error;
-
   if (!success) return null;
 
   return (
