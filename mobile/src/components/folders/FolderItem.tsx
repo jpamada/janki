@@ -67,7 +67,7 @@ export default function FolderItem({
       >
         {folderIsOpen ? <FolderOpen size={18} /> : <FolderClosed size={18} />}
 
-        <Text className="flex-1 font-semibold text-gray-700">
+        <Text className="flex-1 font-semibold text-gray-700 text-lg">
           {folder.name}
         </Text>
       </Pressable>
@@ -86,7 +86,7 @@ export default function FolderItem({
                 className="flex-row items-center gap-2 px-4 py-3"
               >
                  {openSubfolderIds.has(subfolder.id) ? <FolderOpen size={18} /> : <FolderClosed size={18} />}
-                <Text className="font-medium text-gray-600">
+                <Text className="font-medium text-gray-600 text-lg">
                   {subfolder.name}
                 </Text>
               </Pressable>
@@ -103,7 +103,7 @@ export default function FolderItem({
                     className="flex-row items-center gap-2 px-4 py-3 ps-8"
                   >
                     <FileText size={18} />
-                    <Text className="font-medium text-gray-600">{note.title}</Text>
+                    <Text className="font-medium text-gray-600 text-lg">{note.title}</Text>
                   </Pressable>
                 ))
               )}
@@ -121,7 +121,7 @@ export default function FolderItem({
               className="flex-row items-center gap-2 px-4 py-3"
             >
               <FileText size={18} />
-              <Text className="font-medium text-gray-600">{note.title}</Text>
+              <Text className="font-medium text-gray-600 text-lg">{note.title}</Text>
             </Pressable>
           ))}
         </View>

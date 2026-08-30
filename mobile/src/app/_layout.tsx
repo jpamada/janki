@@ -9,7 +9,6 @@ import { db } from '@/db/client';
 import migrations from '../../drizzle/migrations';
 import '../../global.css';
 
-
 export default function RootLayout() {
   const { success, error } = useMigrations(db, migrations);
 
@@ -22,38 +21,38 @@ export default function RootLayout() {
   }
 
   return (
-      <KeyboardProvider>
-        <GestureHandlerRootView>
-          <QueryClientProvider 
-            client={queryClient}>
-            <Stack>
-              <Stack.Screen
-                name="(tabs)"
-                options={{
-                  headerShown: false
-                }}
-              />
-              <Stack.Screen
-                name="notes"
-                options={{ 
-                  headerShown: false 
-                }}
-              />
-              <Stack.Screen
-                name="subjects"
-                options={{ 
-                  headerShown: false 
-                }}
-              />
-              <Stack.Screen
-                name="categories"
-                options={{ 
-                  headerShown: false 
-                }}
-              />
-            </Stack>
-          </QueryClientProvider>
-        </GestureHandlerRootView>
-      </KeyboardProvider>
+    <KeyboardProvider>
+      <GestureHandlerRootView>
+        <QueryClientProvider 
+          client={queryClient}>
+          <Stack>
+            <Stack.Screen
+              name="(tabs)"
+              options={{
+                headerShown: false
+              }}
+            />
+            <Stack.Screen
+              name="notes"
+              options={{ 
+                headerShown: false 
+              }}
+            />
+            <Stack.Screen
+              name="subjects"
+              options={{ 
+                headerShown: false 
+              }}
+            />
+            <Stack.Screen
+              name="categories"
+              options={{ 
+                headerShown: false 
+              }}
+            />
+          </Stack>
+        </QueryClientProvider>
+      </GestureHandlerRootView>
+    </KeyboardProvider>
   );
 }

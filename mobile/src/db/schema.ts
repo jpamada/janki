@@ -30,7 +30,7 @@ export const folders = sqliteTable("folders", {
         columns: [table.categoryId],
         foreignColumns: [categories.id],
         name: "folders_category_id_fk"
-    }).onDelete("restrict"),
+    }).onDelete("set null"),
 
     index("folders_category_id_idx").on(
         table.categoryId
@@ -185,7 +185,7 @@ export const subjects = sqliteTable("subjects", {
         columns: [table.categoryId],
         foreignColumns: [categories.id],
         name: "subjects_category_id_fk"
-    }).onDelete("restrict"),
+    }).onDelete("set null"),
 
     index("subjects_category_id_idx").on(
         table.categoryId

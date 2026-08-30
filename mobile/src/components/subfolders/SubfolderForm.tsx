@@ -46,7 +46,7 @@ export default function SubfolderForm({
               onBlur={onBlur}
               onChangeText={onChange}
               placeholder=""
-              className="text-gray-800 text-lg rounded-xl border px-2 py-4 border-gray-200"
+              className='bg-gray-100 rounded-xl text-lg text-gray-600 px-2 py-4'
             />
 
             {errors.name && (

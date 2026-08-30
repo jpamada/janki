@@ -136,7 +136,7 @@ export default function LessonScreen() {
 
       <View className="flex-1 p-4">
         <Text className="text-gray-400 text-sm font-semibold mb-2">
-          All Lessons
+          {subjectName} lessons
         </Text>
 
         {isLoading ? (
@@ -154,9 +154,10 @@ export default function LessonScreen() {
             data={lessons}
             keyExtractor={(item) => item.id}
             contentContainerClassName="gap-2"
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <LessonItem
                 id={item.id}
+                index={index}
                 title={item.title}
                 onLongPress={handleLessonLongPress}
               />

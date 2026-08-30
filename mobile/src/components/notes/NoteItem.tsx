@@ -30,7 +30,7 @@ export default function NoteItem({
     >
       <FileText size={18} />
 
-      <Text className="flex-1 font-semibold text-gray-700">
+      <Text className="flex-1 font-semibold text-gray-700 text-lg">
         {title}
       </Text>
     </Pressable>

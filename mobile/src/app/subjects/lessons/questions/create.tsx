@@ -75,7 +75,7 @@ export default function CreateQuestionScreen() {
         onCreateSuccess={createSuccess}
         defaultValues={{
           question: '',
-          lessonId,
+          lessonId: lessonId,
           answers: [
             { answer: '', isCorrect: false },
             { answer: '', isCorrect: false },

@@ -46,12 +46,14 @@ export default function SubjectForm({
         control={control}
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
+            <Text className="text-gray-400 font-semibold mb-1">Title</Text>
+
             <TextInput
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
               placeholder="Enter subject title"
-              className="text-2xl font-semibold px-0"
+              className='bg-gray-100 rounded-xl text-lg text-gray-600 px-2 py-4'
             />
 
             {errors.title && (
@@ -68,15 +70,26 @@ export default function SubjectForm({
           <View className="flex flex-col gap-2">
             <Text className="text-gray-400 font-semibold">Category</Text>
 
-            <View className="bg-white rounded-xl border border-gray-200">
+            <View className="bg-gray-100 rounded-xl">
               <Picker selectedValue={value} onValueChange={onChange}>
-                <Picker.Item label="Default" value={undefined} />
+                <Picker.Item 
+                  label="Default" 
+                  value={undefined}
+                  style={{
+                    fontSize: 16,
+                    color: "#6b7280",
+                  }}
+                />
 
                 {categories.map((category) => (
                   <Picker.Item
                     key={category.id}
                     label={category.name}
                     value={category.id}
+                    style={{
+                      fontSize: 16,
+                      color: "#6b7280",
+                    }}
                   />
                 ))}
               </Picker>

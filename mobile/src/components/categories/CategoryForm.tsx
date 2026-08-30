@@ -38,13 +38,15 @@ export default function CategoryForm({
         control={control}
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
+            <Text className="text-gray-400 font-semibold mb-1">Name</Text>
+
             <TextInput
               multiline
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
-              placeholder="Enter category name"
-              className="text-xl font-semibold border-b-2 border-gray-200 px-0 py-0"
+              placeholder="Enter name"
+              className='bg-gray-100 rounded-xl text-lg text-gray-600 px-2 py-4'
             />
 
             {errors.name && (

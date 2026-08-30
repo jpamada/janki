@@ -208,7 +208,7 @@ export default function QuizScreen() {
 
       ) : (
         <EmptyStateScreen
-          icon={<FileQuestionMark size={72} />}
+          icon={<FileQuestionMark color="#9ca3af" size={72} />}
           navigate={{
             pathname: "/subjects/lessons/questions/create",
             params: { lessonId },

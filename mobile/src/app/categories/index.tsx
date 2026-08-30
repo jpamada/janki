@@ -73,6 +73,12 @@ export default function CategoryScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['categories'],
       });
+      await queryClient.invalidateQueries({
+        queryKey: ['folders', selectedCategoryId],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['subjects', selectedCategoryId],
+      });
       setIsDeleting(false);
       setModalVisible(false);
       setSelectedCategoryId(null);

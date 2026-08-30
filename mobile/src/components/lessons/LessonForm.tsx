@@ -33,17 +33,20 @@ export default function LessonForm({
         {isEditing ? 'Rename Lesson' : 'Create Lesson'}
       </Text>
 
+      
       <Controller
         name="title"
         control={control}
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
+            <Text className="text-gray-400 font-semibold mb-1">Title</Text>
+            
             <TextInput
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
               placeholder="Enter lesson title"
-              className="px-0 text-2xl font-semibold"
+              className='bg-gray-100 rounded-xl text-lg text-gray-600 px-2 py-4'
             />
 
             {errors.title && (

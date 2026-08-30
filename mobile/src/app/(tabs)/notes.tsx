@@ -98,9 +98,9 @@ export default function NotesScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['folders'],
       });
-      setFolderModalVisible(false);
       setIsEditing(false);
       setSelectedFolderId(null);
+      setFolderModalVisible(false);
     },
 
     onError: (error) => {
@@ -118,6 +118,7 @@ export default function NotesScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['folders'],
       });
+      setIsDeleting(false);
       setSelectedFolderId(null);
       setFolderModalVisible(false);
     },
@@ -307,9 +308,12 @@ export default function NotesScreen() {
 
         <Pressable
           onPress={() => router.push('/categories')}
-          className="bg-gray-50 rounded-full px-4 py-2"
+          className="flex flex-row items-center gap-1 bg-gray-50 rounded-full px-4 py-2"
         >
-          <Plus size={16} />
+          <Plus color="#4b5563" strokeWidth={2} size={16} />
+          <Text className='text-gray-600 text-sm font-semibold'>
+            New Category
+          </Text>
         </Pressable>
       </ScrollView>
 
@@ -512,7 +516,7 @@ export default function NotesScreen() {
                     setIsDeleting(true);
                     setBottomSheetVisible(false);
                     setSubfolderModalVisible(true);
-                    
+
                   } else if (selectedNoteId) {
                     setIsDeleting(true);
                     setNoteModalVisible(true);
@@ -585,13 +589,14 @@ export default function NotesScreen() {
                   </Pressable>
                 </View>
               </View>
+
             ) : (
               <FolderForm
                 onSubmit={handleFolderSubmit}
                 isEditing={isEditing}
                 defaultValues={{
                   name: selectedFolder?.name ?? 'Untitled',
-                  categoryId: selectedFolder?.categoryId ?? null,
+                  categoryId: selectedFolder?.categoryId ?? selectedCategoryId ?? null,
                 }}
               />
             )}

@@ -124,7 +124,7 @@ export default function SubjectsScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <Header title="Subjects" />
+      <Header title="Quiz" />
 
       <ScrollView
         horizontal
@@ -167,13 +167,20 @@ export default function SubjectsScreen() {
 
         <Pressable
           onPress={() => router.push('/categories')}
-          className="bg-gray-50 rounded-full px-4 py-2"
+          className="flex flex-row items-center gap-1 bg-gray-50 rounded-full px-4 py-2"
         >
-          <Plus size={16} />
+          <Plus color="#4b5563" strokeWidth={2} size={16} />
+          <Text className='text-gray-600 text-sm font-semibold'>
+            New Category
+          </Text>
         </Pressable>
       </ScrollView>
 
       <View className="flex-1 px-6 py-4">
+        <Text className="text-gray-400 text-sm font-semibold mb-2">
+          Subjects
+        </Text>
+
         {isLoading ? (
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="small" color="#4b5563" />
@@ -317,7 +324,7 @@ export default function SubjectsScreen() {
                 isEditing={isEditing}
                 defaultValues={{
                   title: selectedSubject?.title ?? "",
-                  categoryId: selectedSubject?.categoryId ?? null
+                  categoryId: selectedSubject?.categoryId ?? selectedCategoryId ?? null
                 }}
               />
             )}

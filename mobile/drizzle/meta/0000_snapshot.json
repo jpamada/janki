@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "53736597-f341-4b5c-9e8b-558e8955d665",
+  "id": "0b515fa4-bc30-40ff-b757-b33d96dad8f4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "answers": {
@@ -168,7 +168,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -809,7 +809,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },

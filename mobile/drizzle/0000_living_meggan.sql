@@ -21,7 +21,7 @@ CREATE TABLE `folders` (
 	`created_at` integer NOT NULL,
 	`updated_at` integer,
 	`deleted_at` integer,
-	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE restrict
+	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE INDEX `folders_category_id_idx` ON `folders` (`category_id`);--> statement-breakpoint
@@ -114,7 +114,7 @@ CREATE TABLE `subjects` (
 	`created_at` integer NOT NULL,
 	`updated_at` integer,
 	`deleted_at` integer,
-	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE restrict
+	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE INDEX `subjects_category_id_idx` ON `subjects` (`category_id`);

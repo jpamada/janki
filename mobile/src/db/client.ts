@@ -5,7 +5,7 @@ import * as schema from './schema';
 import * as relations from './relations';
 
 const expoDb = openDatabaseSync('janki.db');
-
+expoDb.execSync('PRAGMA foreign_keys = ON;');
 
 export const db = drizzle(expoDb, {
   schema: {

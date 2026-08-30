@@ -54,7 +54,7 @@ export default function FolderForm({
               onBlur={onBlur}
               onChangeText={onChange}
               placeholder=""
-              className="text-gray-800 text-lg rounded-xl border px-2 py-4 border-gray-200"
+              className='bg-gray-100 rounded-xl text-lg text-gray-600 px-2 py-4'
             />
 
             {errors.name && (
@@ -71,15 +71,25 @@ export default function FolderForm({
           <View className="flex flex-col gap-2">
             <Text className="text-gray-400 font-semibold">Category</Text>
 
-            <View className="bg-white rounded-xl border border-gray-200">
+            <View className="bg-gray-100 rounded-xl">
               <Picker selectedValue={value} onValueChange={onChange}>
-                <Picker.Item label="Default" value={undefined} />
+                <Picker.Item 
+                  label="Default" 
+                  value={null}   
+                  style={{
+                    fontSize: 16,
+                    color: "#6b7280",
+                  }}/>
 
                 {categories.map((category) => (
                   <Picker.Item
                     key={category.id}
                     label={category.name}
                     value={category.id}
+                    style={{
+                      fontSize: 16,
+                      color: "#6b7280",
+                    }}
                   />
                 ))}
               </Picker>

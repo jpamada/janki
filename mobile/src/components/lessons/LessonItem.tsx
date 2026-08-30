@@ -7,12 +7,14 @@ import * as Haptics from "expo-haptics";
 type LessonItem = {
   id: string;
   title: string;
+  index: number;
   onLongPress: (id: string) => void;
 };
 
 export default function LessonItem({
   id,
   title,
+  index,
   onLongPress
 }: LessonItem) {
 
@@ -26,8 +28,12 @@ export default function LessonItem({
         pathname: `/subjects/lessons/quiz/play`,
         params: { lessonId: id }
       })}
-      className="bg-gray-50 rounded-lg p-4"
+      className="flex flex-row items-center gap-2 bg-gray-50 rounded-lg p-4"
     >
+      <Text className="text-gray-600 text-xl font-bold">
+        {index + 1}
+      </Text>
+
       <Text className="text-gray-600 text-xl font-bold">
         {title}
       </Text>

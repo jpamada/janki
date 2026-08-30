@@ -29,7 +29,7 @@ export default function BrowseQuestionScreen() {
       }}
     >
       <Header 
-        title="Subjects"
+        title="Questions"
         back={
           <Pressable onPress={() => router.back()}>
             <ArrowLeft />
@@ -66,7 +66,7 @@ export default function BrowseQuestionScreen() {
         ): (
           <View className='flex-1 justify-center items-center'>
             <SearchX size={64} color="#9ca3af" />
-            <Text className='text-gray-400 font-semibold'>No subjects found</Text>
+            <Text className='text-gray-400 font-semibold'>No questions found</Text>
           </View>
         )}
       </View>

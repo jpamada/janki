@@ -14,34 +14,57 @@ export default function HomeScreen() {
         className="flex-1 px-6 py-4"
         showsVerticalScrollIndicator={false}
       >
-        <Text className="text-gray-400 text-sm font-semibold mb-2">
-          All Features
-        </Text>
-
         <View className='flex justify-between gap-4'>
-          <Pressable onPress={() => router.push(`/notes`)}>
-            <View className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg'>
+          <Text className="text-gray-400 text-sm font-semibold">
+            Make a second brain
+          </Text>
+
+          <View className='flex flex-col gap-4 p-6 bg-gray-50 rounded-xl mb-4'>
+            <View className='flex flex-row items-center gap-4'>
               <View className='bg-white rounded-xl p-4'>
                 <NotepadText color="#9ca3af" />
               </View>
-              <View>
-                <Text className='text-gray-600 font-bold'>Notes</Text>
-                <Text className='text-gray-400'>Create new notes to remember</Text>
+              <View className='flex flex-col'>
+                <Text className='text-gray-600 text-xl font-semibold'>Notes</Text>
+                <Text className='text-gray-400'>Don't forget what you know</Text>
               </View>
             </View>
-          </Pressable>
 
-          <Pressable onPress={() => router.push(`/subjects`)}>
-            <View className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg'>
+            <Pressable 
+              className='bg-gray-200 rounded-full px-4 py-3'
+              onPress={() => router.push(`/notes`)}
+            >
+              <Text className='text-gray-500 text-center font-semibold'>
+                Create new notes
+              </Text>
+            </Pressable>
+          </View>
+
+          <Text className="text-gray-400 text-sm font-semibold">
+            Personalize your quiz
+          </Text>
+
+          <View className='flex flex-col gap-4 p-6 bg-gray-50 rounded-lg'>
+            <View className='flex flex-row items-center gap-4'>
               <View className='bg-white rounded-xl p-4'>
                 <Lightbulb color="#9ca3af" />
               </View>
-              <View>
-                <Text className='text-gray-600 font-bold'>Quiz</Text>
+
+              <View className='flex flex-col'>
+                <Text className='text-gray-600 text-xl font-semibold'>Quiz</Text>
                 <Text className='text-gray-400'>Test and prove your skills</Text>
               </View>
             </View>
-          </Pressable>
+
+            <Pressable 
+              onPress={() => router.push(`/subjects`)}
+              className='bg-gray-200 rounded-full px-4 py-3'
+            >
+              <Text className='text-gray-500 text-center font-semibold'>
+                Create quizzes
+              </Text>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
     </View>
