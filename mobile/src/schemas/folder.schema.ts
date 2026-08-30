@@ -8,7 +8,8 @@ export const folderSchema = z.object({
 
   categoryId: z
     .string()
-    .trim(),
+    .trim()
+    .nullable(),
 
   name: z
     .string()

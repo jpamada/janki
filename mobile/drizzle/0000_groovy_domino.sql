@@ -16,7 +16,7 @@ CREATE TABLE `categories` (
 --> statement-breakpoint
 CREATE TABLE `folders` (
 	`id` text PRIMARY KEY NOT NULL,
-	`category_id` text NOT NULL,
+	`category_id` text,
 	`name` text NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer,
@@ -110,8 +110,11 @@ CREATE INDEX `subfolders_folder_id_idx` ON `subfolders` (`folder_id`);--> statem
 CREATE TABLE `subjects` (
 	`id` text PRIMARY KEY NOT NULL,
 	`title` text NOT NULL,
-	`category` text NOT NULL,
+	`category_id` text,
 	`created_at` integer NOT NULL,
 	`updated_at` integer,
-	`deleted_at` integer
+	`deleted_at` integer,
+	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE restrict
 );
+--> statement-breakpoint
+CREATE INDEX `subjects_category_id_idx` ON `subjects` (`category_id`);

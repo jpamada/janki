@@ -1,18 +1,18 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { createNote } from "@/repositories/note.repository";
-import { NoteFormData } from "@/schemas/note.schema";
-import { View } from "react-native";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { createNote } from '@/repositories/note.repository';
+import { NoteFormData } from '@/schemas/note.schema';
+import { View } from 'react-native';
 
-import NoteForm from "@/components/notes/NoteForm";
+import NoteForm from '@/components/notes/NoteForm';
 
 export default function CreateNoteScreen() {
-  const { folderId, subfolderId } = useLocalSearchParams<{ 
-    folderId: string; 
-    subfolderId: string 
+  const { folderId, subfolderId } = useLocalSearchParams<{
+    folderId: string;
+    subfolderId: string;
   }>();
-  console.log(subfolderId)
+
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -22,46 +22,46 @@ export default function CreateNoteScreen() {
 
     onSuccess: async (noteId) => {
       await queryClient.invalidateQueries({
-        queryKey: ["folders"]
+        queryKey: ['folders'],
       });
       await queryClient.invalidateQueries({
-        queryKey: ["notes"]
+        queryKey: ['notes'],
       });
       await queryClient.invalidateQueries({
-        queryKey: ["noteSections", noteId]
-      })
+        queryKey: ['noteSections', noteId],
+      });
       router.back();
     },
-    
+
     onError: (error) => {
-      console.error(error);
-    }
-  })
+      console.error(error.message);
+    },
+  });
 
   const handleNoteSubmit = async (data: NoteFormData) => {
     await createNoteMutation.mutateAsync({
       title: data.title,
       folderId: data.folderId,
       subfolderId: data.subfolderId,
-      noteSections: data.noteSections
+      noteSections: data.noteSections,
     });
-  }
+  };
 
   return (
-    <View 
-      className='flex-1 bg-white'
-      style={{ 
-        paddingBottom: insets.bottom 
+    <View
+      className="flex-1 bg-white"
+      style={{
+        paddingBottom: insets.bottom,
       }}
     >
-      <NoteForm 
-        defaultValues={{ 
-          title: "Untitled",
+      <NoteForm
+        defaultValues={{
+          title: 'Untitled',
           folderId: folderId,
           subfolderId: subfolderId,
-        }} 
-        onSubmit={handleNoteSubmit} 
+        }}
+        onSubmit={handleNoteSubmit}
       />
     </View>
-  )
+  );
 }

@@ -1,124 +1,67 @@
 import { lessonSchema, type LessonFormData } from '@/schemas/lesson.schema';
 import { Pressable, Text, TextInput, View } from 'react-native';
-import { getSubjects } from '@/repositories/subject.repository';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Picker } from '@react-native-picker/picker';
-import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react-native';
-import { router } from 'expo-router';
-
-import Header from '../shared/Header';
 
 type LessonFormProps = {
-  onSubmit: (data: LessonFormData) => Promise<void>;
+  isEditing: boolean;
   defaultValues?: LessonFormData;
+  onSubmit: (data: LessonFormData) => Promise<void>;
 };
 
 export default function LessonForm({
+  isEditing,
   onSubmit,
   defaultValues = {
     title: '',
     subjectId: '',
   },
 }: LessonFormProps) {
+
   const { control, handleSubmit, formState: { errors, isSubmitting }} = useForm<LessonFormData>({
     resolver: zodResolver(lessonSchema),
     defaultValues,
   });
 
-  const { data: subjects = [] } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: getSubjects,
-  });
+  const handleLessonSubmit = async (data: LessonFormData) => {
+    await onSubmit(data);
+  };
 
   return (
-    <View className="flex-1">
-      <Header
-        title="Lesson"
-        back={
-          <Pressable onPress={() => router.back()}>
-            <ArrowLeft />
-          </Pressable>
-        }
-        right={
-          <Pressable
-            disabled={isSubmitting}
-            onPress={handleSubmit(onSubmit)}
-            className="active:opacity-70 disabled:bg-gray-400"
-          >
-            <Text className="text-center font-semibold">
-              SAVE
-            </Text>
-          </Pressable>
-        }
+    <View className="flex gap-6">
+      <Text className="text-xl font-bold">
+        {isEditing ? 'Rename Lesson' : 'Create Lesson'}
+      </Text>
+
+      <Controller
+        name="title"
+        control={control}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <View>
+            <TextInput
+              value={value}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              placeholder="Enter lesson title"
+              className="px-0 text-2xl font-semibold"
+            />
+
+            {errors.title && (
+              <Text className="text-red-400">{errors.title.message}</Text>
+            )}
+          </View>
+        )}
       />
-
-      <View className='flex-1 p-4'>
-        <Controller
-          name="title"
-          control={control}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <View>
-              <TextInput
-                value={value}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                placeholder="Enter lesson title"
-                className="px-0 text-2xl font-semibold"
-              />
-
-              {errors.title && (
-                <Text className="text-red-400">{errors.title.message}</Text>
-              )}
-            </View>
-          )}
-        />
-
-        <Controller
-          name="subjectId"
-          control={control}
-          render={({ field: { onChange, value } }) => (
-            <View>
-              <Text>Subject</Text>
-
-              <Picker
-                selectedValue={value}
-                onValueChange={onChange}
-              >
-                <Picker.Item
-                  label="Select a subject"
-                  value=""
-                />
-
-                {subjects.map((subject) => (
-                  <Picker.Item
-                    key={subject.id}
-                    label={subject.title}
-                    value={subject.id}
-                  />
-                ))}
-              </Picker>
-
-              {errors.subjectId && (
-                <Text className="text-red-400">
-                  {errors.subjectId.message}
-                </Text>
-              )}
-            </View>
-          )}
-        />
-        
-        <Pressable
-          disabled={isSubmitting}
-          onPress={handleSubmit(onSubmit)}
-          className="mt-auto rounded-lg bg-black px-4 py-3 active:opacity-70 disabled:bg-gray-400"
-        >
-          <Text className="text-center font-semibold text-white">
-            {isSubmitting ? 'Saving...' : 'Save Lesson'}
-          </Text>
-        </Pressable>
-      </View>
+      
+      <Pressable
+        disabled={isSubmitting}
+        onPress={handleSubmit(handleLessonSubmit)}
+        className="bg-gray-800 rounded-full px-4 py-3 mt-2 active:opacity-70 disabled:bg-gray-400"
+      >
+        <Text className="text-white text-center font-semibold">
+          {isEditing ? 'Rename' : 'Create Lesson'}
+        </Text>
+      </Pressable>
     </View>
   );
 }

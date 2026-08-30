@@ -2,6 +2,8 @@ import { and, eq, isNull } from "drizzle-orm";
 import { lessons } from "@/db/schema";
 import { db } from "@/db/client";
 
+import * as Crypto from "expo-crypto";
+
 export async function getLessons() {
   const query = await db
   .select()
@@ -44,14 +46,15 @@ export async function getLessonById(id: string) {
 
 export async function createLesson(
   input: {
-    id: string;
     title: string;
     subjectId: string;
 }) {
+  const lessonId = Crypto.randomUUID();
+
   await db
   .insert(lessons)
   .values({
-    id: input.id,
+    id: lessonId,
     title: input.title,
     subjectId: input.subjectId,
     createdAt: new Date()

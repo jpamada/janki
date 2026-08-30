@@ -1,49 +1,44 @@
-import { Trash2 } from "lucide-react-native";
-import { Pressable } from "react-native";
+import { Lightbulb } from "lucide-react-native";
+import { Pressable, View } from "react-native";
 import { router } from "expo-router";
 import { Text } from "react-native";
 
-import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import * as Haptics from 'expo-haptics';
 
 type SubjectItem = {
   id: string;
   title: string;
-  onDelete: (id: string) => void;
+  onLongPress: (id: string) => void;
 };
 
 export default function SubjectItem({
   id,
   title,
-  onDelete,
+  onLongPress
 }: SubjectItem) {
-  const renderRightActions = () => {
-    return (
-      <Pressable
-        onPress={() => onDelete(id)}
-        className="w-20 items-center justify-center"
-      >
-        <Trash2 size={24} color="black" />
-      </Pressable>
-    )
-  }
 
   return (
-    <Swipeable
-      rightThreshold={40}
-      overshootRight={false}
-      renderRightActions={renderRightActions}
+    <Pressable
+      delayLongPress={500}
+      onLongPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onLongPress(id);
+      }}
+      onPress={() => router.push({
+        pathname: `/subjects/lessons/[subjectId]`,
+        params: { subjectId: id, subjectName: title }
+      })}
     >
-      <Pressable
-        onPress={() => router.push({
-          pathname: `/subjects/lessons/[subjectId]`,
-          params: { subjectId: id, subjectName: title }
-        })}
-        className="bg-gray-50 rounded-lg p-4"
-      >
-        <Text className="text-gray-600 text-xl font-bold">
-          {title}
-        </Text>
-      </Pressable>
-    </Swipeable>
+      <View className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg'>
+        <View className='bg-white rounded-xl p-4'>
+          <Lightbulb color="#9ca3af" />
+        </View>
+        <View>
+          <Text className='text-gray-600 font-bold'>
+            {title}
+          </Text>
+        </View>
+      </View>
+    </Pressable>
   );
 }

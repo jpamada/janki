@@ -16,8 +16,8 @@ export default function FolderForm({
   onSubmit,
   isEditing,
   defaultValues = {
-    name: '',
-    categoryId: '',
+    name: 'Untitled',
+    categoryId: null,
   },
 }: FolderProps) {
 
@@ -73,6 +73,8 @@ export default function FolderForm({
 
             <View className="bg-white rounded-xl border border-gray-200">
               <Picker selectedValue={value} onValueChange={onChange}>
+                <Picker.Item label="Default" value={undefined} />
+
                 {categories.map((category) => (
                   <Picker.Item
                     key={category.id}

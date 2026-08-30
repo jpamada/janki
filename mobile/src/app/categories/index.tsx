@@ -1,15 +1,15 @@
-import { createCategory, deleteCategory, getCategories, updateCategory } from "@/repositories/category.repository";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FlatList, Modal, Pressable, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ArrowLeft, Plus, SearchX } from "lucide-react-native";
-import { CategoryFormData } from "@/schemas/category.schema";
-import { router } from "expo-router";
-import { useState } from "react";
+import { createCategory, deleteCategory, getCategories, updateCategory } from '@/repositories/category.repository';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { FlatList, Modal, Pressable, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ArrowLeft, Plus, SearchX } from 'lucide-react-native';
+import { CategoryFormData } from '@/schemas/category.schema';
+import { router } from 'expo-router';
+import { useState } from 'react';
 
-import CategoryForm from "@/components/categories/CategoryForm";
-import CategoryItem from "@/components/categories/CategoryItem";
-import Header from "@/components/shared/Header";
+import CategoryForm from '@/components/categories/CategoryForm';
+import CategoryItem from '@/components/categories/CategoryItem';
+import Header from '@/components/shared/Header';
 
 export default function CategoryScreen() {
   const queryClient = useQueryClient();
@@ -20,13 +20,17 @@ export default function CategoryScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  const { data: categories = [], isLoading, error } = useQuery({
-    queryKey: ["categories"],
-    queryFn: getCategories
+  const {
+    data: categories = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['categories'],
+    queryFn: getCategories,
   });
 
   const selectedCategory = categories.find(
-    (category) => category.id === selectedCategoryId
+    (category) => category.id === selectedCategoryId,
   );
 
   const createCategoryMutation = useMutation({
@@ -34,23 +38,23 @@ export default function CategoryScreen() {
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["categories"]
+        queryKey: ['categories'],
       });
       setModalVisible(false);
     },
 
     onError: (error) => {
-      console.error(error);
-    }
+      console.error(error.message);
+    },
   });
 
   const updateCategoryMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: CategoryFormData }) => 
+    mutationFn: ({ id, data }: { id: string; data: CategoryFormData }) =>
       updateCategory(id, data),
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["categories"]
+        queryKey: ['categories'],
       });
       setIsEditing(false);
       setModalVisible(false);
@@ -58,9 +62,9 @@ export default function CategoryScreen() {
     },
 
     onError: (error) => {
-      console.error(error);
-    }
-  })
+      console.error(error.message);
+    },
+  });
 
   const deleteCategoryMutation = useMutation({
     mutationFn: deleteCategory,
@@ -75,7 +79,7 @@ export default function CategoryScreen() {
     },
 
     onError: (error) => {
-      console.error(error);
+      console.error(error.message);
     },
   });
 
@@ -84,16 +88,16 @@ export default function CategoryScreen() {
       await updateCategoryMutation.mutateAsync({
         id: selectedCategoryId,
         data: {
-          name: data.name
-        }
-      })
+          name: data.name,
+        },
+      });
 
     } else {
       await createCategoryMutation.mutateAsync({
-        name: data.name
-      })
+        name: data.name,
+      });
     }
-  }
+  };
 
   const handleEditCategory = (id: string) => {
     setSelectedCategoryId(id);
@@ -102,9 +106,9 @@ export default function CategoryScreen() {
   };
 
   const handleDeleteCategory = async (id: string) => {
-      setSelectedCategoryId(id);
-      setIsDeleting(true);
-      setModalVisible(true);
+    setSelectedCategoryId(id);
+    setIsDeleting(true);
+    setModalVisible(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -113,13 +117,13 @@ export default function CategoryScreen() {
   };
 
   return (
-    <View 
+    <View
       className="flex-1 bg-white"
-      style={{ 
-        paddingBottom: insets.bottom 
+      style={{
+        paddingBottom: insets.bottom,
       }}
     >
-      <Header 
+      <Header
         title="Edit Categories"
         back={
           <Pressable onPress={() => router.back()}>
@@ -131,10 +135,10 @@ export default function CategoryScreen() {
       {isLoading ? (
         <Text>Loading...</Text>
 
-      ): error ? (
+      ) : error ? (
         <Text>Failed to load notes.</Text>
 
-      ): categories.length > 0 ? (
+      ) : categories.length > 0 ? (
         <FlatList
           data={categories}
           keyExtractor={(item) => item.id}
@@ -150,10 +154,10 @@ export default function CategoryScreen() {
           showsVerticalScrollIndicator={false}
         />
 
-      ): (
+      ) : (
         <View className="flex-1 items-center justify-center">
           <SearchX size={64} color="#9ca3af" />
-          <Text className="text-gray-400">No notes found.</Text>
+          <Text className="text-gray-400">Create new category.</Text>
         </View>
       )}
 
@@ -207,13 +211,15 @@ export default function CategoryScreen() {
                     className="bg-red-500  rounded-full px-5 py-3 w-fit active:opacity-70 disabled:bg-gray-300"
                   >
                     <Text className="text-white text-center font-semibold">
-                      {deleteCategoryMutation.isPending ? 'Deleting...' : 'Delete'}
+                      {deleteCategoryMutation.isPending
+                        ? 'Deleting...'
+                        : 'Delete'}
                     </Text>
                   </Pressable>
                 </View>
               </View>
-
-            ): (
+              
+            ) : (
               <CategoryForm
                 isEditing={isEditing}
                 onSubmit={handleCategoryFormSubmit}
@@ -226,5 +232,5 @@ export default function CategoryScreen() {
         </Pressable>
       </Modal>
     </View>
-  )
+  );
 }

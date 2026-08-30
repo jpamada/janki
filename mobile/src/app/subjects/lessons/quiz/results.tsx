@@ -1,12 +1,23 @@
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-gesture-handler';
-import { QuizQuestion } from '@/mappers/question.mapper';
 import { Pressable, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { UserAnswer } from './play';
 
 type QuizResultsProps = {
-  questions: QuizQuestion[];
+  questions: {
+    id: string;
+    question: string;
+    questionAnswers: {
+      id: string;
+      answerId: string;
+      isCorrect: boolean;
+      answer: {
+        id: string;
+        answer: string;
+      };
+    }[];
+  }[];
   userAnswers: UserAnswer[];
 };
 
@@ -22,14 +33,14 @@ export default function QuizResults({
   ).length;
 
   return (
-    <View 
+    <View
       className="flex-1 bg-white p-4"
       style={{
         paddingTop: insets.top,
-        paddingBottom: insets.bottom
+        paddingBottom: insets.bottom,
       }}
     >
-      <View className='flex flex-row justify-between items-center pt-4'>
+      <View className="flex-row items-center justify-between pt-4">
         <Text className="mb-2 text-3xl font-bold">
           Results
         </Text>
@@ -65,9 +76,7 @@ export default function QuizResults({
                 </Text>
 
                 <Text>
-                  {userAnswer?.isCorrect
-                    ? '✓'
-                    : '✕'}
+                  {userAnswer?.isCorrect ? '✓' : '✕'}
                 </Text>
               </View>
 
@@ -76,39 +85,29 @@ export default function QuizResults({
               </Text>
 
               <View className="gap-2">
-                {question.answers.map(
-                  (answer) => {
-                    const isCorrectAnswer =
-                      answer.id ===
-                      userAnswer?.correctAnswerId;
+                {question.questionAnswers.map((questionAnswer) => {
+                  const isCorrectAnswer = questionAnswer.isCorrect;
+                  const isSelected = questionAnswer.answerId === userAnswer?.answerId;
+                  let backgroundClass = 'bg-white';
 
-                    const isSelected =
-                      answer.id ===
-                      userAnswer?.answerId;
+                  if (isCorrectAnswer) {
+                    backgroundClass = 'bg-green-300';
+                    
+                  } else if (isSelected) {
+                    backgroundClass = 'bg-red-300';
+                  }
 
-                    let backgroundClass =
-                      'bg-white';
-
-                    if (isCorrectAnswer) {
-                      backgroundClass =
-                        'bg-green-300';
-                    } else if (isSelected) {
-                      backgroundClass =
-                        'bg-red-300';
-                    }
-
-                    return (
-                      <View
-                        key={answer.id}
-                        className={`rounded-lg p-3 ${backgroundClass}`}
-                      >
-                        <Text className="font-semibold">
-                          {answer.answer}
-                        </Text>
-                      </View>
-                    );
-                  },
-                )}
+                  return (
+                    <View
+                      key={questionAnswer.id}
+                      className={`rounded-lg p-3 ${backgroundClass}`}
+                    >
+                      <Text className="font-semibold">
+                        {questionAnswer.answer.answer}
+                      </Text>
+                    </View>
+                  );
+                })}
               </View>
             </View>
           );

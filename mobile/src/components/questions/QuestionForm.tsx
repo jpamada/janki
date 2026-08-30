@@ -1,5 +1,6 @@
 import { QuestionFormData, questionSchema } from '@/schemas/question.schema';
 import { ArrowLeft, Square, SquareCheck, Trash2 } from 'lucide-react-native';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { getLessons } from '@/repositories/lesson.repository';
@@ -11,11 +12,15 @@ import { router } from 'expo-router';
 import Header from '../shared/Header';
 
 type QuestionFormProps = {
+  onCreateSuccess?: boolean;
+  onEditSuccess?: boolean;
   onSubmit: (data: QuestionFormData) => Promise<void>;
   defaultValues?: QuestionFormData;
 };
 
 export default function QuestionForm({
+  onCreateSuccess,
+  onEditSuccess,
   onSubmit,
   defaultValues = {
     question: '',
@@ -213,6 +218,16 @@ export default function QuestionForm({
           </Text>
         </Pressable>
       </View>
+
+      {onCreateSuccess && (
+        <KeyboardStickyView>
+          <View className="h-12 flex-row items-center bg-gray-600 rounded-xl px-4 m-2">
+            <Text className='text-white font-medium'>
+              1 question added
+            </Text>
+          </View>
+        </KeyboardStickyView>
+      )}
     </View>
   );
 }

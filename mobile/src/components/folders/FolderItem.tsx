@@ -37,7 +37,22 @@ export default function FolderItem({
 }: FolderItemProps) {
 
   const [folderIsOpen, setFolderIsOpen] = useState(false);
-  const [subfolderIsOpen, setSubfolderIsOpen] = useState(false);
+  const [openSubfolderIds, setOpenSubfolderIds] = useState<Set<string>>(new Set());
+
+  const toggleSubfolder = (subfolderId: string) => {
+    setOpenSubfolderIds((prev) => {
+      const next = new Set(prev);
+
+      if (next.has(subfolderId)) {
+        next.delete(subfolderId);
+
+      } else {
+        next.add(subfolderId);
+      }
+
+      return next;
+    });
+  };
 
   return (
     <View className="rounded-xl bg-gray-50">
@@ -63,20 +78,20 @@ export default function FolderItem({
             <View key={subfolder.id}>
               <Pressable
                 delayLongPress={500}
-                onPress={() => setSubfolderIsOpen((prev) => !prev)}
+                onPress={() => toggleSubfolder(subfolder.id)}
                 onLongPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   onSubfolderLongPress(subfolder.id);
                 }}
                 className="flex-row items-center gap-2 px-4 py-3"
               >
-                 {subfolderIsOpen ? <FolderOpen size={18} /> : <FolderClosed size={18} />}
+                 {openSubfolderIds.has(subfolder.id) ? <FolderOpen size={18} /> : <FolderClosed size={18} />}
                 <Text className="font-medium text-gray-600">
                   {subfolder.name}
                 </Text>
               </Pressable>
 
-              {subfolderIsOpen && (
+              {openSubfolderIds.has(subfolder.id) && (
                 subfolder.notes.map((note) => (
                   <Pressable
                     key={note.id}

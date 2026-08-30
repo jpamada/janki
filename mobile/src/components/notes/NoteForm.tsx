@@ -2,8 +2,8 @@ import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboa
 import { noteSchema, type NoteFormData } from '@/schemas/note.schema';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { Pressable, Text, TextInput, View } from 'react-native';
+import { ArrowLeft, Form, Plus, X } from 'lucide-react-native';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Plus } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
 
@@ -30,6 +30,7 @@ export default function NoteForm({
   },
 }: NoteFormProps) {
 
+  const [fabVisible, setFabVisible] = useState(false);
   const [activeContent, setActiveContent] = useState<ActiveContent>(null);
 
   const { control, handleSubmit, formState: { errors, isSubmitting }} = useForm<NoteFormData>({
@@ -123,23 +124,42 @@ export default function NoteForm({
         </KeyboardStickyView>
       )}
 
-      <View
-        className="absolute bottom-6 left-0 right-0 mx-8 h-14 items-center justify-center rounded-full bg-white"
-        style={{
-          boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
-        }}
-      >
+      {fabVisible && (
         <Pressable
-           onPress={() =>
-            append({
-              title: "",
-              position: fields.length,
-              noteContents: [],
-            })
-          }
-          className='px-4 py-2'
+          className="absolute inset-0"
+          onPress={() => setFabVisible(false)}
+        />
+      )}
+
+      <View className="absolute bottom-6 right-6 items-end">
+        {fabVisible && (
+          <View className="mb-3 items-end gap-3">
+            <Pressable
+              onPress={() =>
+                append({
+                  title: "",
+                  position: fields.length,
+                  noteContents: [],
+              })}
+              className="flex-row items-center gap-1 rounded-full bg-white px-4 py-3"
+              style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
+            >
+              <Form size={20} color="#4b5563" />
+              <Text className="font-semibold text-gray-700">New Section</Text>
+            </Pressable>
+          </View>
+        )}
+
+        <Pressable
+          onPress={() => setFabVisible((prev) => !prev)}
+          className="h-14 w-14 items-center justify-center rounded-full bg-white"
+          style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
         >
-          <Plus />
+          {fabVisible ? (
+            <X size={24} color="#4b5563" />
+          ) : (
+            <Plus size={24} color="#4b5563" />
+          )}
         </Pressable>
       </View>
     </View>

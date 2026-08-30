@@ -7,9 +7,7 @@ export default function SubjectsLayout() {
         headerShown: false
       }}
     >
-      <Stack.Screen name="create" />
       <Stack.Screen name="lessons/[subjectId]" />
-      <Stack.Screen name="lessons/create" />
     </Stack>
   );
 }

@@ -1,65 +1,36 @@
-import { Settings, Trash2 } from "lucide-react-native";
 import { Pressable } from "react-native";
 import { Text } from "react-native";
 import { router } from "expo-router";
 
-import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import * as Haptics from "expo-haptics";
 
 type LessonItem = {
   id: string;
   title: string;
-  subjectId: string;
-  onDelete: (id: string) => void;
+  onLongPress: (id: string) => void;
 };
 
 export default function LessonItem({
   id,
   title,
-  subjectId,
-  onDelete,
+  onLongPress
 }: LessonItem) {
-  const renderRightActions = () => {
-    return (
-      <>
-        <Pressable
-          onPress={() => onDelete(id)}
-          className="w-20 items-center justify-center bg-red-500"
-        >
-          <Trash2 size={24} color="white" />
-        </Pressable>
-
-        <Pressable
-          onPress={() => 
-            router.push({
-              pathname: `/subjects/lessons/questions/create`,
-              params: { lessonId: id },
-            })
-          }
-          className="w-20 items-center justify-center bg-gray-400"
-        >
-          <Settings size={24} color="white" />
-        </Pressable>
-      </>
-    )
-  }
 
   return (
-    <Swipeable
-      rightThreshold={40}
-      overshootRight={false}
-      renderRightActions={renderRightActions}
+    <Pressable
+      onLongPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onLongPress(id);
+      }}
+      onPress={() => router.push({
+        pathname: `/subjects/lessons/quiz/play`,
+        params: { lessonId: id }
+      })}
+      className="bg-gray-50 rounded-lg p-4"
     >
-      <Pressable
-        onPress={() => router.push({
-          pathname: `/subjects/lessons/quiz/play`,
-          params: { lessonId: id }
-        })}
-        className="bg-gray-50 rounded-lg p-4"
-      >
-        <Text className="text-gray-600 text-xl font-bold">
-          {title}
-        </Text>
-      </Pressable>
-    </Swipeable>
+      <Text className="text-gray-600 text-xl font-bold">
+        {title}
+      </Text>
+    </Pressable>
   );
 }

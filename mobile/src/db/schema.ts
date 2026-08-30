@@ -9,7 +9,7 @@ export const categories = sqliteTable("categories", {
 export const folders = sqliteTable("folders", {
     id: text("id").primaryKey(),
 
-    categoryId: text("category_id").notNull(),
+    categoryId: text("category_id"),
 
     name: text("name").notNull(),
 
@@ -29,7 +29,7 @@ export const folders = sqliteTable("folders", {
     foreignKey({
         columns: [table.categoryId],
         foreignColumns: [categories.id],
-        name: "category_id_fk"
+        name: "folders_category_id_fk"
     }).onDelete("restrict"),
 
     index("folders_category_id_idx").on(
@@ -60,7 +60,7 @@ export const subfolders = sqliteTable("subfolders", {
     foreignKey({
         columns: [table.folderId],
         foreignColumns: [folders.id],
-        name: "folder_id_fk"
+        name: "subfolders_folder_id_fk",
     }).onDelete("restrict"),
 
     index("subfolders_folder_id_idx").on(
@@ -93,13 +93,13 @@ export const notes = sqliteTable("notes", {
     foreignKey({
         columns: [table.folderId],
         foreignColumns: [folders.id],
-        name: "folder_id_fk",
+        name: "notes_folder_id_fk",
     }).onDelete("cascade"),
 
     foreignKey({
         columns: [table.subfolderId],
         foreignColumns: [subfolders.id],
-        name: "subfolder_id_fk",
+        name: "notes_subfolder_id_fk",
     }).onDelete("cascade"),
 
     index("notes_folder_id_idx").on(
@@ -124,7 +124,7 @@ export const noteSections = sqliteTable("note_sections", {
     foreignKey({
         columns: [table.noteId],
         foreignColumns: [notes.id],
-        name: "note_id_fk"
+        name: "note_sections_note_id_fk"
     }).onDelete("cascade"),
 
     index("note_sections_note_id_idx").on(
@@ -153,7 +153,7 @@ export const noteContents = sqliteTable("note_contents", {
     foreignKey({
         columns: [table.noteSectionId],
         foreignColumns: [noteSections.id],
-        name: "note_section_id_fk"
+        name: "note_contents_note_section_id_fk"
     }).onDelete("cascade"),
 
     index("note_contents_note_section_id_idx").on(
@@ -166,7 +166,7 @@ export const subjects = sqliteTable("subjects", {
 
     title: text("title").notNull(),
 
-    category: text("category").notNull(),
+    categoryId: text("category_id"),
 
     createdAt: integer("created_at", {
         mode: "timestamp_ms"
@@ -179,7 +179,18 @@ export const subjects = sqliteTable("subjects", {
     deletedAt: integer("deleted_at", {
         mode: "timestamp_ms"
     }),
-});
+
+}, (table) => [
+    foreignKey({
+        columns: [table.categoryId],
+        foreignColumns: [categories.id],
+        name: "subjects_category_id_fk"
+    }).onDelete("restrict"),
+
+    index("subjects_category_id_idx").on(
+        table.categoryId
+    ),
+]);
 
 export const lessons = sqliteTable("lessons", {
     id: text("id").primaryKey(),
@@ -204,7 +215,7 @@ export const lessons = sqliteTable("lessons", {
     foreignKey({
         columns: [table.subjectId],
         foreignColumns: [subjects.id],
-        name: "subject_id_fk",
+        name: "lessons_subject_id_fk",
     }).onDelete("restrict"),
 
     index("lessons_subject_id_idx").on(
@@ -235,7 +246,7 @@ export const questions = sqliteTable("questions", {
     foreignKey({
         columns: [table.lessonId],
         foreignColumns: [lessons.id],
-        name: "lesson_id_fk",
+        name: "quesions_lesson_id_fk",
     }).onDelete("restrict"),
 
     index("questions_lesson_id_idx").on(
@@ -266,7 +277,7 @@ export const answers = sqliteTable("answers", {
     foreignKey({
         columns: [table.lessonId],
         foreignColumns: [lessons.id],
-        name: "lesson_id_fk",
+        name: "answers_lesson_id_fk",
     }).onDelete("restrict"),
 
     index("answers_lesson_id_idx").on(
@@ -305,12 +316,12 @@ export const questionAnswers = sqliteTable("question_answers", {
     foreignKey({
         columns: [table.questionId],
         foreignColumns: [questions.id],
-        name: "question_id_fk",
+        name: "question_answers_question_id_fk",
     }).onDelete("restrict"),
 
     foreignKey({
         columns: [table.answerId],
         foreignColumns: [answers.id],
-        name: "answer_id_fk",
+        name: "question_answers_answer_id_fk",
     }).onDelete("restrict"),
 ]);

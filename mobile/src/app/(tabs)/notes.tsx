@@ -1,4 +1,4 @@
-import { createFolder, deleteFolder, getFolders, getFoldersByCategory, updateFolder } from '@/repositories/folder.repository';
+import { createFolder, deleteFolder, getFoldersByCategory, updateFolder } from '@/repositories/folder.repository';
 import { Folders, PenLine, Plus, SearchX, SquarePen, StickyNote, Trash2, X } from 'lucide-react-native';
 import { createSubfolder, deleteSubfolder, updateSubfolder } from '@/repositories/subfolder.repository';
 import { ActivityIndicator, FlatList, Modal, Pressable, ScrollView, Text, View } from 'react-native';
@@ -31,15 +31,23 @@ export default function NotesScreen() {
 
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null,);
-  const [selectedSubfolderId, setSelectedSubfolderId] = useState<string | null>(null,);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedSubfolderId, setSelectedSubfolderId] = useState<string | null>(null);
 
-  const { data: notes = [], isLoading: notesIsLoading, error: notesError } = useQuery({
+  const {
+    data: notes = [],
+    isLoading: notesIsLoading,
+    error: notesError,
+  } = useQuery({
     queryKey: ['notes'],
     queryFn: getNotes,
   });
 
-  const { data: folders = [], isLoading: foldersIsLoading, error: foldersError } = useQuery({
+  const {
+    data: folders = [],
+    isLoading: foldersIsLoading,
+    error: foldersError,
+  } = useQuery({
     queryKey: ['folders', selectedCategoryId],
     queryFn: () => getFoldersByCategory(selectedCategoryId),
   });
@@ -57,7 +65,9 @@ export default function NotesScreen() {
     .flatMap((folder) => folder.subfolders)
     .find((subfolder) => subfolder.id === selectedSubfolderId);
 
-  const selectedNote = notes.find((note) => note.id === selectedNoteId);
+  const selectedNote = notes.find(
+    (note) => note.id === selectedNoteId
+  );
 
   const createFolderMutation = useMutation({
     mutationFn: createFolder,
@@ -73,7 +83,7 @@ export default function NotesScreen() {
     },
 
     onError: (error) => {
-      console.error(error);
+      console.error(error.message);
     },
   });
 
@@ -94,7 +104,7 @@ export default function NotesScreen() {
     },
 
     onError: (error) => {
-      console.error(error);
+      console.error(error.message);
     },
   });
 
@@ -113,7 +123,7 @@ export default function NotesScreen() {
     },
 
     onError: (error) => {
-      console.error(error);
+      console.error(error.message);
     },
   });
 
@@ -129,7 +139,7 @@ export default function NotesScreen() {
     },
 
     onError: (error) => {
-      console.error(error);
+      console.error(error.message);
     },
   });
 
@@ -148,7 +158,7 @@ export default function NotesScreen() {
     },
 
     onError: (error) => {
-      console.error(error);
+      console.error(error.message);
     },
   });
 
@@ -165,7 +175,7 @@ export default function NotesScreen() {
     },
 
     onError: (error) => {
-      console.error(error);
+      console.error(error.message);
     },
   });
 
@@ -185,7 +195,7 @@ export default function NotesScreen() {
     },
 
     onError: (error) => {
-      console.error(error);
+      console.error(error.message);
     },
   });
 
@@ -264,11 +274,13 @@ export default function NotesScreen() {
       >
         <Pressable
           onPress={() => setSelectedCategoryId(null)}
-          className="bg-gray-50 rounded-full px-4 py-2"
+          className={`rounded-full px-4 py-2 ${
+            selectedCategoryId == null ? "bg-gray-600" : "bg-gray-50"
+          }`}
         >
           <Text
             className={`text-gray-600 text-sm ${
-              selectedCategoryId == null ? 'font-bold' : 'font-semibold'
+              selectedCategoryId == null ? 'text-white font-bold' : 'font-semibold'
             }`}
           >
             Default
@@ -279,13 +291,13 @@ export default function NotesScreen() {
           <Pressable
             key={category.id}
             onPress={() => setSelectedCategoryId(category.id)}
-            className="bg-gray-50 rounded-full px-4 py-2"
+            className={`rounded-full px-4 py-2 ${
+              selectedCategoryId === category.id ? "bg-gray-600" : "bg-gray-50"
+            }`}
           >
             <Text
               className={`text-gray-600 text-sm ${
-                selectedCategoryId === category.id
-                  ? 'font-bold'
-                  : 'font-semibold'
+                selectedCategoryId === category.id ? 'text-white font-bold' : 'font-semibold'
               }`}
             >
               {category.name}
@@ -415,107 +427,107 @@ export default function NotesScreen() {
           }}
         >
           <View className="bg-gray-50 rounded-t-3xl px-4 py-8 h-auto">
-            {selectedFolderId && (
-              <View>
+            <View className="bg-white rounded-3xl">
+              {selectedFolderId && (
+                <View>
+                  <Pressable
+                    onPress={() => {
+                      setBottomSheetVisible(false);
+                      router.push({
+                        pathname: `/notes/create`,
+                        params: { folderId: selectedFolderId },
+                      });
+                    }}
+                  >
+                    <View className="flex flex-row items-center gap-2 p-4">
+                      <SquarePen size={16} />
+                      <Text className="text-center text-xl">New Note</Text>
+                    </View>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => {
+                      if (!selectedFolderId) return;
+                      setIsEditing(false);
+                      setIsDeleting(false);
+                      setFabVisible(false);
+                      setSelectedSubfolderId(null);
+                      setBottomSheetVisible(false);
+                      setSubfolderModalVisible(true);
+                    }}
+                  >
+                    <View className="flex flex-row items-center gap-2 p-4">
+                      <Folders size={16} />
+                      <Text className="text-center text-xl">New Subfolder</Text>
+                    </View>
+                  </Pressable>
+                </View>
+              )}
+
+              {selectedSubfolderId && (
                 <Pressable
                   onPress={() => {
                     setBottomSheetVisible(false);
                     router.push({
                       pathname: `/notes/create`,
-                      params: { folderId: selectedFolderId },
+                      params: { subfolderId: selectedSubfolderId },
                     });
                   }}
                 >
-                  <View className="flex flex-row items-center gap-2 bg-white p-4">
+                  <View className="flex flex-row items-center gap-2 p-4">
                     <SquarePen size={16} />
-                    <Text className="text-center text-xl">
-                      New Note
-                    </Text>
+                    <Text className="text-center text-xl">New Note</Text>
                   </View>
                 </Pressable>
+              )}
 
-                <Pressable
-                  onPress={() => {
-                    if (!selectedFolderId) return;
-                    setIsEditing(false);
-                    setIsDeleting(false);
-                    setFabVisible(false);
-                    setSelectedSubfolderId(null);
-                    setBottomSheetVisible(false);
-                    setSubfolderModalVisible(true);
-                  }}
-                >
-                  <View className="flex flex-row items-center gap-2 bg-white p-4">
-                    <Folders size={16} />
-                    <Text className="text-center text-xl">New Subfolder</Text>
-                  </View>
-                </Pressable>
-              </View>
-            )}
-
-            {selectedSubfolderId && (
               <Pressable
                 onPress={() => {
-                  setBottomSheetVisible(false);
-                  router.push({
-                    pathname: `/notes/create`,
-                    params: { subfolderId: selectedSubfolderId },
-                  });
+                  if (selectedFolderId) {
+                    setIsEditing(true);
+                    setBottomSheetVisible(false);
+                    setFolderModalVisible(true);
+
+                  } else if (selectedSubfolderId) {
+                    setIsEditing(true);
+                    setBottomSheetVisible(false);
+                    setSubfolderModalVisible(true);
+                  }
                 }}
               >
-                <View className="flex flex-row items-center gap-2 bg-white p-4">
-                  <SquarePen size={16} />
-                  <Text className="text-center text-xl">
-                    New Note
+                <View className="flex flex-row items-center gap-2 p-4">
+                  <PenLine size={16} />
+                  <Text className="text-center text-xl">Rename</Text>
+                </View>
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
+                  if (selectedFolderId) {
+                    setIsDeleting(true);
+                    setFolderModalVisible(true);
+                    setBottomSheetVisible(false);
+
+                  } else if (selectedSubfolderId) {
+                    setIsDeleting(true);
+                    setBottomSheetVisible(false);
+                    setSubfolderModalVisible(true);
+                    
+                  } else if (selectedNoteId) {
+                    setIsDeleting(true);
+                    setNoteModalVisible(true);
+                    setBottomSheetVisible(false);
+                  }
+                }}
+              >
+                <View className="flex flex-row items-center gap-2 p-4">
+                  <Trash2 color="#f87171" size={16} />
+                  <Text className="text-red-400 text-center text-xl">
+                    Delete
                   </Text>
                 </View>
               </Pressable>
-            )}
-
-            <Pressable
-              onPress={() => {
-                if (selectedFolderId) {
-                  setIsEditing(true);
-                  setBottomSheetVisible(false);
-                  setFolderModalVisible(true);
-
-                } else if (selectedSubfolderId) {
-                  setIsEditing(true);
-                  setBottomSheetVisible(false);
-                  setSubfolderModalVisible(true);
-                }
-              }}
-            >
-              <View className="flex flex-row items-center gap-2 bg-white p-4">
-                <PenLine size={16} />
-                <Text className="text-center text-xl">Rename</Text>
-              </View>
-            </Pressable>
-
-            <Pressable
-              onPress={() => {
-                if (selectedFolderId) {
-                  setIsDeleting(true);
-                  setFolderModalVisible(true);
-                  setBottomSheetVisible(false);
-
-                } else if (selectedSubfolderId) {
-                  setIsDeleting(true);
-                  setBottomSheetVisible(false);
-                  setSubfolderModalVisible(true);
-
-                } else if (selectedNoteId) {
-                  setIsDeleting(true);
-                  setNoteModalVisible(true);
-                  setBottomSheetVisible(false);
-                }
-              }}
-            >
-              <View className="flex flex-row items-center gap-2 bg-white p-4">
-                <Trash2 color="#f87171" size={16} />
-                <Text className="text-red-400 text-center text-xl">Delete</Text>
-              </View>
-            </Pressable>
+            </View>
           </View>
         </Pressable>
       </Modal>
@@ -541,12 +553,11 @@ export default function NotesScreen() {
           >
             {isDeleting ? (
               <View>
-                <Text className="text-xl font-bold">
-                  Delete Folder
-                </Text>
+                <Text className="text-xl font-bold">Delete Folder</Text>
 
                 <Text className="mt-2 text-gray-500">
-                  Are you sure you want to delete this folder. This action cannot be undone.
+                  Are you sure you want to delete this folder. This action
+                  cannot be undone.
                 </Text>
 
                 <View className="mt-6 flex-row justify-end gap-3">
@@ -558,9 +569,7 @@ export default function NotesScreen() {
                     }}
                     className="rounded-full px-4 py-2"
                   >
-                    <Text className="font-semibold text-gray-600">
-                      Cancel
-                    </Text>
+                    <Text className="font-semibold text-gray-600">Cancel</Text>
                   </Pressable>
 
                   <Pressable
@@ -569,19 +578,20 @@ export default function NotesScreen() {
                     className="rounded-full bg-red-500 px-4 py-2"
                   >
                     <Text className="font-semibold text-white">
-                      {deleteFolderMutation.isPending ? 'Deleting...' : 'Delete'}
+                      {deleteFolderMutation.isPending
+                        ? 'Deleting...'
+                        : 'Delete'}
                     </Text>
                   </Pressable>
                 </View>
               </View>
-
             ) : (
               <FolderForm
                 onSubmit={handleFolderSubmit}
                 isEditing={isEditing}
                 defaultValues={{
-                  name: selectedFolder?.name ?? '',
-                  categoryId: selectedFolder?.categoryId ?? '',
+                  name: selectedFolder?.name ?? 'Untitled',
+                  categoryId: selectedFolder?.categoryId ?? null,
                 }}
               />
             )}
@@ -611,12 +621,11 @@ export default function NotesScreen() {
           >
             {isDeleting ? (
               <View>
-                <Text className="text-xl font-bold">
-                  Delete Subfolder
-                </Text>
+                <Text className="text-xl font-bold">Delete Subfolder</Text>
 
                 <Text className="mt-2 text-gray-500">
-                  Are you sure you want to delete this subfolder. This action cannot be undone.
+                  Are you sure you want to delete this subfolder. This action
+                  cannot be undone.
                 </Text>
 
                 <View className="mt-6 flex-row justify-end gap-3">
@@ -638,19 +647,21 @@ export default function NotesScreen() {
                     className="rounded-full bg-red-500 px-4 py-2"
                   >
                     <Text className="font-semibold text-white">
-                      {deleteSubfolderMutation.isPending ? 'Deleting...' : 'Delete'}
+                      {deleteSubfolderMutation.isPending
+                        ? 'Deleting...'
+                        : 'Delete'}
                     </Text>
                   </Pressable>
                 </View>
               </View>
-
             ) : (
               <SubfolderForm
                 onSubmit={handleSubfolderSubmit}
                 isEditing={isEditing}
                 defaultValues={{
-                  name: selectedSubfolder?.name ?? '',
-                  folderId: selectedSubfolder?.folderId ?? selectedFolderId ?? '',
+                  name: selectedSubfolder?.name ?? 'Untitled',
+                  folderId:
+                    selectedSubfolder?.folderId ?? selectedFolderId ?? '',
                 }}
               />
             )}
@@ -679,12 +690,11 @@ export default function NotesScreen() {
           >
             {isDeleting ? (
               <View>
-                <Text className="text-xl font-bold">
-                  Delete Note
-                </Text>
+                <Text className="text-xl font-bold">Delete Note</Text>
 
                 <Text className="mt-2 text-gray-500">
-                  Are you sure you want to delete this note. This action cannot be undone.
+                  Are you sure you want to delete this note. This action cannot
+                  be undone.
                 </Text>
 
                 <View className="mt-6 flex-row justify-end gap-3">
@@ -710,7 +720,6 @@ export default function NotesScreen() {
                   </Pressable>
                 </View>
               </View>
-
             ) : null}
           </Pressable>
         </Pressable>

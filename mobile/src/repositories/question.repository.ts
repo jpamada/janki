@@ -29,41 +29,36 @@ export async function getQuestionsByLessonId(lessonId: string) {
 export async function getQuestionsByLessonIdWithAnswers(
   lessonId: string,
 ) {
-  const result = await db
-  .select({
-    questionId: questions.id,
-    question: questions.question,
+  const query = db.query.questions
+  .findMany({
+    where: eq(questions.lessonId, lessonId),
 
-    answerId: answers.id,
-    answer: answers.answer,
-    isCorrect: questionAnswers.isCorrect,
-  })
-  .from(questions)
-  .innerJoin(
-    questionAnswers,
-    eq(questionAnswers.questionId, questions.id),
-  )
-  .innerJoin(
-    answers,
-    eq(questionAnswers.answerId, answers.id),
-  )
-  .where(
-    eq(questions.lessonId, lessonId)
-  );
+    with: {
+      questionAnswers: {
+        with: {
+          answer: true,
+        },
+      },
+    },
+  });
 
-  return result;
+  return query;
 }
 
 export async function getQuestionById(id: string) {
-  const query = await db
-  .select()
-  .from(questions)
-  .where(
-    eq(questions.id, id)
-  )
-  .limit(1);
+  const query = db.query.questions
+  .findFirst({
+    where: eq(questions.id, id),
+    with: {
+      questionAnswers: {
+        with: {
+          answer: true,
+        },
+      },
+    },
+  });
 
-  return query[0];
+  return query;
 }
 
 export async function createQuestion(
@@ -147,3 +142,70 @@ export async function deleteQuestion(id: string) {
     eq(questions.id, id)
   );
 };
+
+export async function updateQuestionWithAnswers(
+  questionId: string,
+  input: {
+    question: string;
+    lessonId: string;
+    answers: {
+      answer: string;
+      isCorrect: boolean;
+    }[];
+  }
+): Promise<void> {
+  await db.transaction(async (tx) => {
+    await tx
+      .update(questions)
+      .set({
+        question: input.question,
+        lessonId: input.lessonId,
+        updatedAt: new Date(),
+      })
+      .where(
+        eq(questions.id, questionId)
+      );
+
+    const existingQuestionAnswers = await tx
+      .select({
+        answerId: questionAnswers.answerId,
+      })
+      .from(questionAnswers)
+      .where(
+        eq(questionAnswers.questionId, questionId)
+      );
+
+    await tx
+      .delete(questionAnswers)
+      .where(
+        eq(questionAnswers.questionId, questionId)
+      );
+
+    for (const item of existingQuestionAnswers) {
+      await tx
+        .delete(answers)
+        .where(
+          eq(answers.id, item.answerId)
+        );
+    }
+
+    for (const answer of input.answers) {
+      const answerId = Crypto.randomUUID();
+
+      await tx.insert(answers).values({
+        id: answerId,
+        answer: answer.answer,
+        lessonId: input.lessonId,
+        createdAt: new Date(),
+      });
+
+      await tx.insert(questionAnswers).values({
+        id: Crypto.randomUUID(),
+        questionId,
+        answerId,
+        isCorrect: answer.isCorrect,
+        createdAt: new Date(),
+      });
+    }
+  });
+}

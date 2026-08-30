@@ -1,5 +1,5 @@
 import { folders } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '@/db/client';
 
 import * as Crypto from "expo-crypto";
@@ -27,8 +27,7 @@ export async function getFoldersByCategory(
   let query;
 
   if (categoryId?.trim()) {
-    query = await db.query.folders
-    .findMany({
+    query = await db.query.folders.findMany({
       where: eq(
         folders.categoryId, categoryId
       ),
@@ -42,9 +41,12 @@ export async function getFoldersByCategory(
         notes: true,
       },
     });
-
+    
   } else {
     query = await db.query.folders.findMany({
+      where: isNull(
+        folders.categoryId
+      ),
       with: {
         category: true,
         subfolders: {
@@ -75,7 +77,7 @@ export async function getFolderById(id: string) {
 export async function createFolder(
   input: {
     name: string;
-    categoryId: string;
+    categoryId?: string | null;
 }) {
   const folderId = Crypto.randomUUID();
   await db
@@ -83,7 +85,7 @@ export async function createFolder(
   .values({
     id: folderId,
     name: input.name,
-    categoryId: input.categoryId,
+    categoryId: input.categoryId ?? null,
     createdAt: new Date(),
   });
 }
@@ -92,13 +94,13 @@ export async function updateFolder(
   id: string,
   input: {
     name: string;
-    categoryId?: string;
+    categoryId?: string | null;
 }) {
   await db
   .update(folders)
   .set({
     name: input.name,
-    categoryId: input.categoryId,
+    categoryId: input.categoryId ?? null,
     updatedAt: new Date(),
   })
   .where(
