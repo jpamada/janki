@@ -28,16 +28,15 @@ export default function SubjectItem({
         pathname: `/subjects/lessons/[subjectId]`,
         params: { subjectId: id, subjectName: title }
       })}
+      className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg active:bg-gray-100'
     >
-      <View className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg'>
-        <View className='bg-white rounded-xl p-4'>
-          <Lightbulb color="#9ca3af" />
-        </View>
-        <View>
-          <Text className='text-gray-600 font-bold'>
-            {title}
-          </Text>
-        </View>
+      <View className='bg-white rounded-xl p-4'>
+        <Lightbulb color="#9ca3af" />
+      </View>
+      <View>
+        <Text className='text-gray-600 font-bold'>
+          {title}
+        </Text>
       </View>
     </Pressable>
   );

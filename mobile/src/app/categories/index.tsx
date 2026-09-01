@@ -128,11 +128,7 @@ export default function CategoryScreen() {
     >
       <Header
         title="Edit Categories"
-        back={
-          <Pressable onPress={() => router.back()}>
-            <ArrowLeft />
-          </Pressable>
-        }
+        back={true}
       />
 
       {isLoading ? (
@@ -171,7 +167,7 @@ export default function CategoryScreen() {
       <View className="absolute bottom-6 right-6 items-end">
         <Pressable
           onPress={() => setModalVisible((prev) => !prev)}
-          className="h-14 w-14 items-center justify-center rounded-full bg-white"
+          className="h-14 w-14 items-center justify-center rounded-full bg-white active:bg-gray-50"
           style={{
             boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)',
           }}
@@ -211,13 +207,25 @@ export default function CategoryScreen() {
                   </Text>
                 </View>
 
-                <View>
+                <View className="mt-6 flex-row justify-end gap-2">
+                  <Pressable
+                    onPress={() => {
+                      setIsEditing(false);
+                      setIsDeleting(false);
+                      setModalVisible(false);
+                      setSelectedCategoryId(null);
+                    }}
+                    className="rounded-full px-5 py-2 active:bg-gray-100"
+                  >
+                    <Text className="font-semibold text-gray-600">Cancel</Text>
+                  </Pressable>
+
                   <Pressable
                     disabled={deleteCategoryMutation.isPending}
                     onPress={handleConfirmDelete}
-                    className="bg-red-500  rounded-full px-5 py-3 w-fit active:opacity-70 disabled:bg-gray-300"
+                    className="rounded-full bg-red-500 px-5 py-2 active:bg-red-400"
                   >
-                    <Text className="text-white text-center font-semibold">
+                    <Text className="font-semibold text-white">
                       {deleteCategoryMutation.isPending
                         ? 'Deleting...'
                         : 'Delete'}

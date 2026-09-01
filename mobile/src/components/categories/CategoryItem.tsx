@@ -16,22 +16,31 @@ export default function CategoryItem({
 }: CategoryItemProps) {
 
   return (
-    <Pressable className="flex-row items-center bg-gray-50 rounded-lg p-4">
+    <Pressable className="flex-row items-center bg-gray-50 rounded-lg p-2 active:bg-gray-100">
       <View className="flex-1">
-        <Pressable onPress={() => onEdit(id)}>
+        <Pressable 
+          onPress={() => onEdit(id)}
+          className="ps-4"
+        >
           <Text className="text-gray-800 text-lg font-semibold">
             {name}
           </Text>
         </Pressable>
       </View>
 
-      <View className="flex flex-row items-center gap-4">
-        <Pressable onPress={() => onEdit(id)} >
-          <Pencil size={24} />
+      <View className="flex flex-row items-center">
+        <Pressable 
+          onPress={() => onEdit(id)}
+          className="p-4 rounded-full active:bg-gray-100"
+        >
+          <Pencil color="#1f2937" />
         </Pressable>
 
-        <Pressable onPress={() => onDelete(id)}>
-          <Trash2 size={24} />
+        <Pressable 
+          onPress={() => onDelete(id)}
+          className="p-4 rounded-full active:bg-gray-100"
+        >
+          <Trash2 color="#1f2937" />
         </Pressable>
       </View>
     </Pressable>

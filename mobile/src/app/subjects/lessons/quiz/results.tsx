@@ -3,6 +3,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { Pressable, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { UserAnswer } from './play';
+import { CircleCheck, CircleX } from 'lucide-react-native';
 
 type QuizResultsProps = {
   questions: {
@@ -47,7 +48,7 @@ export default function QuizResults({
 
         <Pressable
           onPress={() => router.back()}
-          className="rounded-lg bg-black px-3 py-2"
+          className="rounded-lg bg-gray-800 px-3 py-2 active:bg-gray-700"
         >
           <Text className="text-center font-semibold text-white">
             Finish Quiz
@@ -76,7 +77,9 @@ export default function QuizResults({
                 </Text>
 
                 <Text>
-                  {userAnswer?.isCorrect ? '✓' : '✕'}
+                  {userAnswer?.isCorrect 
+                    ? <CircleCheck size={18}/>
+                    : <CircleX size={18} />}
                 </Text>
               </View>
 
@@ -89,12 +92,14 @@ export default function QuizResults({
                   const isCorrectAnswer = questionAnswer.isCorrect;
                   const isSelected = questionAnswer.answerId === userAnswer?.answerId;
                   let backgroundClass = 'bg-white';
+                  let textClass = 'text-black'
 
                   if (isCorrectAnswer) {
-                    backgroundClass = 'bg-green-300';
+                    backgroundClass = 'bg-gray-800';
+                    textClass = "text-white"
                     
                   } else if (isSelected) {
-                    backgroundClass = 'bg-red-300';
+                    textClass = "text-red-400"
                   }
 
                   return (
@@ -102,7 +107,7 @@ export default function QuizResults({
                       key={questionAnswer.id}
                       className={`rounded-lg p-3 ${backgroundClass}`}
                     >
-                      <Text className="font-semibold">
+                      <Text className={`font-semibold ${textClass}`}>
                         {questionAnswer.answer.answer}
                       </Text>
                     </View>

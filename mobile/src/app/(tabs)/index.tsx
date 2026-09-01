@@ -31,7 +31,7 @@ export default function HomeScreen() {
             </View>
 
             <Pressable 
-              className='bg-gray-200 rounded-full px-4 py-3'
+              className='bg-gray-200 rounded-full px-4 py-3 active:bg-gray-100'
               onPress={() => router.push(`/(tabs)/notes`)}
             >
               <Text className='text-gray-500 text-center font-semibold'>
@@ -58,7 +58,7 @@ export default function HomeScreen() {
 
             <Pressable 
               onPress={() => router.push(`/subjects`)}
-              className='bg-gray-200 rounded-full px-4 py-3'
+              className='bg-gray-200 rounded-full px-4 py-3 active:bg-gray-100'
             >
               <Text className='text-gray-500 text-center font-semibold'>
                 Create quizzes

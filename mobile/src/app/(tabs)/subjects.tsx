@@ -136,7 +136,7 @@ export default function SubjectsScreen() {
         <Pressable
           onPress={() => setSelectedCategoryId(null)}
           className={`rounded-full px-4 py-2 ${
-            selectedCategoryId == null ? "bg-gray-600" : "bg-gray-50"
+            selectedCategoryId == null ? "bg-gray-600" : "bg-gray-50 active:bg-gray-100"
           }`}
         >
           <Text
@@ -153,7 +153,7 @@ export default function SubjectsScreen() {
             key={category.id}
             onPress={() => setSelectedCategoryId(category.id)}
             className={`rounded-full px-4 py-2 ${
-              selectedCategoryId === category.id ? "bg-gray-600" : "bg-gray-50"
+              selectedCategoryId === category.id ? "bg-gray-600" : "bg-gray-50 active:bg-gray-100" 
             }`}
           >
             <Text
@@ -168,7 +168,7 @@ export default function SubjectsScreen() {
 
         <Pressable
           onPress={() => router.push('/categories')}
-          className="flex flex-row items-center gap-1 bg-gray-50 rounded-full px-4 py-2"
+          className="flex flex-row items-center gap-1 bg-gray-50 rounded-full px-4 py-2 active:bg-gray-100"
         >
           <Plus color="#4b5563" strokeWidth={2} size={16} />
           <Text className='text-gray-600 text-sm font-semibold'>
@@ -216,7 +216,7 @@ export default function SubjectsScreen() {
 
       <Pressable
         onPress={() => setModalVisible(true)}
-        className="absolute bottom-6 right-6 items-center justify-center bg-white rounded-full h-14 w-14"
+        className="absolute bottom-6 right-6 items-center justify-center bg-white rounded-full h-14 w-14 active:bg-gray-50"
         style={{
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
         }}
@@ -245,11 +245,10 @@ export default function SubjectsScreen() {
                   setBottomSheetVisible(false);
                   setModalVisible(true);
                 }}
+                className="flex flex-row items-center gap-2 p-4 rounded-t-3xl active:bg-gray-100"
               >
-                <View className="flex flex-row items-center gap-2 p-4">
-                  <PenLine size={16} />
-                  <Text className="text-center text-xl">Rename</Text>
-                </View>
+                <PenLine size={16} />
+                <Text className="text-center text-xl">Update</Text>
               </Pressable>
 
               <Pressable
@@ -258,13 +257,12 @@ export default function SubjectsScreen() {
                   setModalVisible(true);
                   setBottomSheetVisible(false);
                 }}
+                className="flex flex-row items-center gap-2 p-4 rounded-b-3xl active:bg-gray-100"
               >
-                <View className="flex flex-row items-center gap-2 p-4">
-                  <Trash2 color="#f87171" size={16} />
-                  <Text className="text-red-400 text-center text-xl">
-                    Delete
-                  </Text>
-                </View>
+                <Trash2 color="#f87171" size={16} />
+                <Text className="text-red-400 text-center text-xl">
+                  Delete
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -296,14 +294,14 @@ export default function SubjectsScreen() {
                   be undone.
                 </Text>
 
-                <View className="mt-6 flex-row justify-end gap-3">
+                <View className="mt-6 flex-row justify-end gap-2">
                   <Pressable
                     onPress={() => {
                       setIsDeleting(false);
                       setSelectedSubjectId(null);
                       setModalVisible(false);
                     }}
-                    className="rounded-full px-4 py-2"
+                    className="rounded-full px-5 py-2 active:bg-gray-100"
                   >
                     <Text className="font-semibold text-gray-600">Cancel</Text>
                   </Pressable>
@@ -311,7 +309,7 @@ export default function SubjectsScreen() {
                   <Pressable
                     disabled={deleteSubjectMutation.isPending}
                     onPress={handleDelete}
-                    className="rounded-full bg-red-500 px-4 py-2"
+                    className="rounded-full bg-red-500 px-5 py-2 active:bg-red-400"
                   >
                     <Text className="font-semibold text-white">
                       {deleteSubjectMutation.isPending ? 'Deleting...' : 'Delete'}

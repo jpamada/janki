@@ -25,9 +25,9 @@ export default function QuestionItem({
       onPress={() => {
         router.push(`/subjects/lessons/questions/${id}`);
       }}
-      className="bg-gray-50 rounded-lg p-4"
+      className="bg-gray-50 rounded-lg p-4 active:bg-gray-100"
     >
-      <Text className="text-gray-600 text-xl font-bold">
+      <Text className="text-gray-600 text-xl font-semibold">
         {question}
       </Text>
     </Pressable>

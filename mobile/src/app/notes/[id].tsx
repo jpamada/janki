@@ -2,15 +2,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { getContentsByNote } from '@/repositories/content.repository';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { updateNote } from '@/repositories/note.repository';
 import { type NoteFormData } from '@/schemas/note.schema';
-import { ArrowLeft, SearchX } from 'lucide-react-native';
 import { FlatList } from 'react-native-gesture-handler';
+import { SearchX } from 'lucide-react-native';
 
 import ContentItem from '@/components/contents/ContentItem';
 import Header from '@/components/shared/Header';
-import { useCallback } from 'react';
 
 export default function NoteScreen() {
   const { id, title } = useLocalSearchParams<{ 
@@ -27,7 +26,6 @@ export default function NoteScreen() {
     queryFn: () => getContentsByNote(id),
     enabled: !!id,
   });
-  console.log(contents)
 
   const updateNoteMutation = useMutation({
     mutationFn: (data: NoteFormData) => updateNote(id, data),
@@ -64,14 +62,6 @@ export default function NoteScreen() {
     });
   };
 
-    useFocusEffect(
-    useCallback(() => {
-      if (id) {
-        queryClient.invalidateQueries({ queryKey: ["contents", id] });
-      }
-    }, [id, queryClient])
-  );
-
   return (
     <View
       className="flex-1 bg-white"
@@ -81,11 +71,7 @@ export default function NoteScreen() {
     >
       <Header
         title={title}
-         back={
-          <Pressable onPress={() => router.back()}>
-            <ArrowLeft />
-          </Pressable>
-        }
+        back={true}
       />
 
       {isLoading ? (
@@ -126,7 +112,7 @@ export default function NoteScreen() {
           pathname: `/notes/contents/create`,
           params: { noteId: id, title: title }
         })}
-        className="absolute bottom-6 right-6 items-center justify-center bg-white rounded-full h-14 w-14"
+        className="absolute bottom-6 right-6 items-center justify-center bg-white rounded-full h-14 w-14 active:bg-gray-50"
         style={{
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
         }}

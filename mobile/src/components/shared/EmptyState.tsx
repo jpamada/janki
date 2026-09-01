@@ -41,7 +41,7 @@ export default function EmptyStateScreen({
           <Pressable
             onPress={() =>
             router.push(navigate)}
-            className='bg-gray-800 border rounded-full px-4 py-2'
+            className='bg-gray-800 border rounded-full px-4 py-3 active:bg-gray-700'
           >
             <Text className='text-white'>
               Manage Questions
@@ -51,7 +51,7 @@ export default function EmptyStateScreen({
         
         <Pressable
           onPress={() => router.back()}
-          className='bg-white border border-gray-600 rounded-full px-4 py-2'
+          className='bg-white border border-gray-600 rounded-full px-4 py-3 active:bg-gray-100'
         >
           <Text>Go Back</Text>
         </Pressable>

@@ -53,22 +53,7 @@ export default function QuestionForm({
     <View className="flex-1">
       <Header
         title="Questions"
-        back={
-          <Pressable onPress={() => router.back()}>
-            <ArrowLeft />
-          </Pressable>
-        }
-        right={
-          <Pressable
-            disabled={isSubmitting}
-            onPress={handleSubmit(handleFormSubmit)}
-            className="active:opacity-70 disabled:bg-gray-400"
-          >
-            <Text className="font-semibold">
-              SAVE
-            </Text>
-          </Pressable>
-        }
+        back={true}
       />
 
       <KeyboardAwareScrollView className="flex-1 mb-2" bottomOffset={20}>
@@ -111,17 +96,20 @@ export default function QuestionForm({
 
             {fields.map((field, index) => (
               <View key={field.id} className='px-1 py-2'>
-                <View className='flex flex-row justify-between items-center mb-2'>
-                  <Text className='text-gray-600 font-semibold'>
+                <View className='flex flex-row justify-between items-center mb-1'>
+                  <Text className='text-gray-600 text-lg font-semibold'>
                     {index + 1}
                   </Text>
 
-                  <View className='flex flex-row gap-4'>
+                  <View className='flex flex-row'>
                     <Controller
                       name={`answers.${index}.isCorrect`}
                       control={control}
                       render={({ field: { onChange, value } }) => (
-                        <Pressable onPress={() => onChange(!value)}>
+                        <Pressable 
+                          onPress={() => onChange(!value)}
+                          className='px-4 py-2 rounded-full active:bg-gray-100'
+                        >
                           {value ? (
                             <View className='flex flex-row items-center gap-1'>
                               <Text className='text-gray-600 font-semibold'>
@@ -142,7 +130,10 @@ export default function QuestionForm({
                       )}
                     />
 
-                    <Pressable onPress={() => remove(index)}>
+                    <Pressable 
+                      onPress={() => remove(index)}
+                      className='px-4 py-2 rounded-full active:bg-gray-100'
+                    >
                       <Trash2 color="#4b5563" size={24}/>
                     </Pressable>
                   </View>
@@ -179,7 +170,7 @@ export default function QuestionForm({
               answer: '', 
               isCorrect: false 
             })}
-            className='border-2 border-gray-200 border-dashed mx-1 py-2'
+            className='border-2 border-gray-200 border-dashed mx-1 py-2 active:bg-gray-50'
           >
             <Text className="text-gray-300 text-sm text-center font-semibold">
               Add answer
@@ -190,13 +181,27 @@ export default function QuestionForm({
 
       {onCreateSuccess && (
         <KeyboardStickyView>
-          <View className="h-12 flex-row items-center bg-gray-600 rounded-xl px-4 m-2">
-            <Text className='text-white font-medium'>
+          <View className="h-12 flex-row items-center bg-gray-100 rounded-xl px-4 m-2">
+            <Text className='text-gray-800 font-medium'>
               1 question added
             </Text>
           </View>
         </KeyboardStickyView>
       )}
+
+      <KeyboardStickyView>
+        <View className="flex-row items-center border-t border-gray-200 bg-white px-4 py-6">
+          <Pressable
+            disabled={isSubmitting}
+            onPress={handleSubmit(handleFormSubmit)}
+            className="bg-gray-600 rounded-full px-4 py-4 w-full active:bg-gray-500"
+          >
+            <Text className="text-white text-center text-lg font-semibold">
+              Save Changes
+            </Text>
+          </Pressable>
+        </View>
+      </KeyboardStickyView>
     </View>
   );
 }

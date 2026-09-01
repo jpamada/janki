@@ -1,5 +1,5 @@
 import { createFolder, deleteFolder, getFoldersByCategory, updateFolder } from '@/repositories/folder.repository';
-import { Folders, PenLine, Plus, SearchX, SquarePen, StickyNote, Trash2, X } from 'lucide-react-native';
+import { FileText, FolderClosed, Folders, PenLine, Plus, SearchX, SquarePen, StickyNote, Trash2, X } from 'lucide-react-native';
 import { createSubfolder, deleteSubfolder, updateSubfolder } from '@/repositories/subfolder.repository';
 import { ActivityIndicator, FlatList, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { createNote, deleteNote, getNotes, updateNote } from '@/repositories/note.repository';
@@ -361,8 +361,9 @@ export default function NotesScreen() {
       >
         <Pressable
           onPress={() => setSelectedCategoryId(null)}
+          disabled={selectedCategoryId == null}
           className={`rounded-full px-4 py-2 ${
-            selectedCategoryId == null ? "bg-gray-600" : "bg-gray-50"
+            selectedCategoryId == null ? "bg-gray-600" : "bg-gray-50 active:bg-gray-100"
           }`}
         >
           <Text
@@ -379,7 +380,7 @@ export default function NotesScreen() {
             key={category.id}
             onPress={() => setSelectedCategoryId(category.id)}
             className={`rounded-full px-4 py-2 ${
-              selectedCategoryId === category.id ? "bg-gray-600" : "bg-gray-50"
+              selectedCategoryId === category.id ? "bg-gray-600" : "bg-gray-50 active:bg-gray-100"
             }`}
           >
             <Text
@@ -394,7 +395,7 @@ export default function NotesScreen() {
 
         <Pressable
           onPress={() => router.push('/categories')}
-          className="flex flex-row items-center gap-1 bg-gray-50 rounded-full px-4 py-2"
+          className="flex flex-row items-center gap-1 bg-gray-50 rounded-full px-4 py-2 active:bg-gray-100"
         >
           <Plus color="#4b5563" strokeWidth={2} size={16} />
           <Text className='text-gray-600 text-sm font-semibold'>
@@ -468,10 +469,10 @@ export default function NotesScreen() {
                 setSelectedFolderId(null);
                 setFolderModalVisible(true);
               }}
-              className="flex-row items-center gap-1 rounded-full bg-white px-4 py-3"
+              className="flex-row items-center gap-2 rounded-full bg-white px-4 py-3 active:bg-gray-50"
               style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
             >
-              <Folders size={20} color="#4b5563" />
+              <FolderClosed size={20} color="#4b5563" />
               <Text className="font-semibold text-gray-700">New Folder</Text>
             </Pressable>
 
@@ -480,10 +481,10 @@ export default function NotesScreen() {
                 setFabVisible(false);
                 setNoteModalVisible(true);
               }}
-              className="flex-row items-center gap-1 rounded-full bg-white px-4 py-3"
+              className="flex-row items-center gap-2 rounded-full bg-white px-4 py-3 active:bg-gray-50"
               style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
             >
-              <StickyNote size={20} color="#4b5563" />
+              <FileText size={20} color="#4b5563" />
               <Text className="font-semibold text-gray-700">New Note</Text>
             </Pressable>
           </View>
@@ -491,7 +492,7 @@ export default function NotesScreen() {
 
         <Pressable
           onPress={() => setFabVisible((prev) => !prev)}
-          className="h-14 w-14 items-center justify-center rounded-full bg-white"
+          className="h-14 w-14 items-center justify-center rounded-full bg-white active:bg-gray-50"
           style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
         >
           {fabVisible ? (
@@ -525,11 +526,10 @@ export default function NotesScreen() {
                       setBottomSheetVisible(false);
                       setNoteModalVisible(true);
                     }}
+                    className="flex flex-row items-center gap-2 p-4 rounded-t-3xl active:bg-gray-100"
                   >
-                    <View className="flex flex-row items-center gap-2 p-4">
-                      <SquarePen size={16} />
-                      <Text className="text-center text-xl">New Note</Text>
-                    </View>
+                    <SquarePen size={16} />
+                    <Text className="text-center text-xl">New Note</Text>
                   </Pressable>
 
                   <Pressable
@@ -542,11 +542,10 @@ export default function NotesScreen() {
                       setBottomSheetVisible(false);
                       setSubfolderModalVisible(true);
                     }}
+                    className="flex flex-row items-center gap-2 p-4 active:bg-gray-100"
                   >
-                    <View className="flex flex-row items-center gap-2 p-4">
-                      <Folders size={16} />
-                      <Text className="text-center text-xl">New Subfolder</Text>
-                    </View>
+                    <Folders size={16} />
+                    <Text className="text-center text-xl">New Subfolder</Text>
                   </Pressable>
                 </View>
               )}
@@ -557,11 +556,10 @@ export default function NotesScreen() {
                     setBottomSheetVisible(false);
                     setNoteModalVisible(true);
                   }}
+                  className="flex flex-row items-center gap-2 p-4 active:bg-gray-100"
                 >
-                  <View className="flex flex-row items-center gap-2 p-4">
-                    <SquarePen size={16} />
-                    <Text className="text-center text-xl">New Note</Text>
-                  </View>
+                  <SquarePen size={16} />
+                  <Text className="text-center text-xl">New Note</Text>
                 </Pressable>
               )}
 
@@ -583,11 +581,10 @@ export default function NotesScreen() {
                     setNoteModalVisible(true);
                   }
                 }}
+                className="flex flex-row items-center gap-2 p-4 active:bg-gray-100"
               >
-                <View className="flex flex-row items-center gap-2 p-4">
-                  <PenLine size={16} />
-                  <Text className="text-center text-xl">Update</Text>
-                </View>
+                <PenLine size={16} />
+                <Text className="text-center text-xl">Update</Text>
               </Pressable>
 
               <Pressable
@@ -608,13 +605,12 @@ export default function NotesScreen() {
                     setBottomSheetVisible(false);
                   }
                 }}
+                className="flex flex-row items-center gap-2 p-4 rounded-b-3xl active:bg-gray-100"
               >
-                <View className="flex flex-row items-center gap-2 p-4">
-                  <Trash2 color="#f87171" size={16} />
-                  <Text className="text-red-400 text-center text-xl">
-                    Delete
-                  </Text>
-                </View>
+                <Trash2 color="#f87171" size={16} />
+                <Text className="text-red-400 text-center text-xl">
+                  Delete
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -649,14 +645,14 @@ export default function NotesScreen() {
                   cannot be undone.
                 </Text>
 
-                <View className="mt-6 flex-row justify-end gap-3">
+                <View className="mt-6 flex-row justify-end gap-2">
                   <Pressable
                     onPress={() => {
                       setIsDeleting(false);
                       setSelectedFolderId(null);
                       setFolderModalVisible(false);
                     }}
-                    className="rounded-full px-4 py-2"
+                    className="rounded-full px-5 py-2 active:bg-gray-100"
                   >
                     <Text className="font-semibold text-gray-600">Cancel</Text>
                   </Pressable>
@@ -664,7 +660,7 @@ export default function NotesScreen() {
                   <Pressable
                     onPress={handleDelete}
                     disabled={deleteFolderMutation.isPending}
-                    className="rounded-full bg-red-500 px-4 py-2"
+                    className="rounded-full bg-red-500 px-5 py-2 active:bg-red-400"
                   >
                     <Text className="font-semibold text-white">
                       {deleteFolderMutation.isPending
@@ -718,7 +714,7 @@ export default function NotesScreen() {
                   cannot be undone.
                 </Text>
 
-                <View className="mt-6 flex-row justify-end gap-3">
+                <View className="mt-6 flex-row justify-end gap-2">
                   <Pressable
                     onPress={() => {
                       setIsDeleting(false);
@@ -726,7 +722,7 @@ export default function NotesScreen() {
                       setSelectedSubfolderId(null);
                       setSubfolderModalVisible(false);
                     }}
-                    className="rounded-full px-4 py-2"
+                    className="rounded-full px-5 py-2 active:bg-gray-100"
                   >
                     <Text className="font-semibold text-gray-600">Cancel</Text>
                   </Pressable>
@@ -734,7 +730,7 @@ export default function NotesScreen() {
                   <Pressable
                     disabled={deleteSubfolderMutation.isPending}
                     onPress={handleDelete}
-                    className="rounded-full bg-red-500 px-4 py-2"
+                    className="rounded-full bg-red-500 px-5 py-2 active:bg-red-400"
                   >
                     <Text className="font-semibold text-white">
                       {deleteSubfolderMutation.isPending
@@ -787,14 +783,14 @@ export default function NotesScreen() {
                   be undone.
                 </Text>
 
-                <View className="mt-6 flex-row justify-end gap-3">
+                <View className="mt-6 flex-row justify-end gap-2">
                   <Pressable
                     onPress={() => {
                       setIsDeleting(false);
                       setSelectedNoteId(null);
                       setNoteModalVisible(false);
                     }}
-                    className="rounded-full px-4 py-2"
+                    className="rounded-full px-5 py-2 active:bg-gray-100"
                   >
                     <Text className="font-semibold text-gray-600">Cancel</Text>
                   </Pressable>
@@ -802,7 +798,7 @@ export default function NotesScreen() {
                   <Pressable
                     disabled={deleteNoteMutation.isPending}
                     onPress={handleDelete}
-                    className="rounded-full bg-red-500 px-4 py-2"
+                    className="rounded-full bg-red-500 px-5 py-2 active:bg-red-400"
                   >
                     <Text className="font-semibold text-white">
                       {deleteNoteMutation.isPending ? 'Deleting...' : 'Delete'}

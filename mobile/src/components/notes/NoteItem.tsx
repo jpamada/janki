@@ -29,7 +29,7 @@ export default function NoteItem({
         pathname: `/notes/[id]`,
         params: { id: id, title: title }
       })}
-      className="bg-gray-50 rounded-xl flex-row items-center gap-2 px-4 py-4"
+      className="bg-gray-50 rounded-xl flex-row items-center gap-2 px-4 py-4 active:bg-gray-100"
     >
       <FileText size={18} />
 

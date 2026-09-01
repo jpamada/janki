@@ -1,9 +1,11 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import { router } from "expo-router";
+import { ArrowLeft } from "lucide-react-native";
 
 type HeaderProps = {
   title?: string;
-  back?: React.ReactNode;
+  back?: boolean;
   right?: React.ReactNode;
 };
 
@@ -19,22 +21,29 @@ export default function Header({
     <View 
       className={`
         flex flex-row justify-between items-center
-        px-4 py-2 mt-4 
+        px-2 py-2 mt-2
       `}
       style={{
         paddingTop: insets.top
       }}  
     >
       <View className={`
-        flex flex-row gap-2
+        flex flex-row items-center
       `}>
-        <View>
-          {back}
-        </View>
+        {back && (
+          <Pressable
+            onPress={() => router.back()}
+            className="p-3 rounded-full active:bg-gray-100"
+          >
+            <ArrowLeft />
+          </Pressable>
+        )}
 
-        <Text className="text-xl font-semibold">
-          {title}
-        </Text>
+        {title && (
+          <Text className={`text-xl font-semibold ${back ? "px-1" : "px-4"}`}>
+            {title}
+          </Text>
+        )}
       </View>
 
       <View>

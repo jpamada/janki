@@ -16,13 +16,17 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View className="flex flex-col gap-4">
-          <Pressable onPress={() => router.push(`/categories`)}>
-            <View className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg'>
-              <View className='bg-white rounded-xl p-4'>
-                <LayoutGrid color="#9ca3af" />
-              </View>
-              <Text className='text-gray-600 text-lg font-bold'>Categories</Text>
+          <Pressable 
+            onPress={() => router.push(`/categories`)}
+            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg active:bg-gray-100'
+          >
+            <View className='bg-white rounded-xl p-4'>
+              <LayoutGrid color="#9ca3af" />
             </View>
+
+            <Text className='text-gray-600 text-lg font-bold'>
+              Categories
+            </Text>
           </Pressable>
 
           <Pressable>

@@ -63,7 +63,7 @@ export default function FolderItem({
           onFolderLongPress(folder.id);
         }}
         onPress={() => setFolderIsOpen((prev) => !prev)}
-        className="flex-row items-center gap-2 rounded-lg px-4 py-4"
+        className="flex-row items-center gap-2 rounded-lg px-4 py-4 active:bg-gray-100"
       >
         {folderIsOpen ? <FolderOpen size={18} /> : <FolderClosed size={18} />}
 
@@ -83,9 +83,12 @@ export default function FolderItem({
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   onSubfolderLongPress(subfolder.id);
                 }}
-                className="flex-row items-center gap-2 px-4 py-3 ps-8"
+                className="flex-row items-center gap-2 px-4 py-3 ps-8 active:bg-gray-100"
               >
-                 {openSubfolderIds.has(subfolder.id) ? <FolderOpen size={18} /> : <FolderClosed size={18} />}
+                 {openSubfolderIds.has(subfolder.id) 
+                    ? <FolderOpen size={18} /> 
+                    : <FolderClosed size={18} />}
+
                 <Text className="font-medium text-gray-600 text-lg">
                   {subfolder.name}
                 </Text>
@@ -103,7 +106,7 @@ export default function FolderItem({
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       onNoteLongPress(note.id);
                     }}
-                    className="flex-row items-center gap-2 px-4 py-3 ps-12"
+                    className="flex-row items-center gap-2 px-4 py-3 ps-12 active:bg-gray-100"
                   >
                     <FileText size={18} />
                     <Text className="font-medium text-gray-600 text-lg">{note.title}</Text>
@@ -124,7 +127,7 @@ export default function FolderItem({
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 onNoteLongPress(note.id);
               }}
-              className="flex-row items-center gap-2 px-4 py-3 ps-8"
+              className="flex-row items-center gap-2 px-4 py-3 ps-8 active:bg-gray-100"
             >
               <FileText size={18} />
               <Text className="font-medium text-gray-600 text-lg">{note.title}</Text>

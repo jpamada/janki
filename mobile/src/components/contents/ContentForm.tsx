@@ -101,13 +101,9 @@ const handleToggleTodo = () => {
   return (
     <View className="flex-1 bg-white">
       <Header
-        back={
-          <Pressable onPress={() => router.back()}>
-            <X />
-          </Pressable>
-        }
+        back={true}
         right={
-          <View className="flex flex-row items-center gap-2">
+          <View className="flex flex-row items-center">
             {todoVisible && (
               <Controller
                 name="todo"
@@ -115,7 +111,7 @@ const handleToggleTodo = () => {
                 render={({ field: { value, onChange } }) => (
                   <Pressable
                     onPress={() => onChange(!value)}
-                    className="active:opacity-70"
+                    className="p-3 rounded-full active:bg-gray-100"
                   >
                     {value ? (
                       <SquareCheck size={24} color="#4b5563" />
@@ -127,7 +123,10 @@ const handleToggleTodo = () => {
               />
             )}
 
-            <Pressable onPress={() => setBottomSheetVisible(true)}>
+            <Pressable 
+              onPress={() => setBottomSheetVisible(true)}
+              className="p-3 rounded-full active:bg-gray-100"
+            >
               <EllipsisVertical />
             </Pressable>
           </View>
@@ -138,7 +137,7 @@ const handleToggleTodo = () => {
         bottomOffset={80}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="p-4 pb-24"
+        contentContainerClassName="px-4 pb-4 pb-24"
       >
         {titleVisible && (
           <Controller
@@ -250,7 +249,7 @@ const handleToggleTodo = () => {
           <Pressable
             disabled={isSubmitting}
             onPress={handleSubmit(handleFormSubmit)}
-            className="bg-gray-600 rounded-full px-4 py-4 w-full active:opacity-70"
+            className="bg-gray-600 rounded-full px-4 py-4 w-full active:bg-gray-500"
           >
             <Text className="text-white text-center text-lg font-semibold">
               Save Changes
@@ -278,13 +277,12 @@ const handleToggleTodo = () => {
                   handleToggleTitle();
                   setBottomSheetVisible(false);
                 }}
+                className="flex flex-row items-center gap-2 p-4 rounded-t-3xl active:bg-gray-100"
               >
-                <View className="flex flex-row items-center gap-2 p-4">
-                  <TextInitial size={16} />
-                  <Text className="text-center text-xl">
-                    {titleVisible ? "Remove title" : "Add title"}
-                  </Text>
-                </View>
+                <TextInitial size={16} />
+                <Text className="text-center text-xl">
+                  {titleVisible ? "Remove title" : "Add title"}
+                </Text>
               </Pressable>
 
               <Pressable
@@ -292,13 +290,12 @@ const handleToggleTodo = () => {
                   handleToggleTodo();
                   setBottomSheetVisible(false);
                 }}
+                className="flex flex-row items-center gap-2 p-4 active:bg-gray-100"
               >
-                <View className="flex flex-row items-center gap-2 p-4">
-                  <CalendarCheck size={16} />
-                  <Text className="text-center text-xl">
-                    {todoVisible ? "Remove Todo" : "Add Todo"}
-                  </Text>
-                </View>
+                <CalendarCheck size={16} />
+                <Text className="text-center text-xl">
+                  {todoVisible ? "Remove Todo" : "Add Todo"}
+                </Text>
               </Pressable>
 
               <Pressable
@@ -306,13 +303,12 @@ const handleToggleTodo = () => {
                   handleToggleUrl();
                   setBottomSheetVisible(false);
                 }}
+                className="flex flex-row items-center gap-2 p-4 active:bg-gray-100"
               >
-                <View className="flex flex-row items-center gap-2 p-4">
-                  <Link size={16} />
-                  <Text className="text-center text-xl">
-                    {urlVisible ? "Remove URL link" : "Add URL link"}
-                  </Text>
-                </View>
+                <Link size={16} />
+                <Text className="text-center text-xl">
+                  {urlVisible ? "Remove URL link" : "Add URL link"}
+                </Text>
               </Pressable>
 
               <Pressable
@@ -320,13 +316,12 @@ const handleToggleTodo = () => {
                   handleToggleRemarks();
                   setBottomSheetVisible(false);
                 }}
+                className="flex flex-row items-center gap-2 p-4 active:bg-gray-100"
               >
-                <View className="flex flex-row items-center gap-2 p-4">
-                  <ScrollText size={16} />
-                  <Text className="text-center text-xl">
-                    {remarksVisible ? "Remove remarks" : "Add remarks"}
-                  </Text>
-                </View>
+                <ScrollText size={16} />
+                <Text className="text-center text-xl">
+                  {remarksVisible ? "Remove remarks" : "Add remarks"}
+                </Text>
               </Pressable>
               
               {(defaultValues.id && onDelete) && (
@@ -336,13 +331,12 @@ const handleToggleTodo = () => {
                     setBottomSheetVisible(false);
                     onDelete(defaultValues.id);
                   }}
+                  className="flex flex-row items-center gap-2 p-4 rounded-b-3xl active:bg-gray-100"
                 >
-                  <View className="flex flex-row items-center gap-2 p-4">
-                    <Trash2 color="#f87171" size={16} />
-                    <Text className="text-red-400 text-center text-xl">
-                      Delete Content
-                    </Text>
-                  </View>
+                  <Trash2 color="#f87171" size={16} />
+                  <Text className="text-red-400 text-center text-xl">
+                    Delete Content
+                  </Text>
                 </Pressable>
               )}
             </View>

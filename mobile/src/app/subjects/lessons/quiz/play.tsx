@@ -120,18 +120,21 @@ export default function QuizScreen() {
 
       ) : questions.length > 0 && currentQuestion ? (
         <View
-          className="flex-1 bg-white p-4"
+          className="flex-1 bg-white"
           style={{
             paddingTop: insets.top,
             paddingBottom: insets.bottom,
           }}
         >
-          <View className="mt-4 flex-row items-center gap-2">
-            <Pressable onPress={() => router.back()}>
+          <View className="flex-row items-center gap-1 p-1">
+            <Pressable 
+              onPress={() => router.back()}
+              className='p-3 rounded-full active:bg-gray-100'
+            >
               <X strokeWidth={4} color="#1f2937" />
             </Pressable>
 
-            <View className="ml-2 h-3 flex-1 overflow-hidden rounded-full bg-gray-200">
+            <View className="h-3 me-3 flex-1 overflow-hidden rounded-full bg-gray-200">
               <View
                 className="h-full bg-gray-800"
                 style={{ width: `${progress}%` }}
@@ -139,19 +142,19 @@ export default function QuizScreen() {
             </View>
           </View>
 
-          <View className="mb-8 mt-auto rounded-lg bg-gray-100 p-6">
+          <View className="mb-8 mt-auto rounded-lg bg-gray-100 p-6 mx-4">
             <Text className="text-center text-xl font-semibold">
               {currentQuestion.question}
             </Text>
           </View>
 
-          <View className="mt-auto gap-4">
+          <View className="mt-auto gap-4 p-4">
             {currentQuestion?.questionAnswers?.map((item) => (
               <Pressable
                 key={item?.answer?.id}
                 disabled={showFeedback}
                 onPress={() => handleSelectAnswer(item?.answer?.id)}
-                className="rounded-xl bg-gray-800 p-4"
+                className="rounded-xl bg-gray-800 p-4 active:bg-gray-700"
               >
                 <Text className="text-center text-lg font-semibold text-white">
                   {item?.answer?.answer}
@@ -193,7 +196,7 @@ export default function QuizScreen() {
 
                 <Pressable
                   onPress={handleContinue}
-                  className="mt-8 rounded-lg bg-gray-800 p-4"
+                  className="mt-8 rounded-lg bg-gray-800 p-4 active:bg-gray-700"
                 >
                   <Text className="text-center text-lg font-semibold text-white">
                     {currentQuestionIndex < questions.length - 1

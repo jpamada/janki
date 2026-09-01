@@ -66,7 +66,7 @@ export default function NoteForm({
       <Pressable
         disabled={isSubmitting}
         onPress={handleSubmit(handleFormSubmit)}
-        className="bg-gray-800 rounded-full px-4 py-3 mt-2 active:opacity-70 disabled:bg-gray-400"
+        className="bg-gray-800 rounded-full px-4 py-3 mt-2 active:bg-gray-700 disabled:bg-gray-400"
       >
         <Text className="text-white text-center font-semibold">
           {isEditing ? 'Rename' : 'Create Note'}
