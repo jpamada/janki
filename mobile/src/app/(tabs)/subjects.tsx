@@ -1,4 +1,4 @@
-import { createSubject, deleteSubject, getSubjects, getSubjectsByCategory, updateSubject } from "@/repositories/subject.repository";
+import { createSubject, deleteSubject, getSubjectsByCategory, updateSubject } from "@/repositories/subject.repository";
 import { ActivityIndicator, FlatList, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PenLine, Plus, SearchX, Trash2 } from "lucide-react-native";
@@ -18,6 +18,7 @@ export default function SubjectsScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
+  
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 

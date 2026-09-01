@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const noteContentSchema = z.object({
+export const contentSchema = z.object({
   id: z
     .string()
     .trim()
@@ -13,11 +13,11 @@ export const noteContentSchema = z.object({
 
   content: z
     .string()
-    .trim()
-    .min(1, "Content is required"),
+    .trim(),
 
-  type: z
-    .enum(["text", "code"]),
+  todo: z
+    .boolean()
+    .nullable(),
 
   url: z
     .string()
@@ -31,7 +31,7 @@ export const noteContentSchema = z.object({
     .number()
     .int()
     .min(0)
-    .optional(),
+    .nullable(),
 });
 
-export type NoteContentFormData = z.infer<typeof noteContentSchema>;
+export type ContentFormData = z.infer<typeof contentSchema>;

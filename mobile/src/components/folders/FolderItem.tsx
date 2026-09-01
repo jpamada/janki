@@ -73,7 +73,7 @@ export default function FolderItem({
       </Pressable>
 
       {folderIsOpen && (
-        <View className={`${folder.subfolders.length > 0 ? "pb-2 ps-4" : ""}`}>
+        <View className={`${folder.subfolders.length > 0 ? "pb-2" : ""}`}>
           {folder.subfolders.map((subfolder) => (
             <View key={subfolder.id}>
               <Pressable
@@ -83,7 +83,7 @@ export default function FolderItem({
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   onSubfolderLongPress(subfolder.id);
                 }}
-                className="flex-row items-center gap-2 px-4 py-3"
+                className="flex-row items-center gap-2 px-4 py-3 ps-8"
               >
                  {openSubfolderIds.has(subfolder.id) ? <FolderOpen size={18} /> : <FolderClosed size={18} />}
                 <Text className="font-medium text-gray-600 text-lg">
@@ -95,12 +95,15 @@ export default function FolderItem({
                 subfolder.notes.map((note) => (
                   <Pressable
                     key={note.id}
-                    onPress={() => router.push(`/notes/${note.id}`)}
+                    onPress={() => router.push({
+                      pathname: `/notes/[id]`,
+                      params: { id: note.id, title: note.title }
+                    })}
                     onLongPress={() => {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       onNoteLongPress(note.id);
                     }}
-                    className="flex-row items-center gap-2 px-4 py-3 ps-8"
+                    className="flex-row items-center gap-2 px-4 py-3 ps-12"
                   >
                     <FileText size={18} />
                     <Text className="font-medium text-gray-600 text-lg">{note.title}</Text>
@@ -113,12 +116,15 @@ export default function FolderItem({
           {folder.notes.map((note) => (
             <Pressable
               key={note.id}
-              onPress={() => router.push(`/notes/${note.id}`)}
+              onPress={() => router.push({
+                pathname: `/notes/[id]`,
+                params: { id: note.id, title: note.title }
+              })}
               onLongPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 onNoteLongPress(note.id);
               }}
-              className="flex-row items-center gap-2 px-4 py-3"
+              className="flex-row items-center gap-2 px-4 py-3 ps-8"
             >
               <FileText size={18} />
               <Text className="font-medium text-gray-600 text-lg">{note.title}</Text>

@@ -1,6 +1,6 @@
 import { createCategory, deleteCategory, getCategories, updateCategory } from '@/repositories/category.repository';
+import { ActivityIndicator, FlatList, Modal, Pressable, Text, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FlatList, Modal, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft, Plus, SearchX } from 'lucide-react-native';
 import { CategoryFormData } from '@/schemas/category.schema';
@@ -15,16 +15,13 @@ export default function CategoryScreen() {
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-  const {
-    data: categories = [],
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: categories = [], isLoading, error } = useQuery({
     queryKey: ['categories'],
     queryFn: getCategories,
   });
@@ -139,10 +136,14 @@ export default function CategoryScreen() {
       />
 
       {isLoading ? (
-        <Text>Loading...</Text>
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="small" color="#4b5563" />
+        </View>
 
       ) : error ? (
-        <Text>Failed to load notes.</Text>
+        <View className="flex-1 justify-center items-center">
+          <Text>Failed to load categories</Text>
+        </View>
 
       ) : categories.length > 0 ? (
         <FlatList
@@ -163,7 +164,7 @@ export default function CategoryScreen() {
       ) : (
         <View className="flex-1 items-center justify-center">
           <SearchX size={64} color="#9ca3af" />
-          <Text className="text-gray-400">Create new category.</Text>
+          <Text className="text-gray-400">No category found</Text>
         </View>
       )}
 

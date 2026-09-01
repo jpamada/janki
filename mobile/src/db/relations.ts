@@ -1,4 +1,4 @@
-import { answers, categories, folders, lessons, notes, questionAnswers, questions, subfolders } from "./schema";
+import { answers, categories, contents, folders, lessons, notes, questionAnswers, questions, subfolders } from "./schema";
 import { relations } from "drizzle-orm";
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
@@ -22,7 +22,7 @@ export const subfoldersRelations = relations(subfolders, ({ one, many }) => ({
     notes: many(notes),
 }));
 
-export const notesRelations = relations(notes, ({ one }) => ({
+export const notesRelations = relations(notes, ({ one, many }) => ({
     folder: one(folders, {
       fields: [notes.folderId],
       references: [folders.id],
@@ -31,6 +31,14 @@ export const notesRelations = relations(notes, ({ one }) => ({
       fields: [notes.subfolderId],
       references: [subfolders.id],
     }),
+    contents: many(contents),
+}));
+
+export const contentsRelations = relations(contents, ({ one }) => ({
+  note: one(notes, {
+    fields: [contents.noteId],
+    references: [notes.id],
+  }),
 }));
 
 export const questionsRelations = relations(questions, ({ one, many }) => ({

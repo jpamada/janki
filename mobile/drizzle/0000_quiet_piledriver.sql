@@ -14,6 +14,19 @@ CREATE TABLE `categories` (
 	`name` text NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE `note_contents` (
+	`id` text PRIMARY KEY NOT NULL,
+	`note_id` text NOT NULL,
+	`title` text NOT NULL,
+	`content` text NOT NULL,
+	`url` text,
+	`todo` integer,
+	`remarks` text,
+	`position` integer,
+	FOREIGN KEY (`note_id`) REFERENCES `notes`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `contents_note_id_idx` ON `note_contents` (`note_id`);--> statement-breakpoint
 CREATE TABLE `folders` (
 	`id` text PRIMARY KEY NOT NULL,
 	`category_id` text,
@@ -36,28 +49,6 @@ CREATE TABLE `lessons` (
 );
 --> statement-breakpoint
 CREATE INDEX `lessons_subject_id_idx` ON `lessons` (`subject_id`);--> statement-breakpoint
-CREATE TABLE `note_contents` (
-	`id` text PRIMARY KEY NOT NULL,
-	`note_section_id` text NOT NULL,
-	`title` text NOT NULL,
-	`content` text NOT NULL,
-	`type` text NOT NULL,
-	`url` text,
-	`remarks` text,
-	`position` integer,
-	FOREIGN KEY (`note_section_id`) REFERENCES `note_sections`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-CREATE INDEX `note_contents_note_section_id_idx` ON `note_contents` (`note_section_id`);--> statement-breakpoint
-CREATE TABLE `note_sections` (
-	`id` text PRIMARY KEY NOT NULL,
-	`note_id` text NOT NULL,
-	`title` text NOT NULL,
-	`position` integer,
-	FOREIGN KEY (`note_id`) REFERENCES `notes`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-CREATE INDEX `note_sections_note_id_idx` ON `note_sections` (`note_id`);--> statement-breakpoint
 CREATE TABLE `notes` (
 	`id` text PRIMARY KEY NOT NULL,
 	`folder_id` text,

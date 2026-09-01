@@ -1,36 +1,33 @@
-import { getNoteSectionsByNoteId } from '@/repositories/note-section.repository';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getNoteById, updateNote } from '@/repositories/note.repository';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { getContentsByNote } from '@/repositories/content.repository';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { updateNote } from '@/repositories/note.repository';
 import { type NoteFormData } from '@/schemas/note.schema';
-import { SearchX } from 'lucide-react-native';
+import { ArrowLeft, SearchX } from 'lucide-react-native';
+import { FlatList } from 'react-native-gesture-handler';
 
-import NoteForm from '@/components/notes/NoteForm';
+import ContentItem from '@/components/contents/ContentItem';
+import Header from '@/components/shared/Header';
+import { useCallback } from 'react';
 
 export default function NoteScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, title } = useLocalSearchParams<{ 
+    id: string, 
+    title: string 
+  }>();
 
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const {
-    data: note,
-    isLoading: notesIsLoading,
-    error,
-  } = useQuery({
-    queryKey: ['note', id],
-    queryFn: () => getNoteById(id),
+  const { data: contents = [], isLoading: isLoading, error } = useQuery({
+    queryKey: ["contents", id],
+    queryFn: () => getContentsByNote(id),
     enabled: !!id,
   });
-
-  const { data: noteSections, isLoading: noteSectionsIsLoading } = useQuery({
-    queryKey: ['noteSections', id],
-    queryFn: () => getNoteSectionsByNoteId(id),
-    enabled: !!id,
-  });
+  console.log(contents)
 
   const updateNoteMutation = useMutation({
     mutationFn: (data: NoteFormData) => updateNote(id, data),
@@ -45,9 +42,6 @@ export default function NoteScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['note', id],
       });
-      await queryClient.invalidateQueries({
-        queryKey: ['noteSections', id],
-      });
       router.back();
     },
 
@@ -56,9 +50,27 @@ export default function NoteScreen() {
     },
   });
 
-  const handleSubmit = async (data: NoteFormData) => {
+  const handleNoteSubmit = async (data: NoteFormData) => {
     await updateNoteMutation.mutateAsync(data);
   };
+
+  const handleContentPress = (contentId: string) => {
+    router.push({
+      pathname: `/notes/contents/edit`,
+      params: {
+        contentId: contentId,
+        noteId: id
+      },
+    });
+  };
+
+    useFocusEffect(
+    useCallback(() => {
+      if (id) {
+        queryClient.invalidateQueries({ queryKey: ["contents", id] });
+      }
+    }, [id, queryClient])
+  );
 
   return (
     <View
@@ -67,49 +79,60 @@ export default function NoteScreen() {
         paddingBottom: insets.bottom,
       }}
     >
-      {notesIsLoading || noteSectionsIsLoading ? (
+      <Header
+        title={title}
+         back={
+          <Pressable onPress={() => router.back()}>
+            <ArrowLeft />
+          </Pressable>
+        }
+      />
+
+      {isLoading ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="small" color="#4b5563" />
         </View>
 
       ) : error ? (
-        <View className="flex-1 items-center justify-center">
-          <Text>Failed to load note.</Text>
-        </View>
+        <Text>Failed to load notes.</Text>
 
-      ) : !note ? (
-        <View className="flex-1 items-center justify-center">
-          <SearchX size={64} color="#9ca3af" />
-          <Text className="text-gray-400 font-semibold">Note not found</Text>
-        </View>
-        
+      ) : contents.length > 0 ? (
+        <FlatList
+          data={contents}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <ContentItem
+              id={item.id}
+              todo={item.todo}
+              title={item.title}
+              content={item.content}
+              remarks={item.remarks}
+              onPress={handleContentPress}
+            />
+          )}
+          contentContainerClassName="gap-3 p-4"
+          showsVerticalScrollIndicator={false}
+        />
+
       ) : (
-        <View className="flex-1">
-          <NoteForm
-            defaultValues={{
-              title: note.title,
-              folderId: note.folderId ?? undefined,
-
-              noteSections: (noteSections ?? []).map((section) => ({
-                id: section.id,
-                title: section.title,
-                position: section.position ?? undefined,
-
-                noteContents: section.noteContents.map((content) => ({
-                  id: content.id,
-                  title: content.title ?? undefined,
-                  content: content.content,
-                  type: content.type as 'text' | 'code',
-                  url: content.url ?? undefined,
-                  remarks: content.remarks ?? undefined,
-                  position: content.position ?? undefined,
-                })),
-              })),
-            }}
-            onSubmit={handleSubmit}
-          />
+        <View className='flex-1 justify-center items-center'>
+          <SearchX size={64} color="#9ca3af" />
+          <Text className='text-gray-400 font-semibold'>No contents found</Text>
         </View>
       )}
+      
+      <Pressable
+        onPress={() => router.push({
+          pathname: `/notes/contents/create`,
+          params: { noteId: id, title: title }
+        })}
+        className="absolute bottom-6 right-6 items-center justify-center bg-white rounded-full h-14 w-14"
+        style={{
+          boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
+        }}
+      >
+        <Text className="text-3xl text-gray-600">+</Text>
+      </Pressable>
     </View>
   );
 }

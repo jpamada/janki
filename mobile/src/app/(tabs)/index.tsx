@@ -32,7 +32,7 @@ export default function HomeScreen() {
 
             <Pressable 
               className='bg-gray-200 rounded-full px-4 py-3'
-              onPress={() => router.push(`/notes`)}
+              onPress={() => router.push(`/(tabs)/notes`)}
             >
               <Text className='text-gray-500 text-center font-semibold'>
                 Create new notes

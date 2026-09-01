@@ -8,15 +8,23 @@ export default function NotesLayout() {
       }}
     >
       <Stack.Screen 
-        name="create" 
-        options={{ 
-          title: 'New Note' 
-        }}  
-      />
-      <Stack.Screen 
         name="[id]" 
         options={{
-          title: "Edit Note"
+          title: "Notes"
+        }}
+      />
+
+      <Stack.Screen 
+        name="contents/create" 
+        options={{
+          title: "Create Content"
+        }}
+      />
+
+      <Stack.Screen 
+        name="contents/edit" 
+        options={{
+          title: "Edit Content"
         }}
       />
     </Stack>

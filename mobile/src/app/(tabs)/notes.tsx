@@ -2,11 +2,12 @@ import { createFolder, deleteFolder, getFoldersByCategory, updateFolder } from '
 import { Folders, PenLine, Plus, SearchX, SquarePen, StickyNote, Trash2, X } from 'lucide-react-native';
 import { createSubfolder, deleteSubfolder, updateSubfolder } from '@/repositories/subfolder.repository';
 import { ActivityIndicator, FlatList, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { createNote, deleteNote, getNotes, updateNote } from '@/repositories/note.repository';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteNote, getNotes } from '@/repositories/note.repository';
 import { getCategories } from '@/repositories/category.repository';
 import { SubfolderFormData } from '@/schemas/subfolder.schema';
 import { FolderFormData } from '@/schemas/folder.schema';
+import { NoteFormData } from '@/schemas/note.schema';
 import { router } from 'expo-router';
 import { useState } from 'react';
 
@@ -14,6 +15,7 @@ import SubfolderForm from '@/components/subfolders/SubfolderForm';
 import FolderForm from '@/components/folders/FolderForm';
 import FolderItem from '@/components/folders/FolderItem';
 import NoteItem from '@/components/notes/NoteItem';
+import NoteForm from '@/components/notes/NoteForm';
 import Header from '@/components/shared/Header';
 
 export default function NotesScreen() {
@@ -34,20 +36,12 @@ export default function NotesScreen() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedSubfolderId, setSelectedSubfolderId] = useState<string | null>(null);
 
-  const {
-    data: notes = [],
-    isLoading: notesIsLoading,
-    error: notesError,
-  } = useQuery({
+  const { data: notes = [], isLoading: notesIsLoading, error: notesError } = useQuery({
     queryKey: ['notes'],
     queryFn: getNotes,
   });
 
-  const {
-    data: folders = [],
-    isLoading: foldersIsLoading,
-    error: foldersError,
-  } = useQuery({
+  const { data: folders = [], isLoading: foldersIsLoading, error: foldersError } = useQuery({
     queryKey: ['folders', selectedCategoryId],
     queryFn: () => getFoldersByCategory(selectedCategoryId),
   });
@@ -79,6 +73,9 @@ export default function NotesScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['folders'],
       });
+        await queryClient.invalidateQueries({
+        queryKey: ['folders', selectedCategoryId],
+      });
       setFolderModalVisible(false);
     },
 
@@ -97,6 +94,9 @@ export default function NotesScreen() {
       });
       await queryClient.invalidateQueries({
         queryKey: ['folders'],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['folders', selectedCategoryId],
       });
       setIsEditing(false);
       setSelectedFolderId(null);
@@ -118,6 +118,9 @@ export default function NotesScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['folders'],
       });
+      await queryClient.invalidateQueries({
+        queryKey: ['folders', selectedCategoryId],
+      });
       setIsDeleting(false);
       setSelectedFolderId(null);
       setFolderModalVisible(false);
@@ -135,6 +138,9 @@ export default function NotesScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['folders'],
       });
+      await queryClient.invalidateQueries({
+        queryKey: ['folders', selectedCategoryId],
+      });
       setSelectedFolderId(null);
       setSubfolderModalVisible(false);
     },
@@ -151,6 +157,9 @@ export default function NotesScreen() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ['folders'],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['folders', selectedCategoryId],
       });
       setIsEditing(false);
       setSelectedFolderId(null);
@@ -170,9 +179,61 @@ export default function NotesScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['folders'],
       });
+      await queryClient.invalidateQueries({
+        queryKey: ['folders', selectedCategoryId],
+      });
       setIsDeleting(false);
       setSelectedSubfolderId(null);
       setSubfolderModalVisible(false);
+    },
+
+    onError: (error) => {
+      console.error(error.message);
+    },
+  });
+
+  const createNoteMutation = useMutation({
+    mutationFn: createNote,
+
+    onSuccess: async ({id, title}) => {
+      await queryClient.invalidateQueries({
+        queryKey: ['notes'],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['folders'],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['folders', selectedCategoryId],
+      });
+      setNoteModalVisible(false);
+        router.push({
+        pathname: '/notes/[id]',
+        params: {
+          id: id,
+          title: title
+        },
+      });
+    },
+
+    onError: (error) => {
+      console.error(error.message);
+    },
+  });
+
+  const updateNoteMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: NoteFormData }) =>
+      updateNote(id, data),
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['notes'],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['folders', selectedCategoryId],
+      });
+      setIsEditing(false);
+      setSelectedNoteId(null);
+      setNoteModalVisible(false);
     },
 
     onError: (error) => {
@@ -189,6 +250,9 @@ export default function NotesScreen() {
       });
       await queryClient.invalidateQueries({
         queryKey: ['folders'],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['folders', selectedCategoryId],
       });
       setIsDeleting(false);
       setSelectedNoteId(null);
@@ -236,13 +300,35 @@ export default function NotesScreen() {
     }
   };
 
+  const handleNoteSubmit = async (data: NoteFormData) => {
+    if (isEditing && selectedNoteId) {
+      await updateNoteMutation.mutateAsync({
+        id: selectedNoteId,
+        data: {
+          title: data.title,
+          folderId: selectedFolderId ?? null,
+          subfolderId: selectedSubfolderId ?? null
+        },
+      });
+
+    } else {
+      await createNoteMutation.mutateAsync({
+        title: data.title,
+        folderId: selectedFolderId ?? undefined,
+        subfolderId: selectedSubfolderId ?? undefined
+      });
+    }
+  };
+
   const handleFolderLongPress = (id: string) => {
     setSelectedFolderId(id);
+    setSelectedSubfolderId(null);
     setBottomSheetVisible(true);
   };
 
   const handleSubfolderLongPress = (id: string) => {
     setSelectedSubfolderId(id);
+    setSelectedFolderId(null);
     setBottomSheetVisible(true);
   };
 
@@ -392,7 +478,7 @@ export default function NotesScreen() {
             <Pressable
               onPress={() => {
                 setFabVisible(false);
-                router.push('/notes/create');
+                setNoteModalVisible(true);
               }}
               className="flex-row items-center gap-1 rounded-full bg-white px-4 py-3"
               style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
@@ -437,10 +523,7 @@ export default function NotesScreen() {
                   <Pressable
                     onPress={() => {
                       setBottomSheetVisible(false);
-                      router.push({
-                        pathname: `/notes/create`,
-                        params: { folderId: selectedFolderId },
-                      });
+                      setNoteModalVisible(true);
                     }}
                   >
                     <View className="flex flex-row items-center gap-2 p-4">
@@ -472,10 +555,7 @@ export default function NotesScreen() {
                 <Pressable
                   onPress={() => {
                     setBottomSheetVisible(false);
-                    router.push({
-                      pathname: `/notes/create`,
-                      params: { subfolderId: selectedSubfolderId },
-                    });
+                    setNoteModalVisible(true);
                   }}
                 >
                   <View className="flex flex-row items-center gap-2 p-4">
@@ -496,12 +576,17 @@ export default function NotesScreen() {
                     setIsEditing(true);
                     setBottomSheetVisible(false);
                     setSubfolderModalVisible(true);
+
+                  } else if (selectedNoteId) {
+                    setIsEditing(true);
+                    setBottomSheetVisible(false);
+                    setNoteModalVisible(true);
                   }
                 }}
               >
                 <View className="flex flex-row items-center gap-2 p-4">
                   <PenLine size={16} />
-                  <Text className="text-center text-xl">Rename</Text>
+                  <Text className="text-center text-xl">Update</Text>
                 </View>
               </Pressable>
 
@@ -725,7 +810,18 @@ export default function NotesScreen() {
                   </Pressable>
                 </View>
               </View>
-            ) : null}
+
+            ) : (
+              <NoteForm
+                onSubmit={handleNoteSubmit}
+                isEditing={isEditing}
+                defaultValues={{
+                  title: selectedNote?.title ?? 'Untitled',
+                  folderId: selectedNote?.folderId ?? selectedFolderId ?? null,
+                  subfolderId: selectedNote?.subfolderId ?? selectedSubfolderId ?? null,
+                }}
+              />
+            )}
           </Pressable>
         </Pressable>
       </Modal>

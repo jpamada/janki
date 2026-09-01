@@ -111,39 +111,20 @@ export const notes = sqliteTable("notes", {
     ),
 ]);
 
-export const noteSections = sqliteTable("note_sections", {
+export const contents = sqliteTable("note_contents", {
     id: text("id").primaryKey(),
 
     noteId: text("note_id").notNull(),
 
     title: text("title").notNull(),
 
-    position: integer("position"),
-
-}, (table) => [
-    foreignKey({
-        columns: [table.noteId],
-        foreignColumns: [notes.id],
-        name: "note_sections_note_id_fk"
-    }).onDelete("cascade"),
-
-    index("note_sections_note_id_idx").on(
-        table.noteId
-    ),
-]);
-
-export const noteContents = sqliteTable("note_contents", {
-    id: text("id").primaryKey(),
-
-    noteSectionId: text("note_section_id").notNull(),
-
-    title: text("title").notNull(),
-
     content: text("content").notNull(),
 
-    type: text("type").notNull(),
-
     url: text("url"),
+
+    todo: integer("todo", {
+        mode: "boolean"
+    }),
 
     remarks: text("remarks"),
 
@@ -151,13 +132,13 @@ export const noteContents = sqliteTable("note_contents", {
 
 }, (table) => [
     foreignKey({
-        columns: [table.noteSectionId],
-        foreignColumns: [noteSections.id],
-        name: "note_contents_note_section_id_fk"
+        columns: [table.noteId],
+        foreignColumns: [notes.id],
+        name: "contents_note_id_fk"
     }).onDelete("cascade"),
 
-    index("note_contents_note_section_id_idx").on(
-        table.noteSectionId
+    index("contents_note_id_idx").on(
+        table.noteId
     ),
 ]);
 
