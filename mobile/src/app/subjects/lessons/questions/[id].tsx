@@ -1,6 +1,5 @@
 import { getQuestionById, updateQuestionWithAnswers } from "@/repositories/question.repository";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { QuestionFormData } from "@/schemas/question.schema";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -9,14 +8,16 @@ import { SearchX } from "lucide-react-native";
 import QuestionForm from "@/components/questions/QuestionForm";
 
 export default function QuestionsScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, lessonId } = useLocalSearchParams<{ 
+    id: string;
+    lessonId: string;
+  }>();
 
   const queryClient = useQueryClient();
-  const insets = useSafeAreaInsets();
   const router = useRouter();
 
   const { data: question, isLoading, error } = useQuery({
-    queryKey: ['question', id],
+    queryKey: ["question", id],
     queryFn: () => getQuestionById(id),
     enabled: !!id,
   });
@@ -25,21 +26,15 @@ export default function QuestionsScreen() {
     mutationFn: (data: QuestionFormData) =>
       updateQuestionWithAnswers(id, data),
 
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['questions'],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ['question', id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ['questions', question?.lessonId],
-      });
-
-      router.back();
-    },
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: ["question", id],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["questionsWithAnswers", lessonId],
+        });
+        router.back();
+      },
 
     onError: (error) => {
       console.error(error.message);
@@ -51,12 +46,7 @@ export default function QuestionsScreen() {
   };
 
   return (
-    <View
-      className="flex-1 bg-white"
-      style={{
-        paddingBottom: insets.bottom,
-      }}
-    >
+    <View className="flex-1 bg-white">
       {isLoading ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="small" color="#4b5563" />

@@ -1,10 +1,10 @@
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { QuestionFormData, questionSchema } from '@/schemas/question.schema';
-import { ArrowLeft, Square, SquareCheck, Trash2 } from 'lucide-react-native';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Square, SquareCheck, Trash2 } from 'lucide-react-native';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from 'expo-router';
 
 import Header from '../shared/Header';
 
@@ -25,6 +25,8 @@ export default function QuestionForm({
     answers: []
   },
 }: QuestionFormProps) {
+
+  const insets = useSafeAreaInsets();
 
   const { control, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
@@ -51,12 +53,14 @@ export default function QuestionForm({
 
   return (
     <View className="flex-1">
-      <Header
-        title="Questions"
-        back={true}
-      />
+      <Header title="Questions" back={true} />
 
-      <KeyboardAwareScrollView className="flex-1 mb-2" bottomOffset={20}>
+      <KeyboardAwareScrollView 
+        bottomOffset={20}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        className="flex-1 mb-2 pb-32" 
+      >
         <View className='gap-4 bg-white rounded-xl shadow-lg p-4 m-4 pb-8'>
           <Controller
             name="question"
@@ -179,18 +183,19 @@ export default function QuestionForm({
         </View>
       </KeyboardAwareScrollView>
 
-      {onCreateSuccess && (
-        <KeyboardStickyView>
-          <View className="h-12 flex-row items-center bg-gray-100 rounded-xl px-4 m-2">
-            <Text className='text-gray-800 font-medium'>
+      <KeyboardStickyView offset={{ closed: 0, opened: insets.top }}>
+        {onCreateSuccess && (
+          <View className="h-12 flex-row items-center bg-gray-600 rounded-xl px-4 mx-2 my-2">
+            <Text className="text-white font-medium">
               1 question added
             </Text>
           </View>
-        </KeyboardStickyView>
-      )}
+        )}
 
-      <KeyboardStickyView>
-        <View className="flex-row items-center border-t border-gray-200 bg-white px-4 py-6">
+        <View 
+          className="flex-row items-center border-t border-gray-200 bg-white px-4 py-6"
+          style={{ paddingBottom: insets.bottom }}
+        >
           <Pressable
             disabled={isSubmitting}
             onPress={handleSubmit(handleFormSubmit)}

@@ -14,7 +14,6 @@ export default function CreateNoteScreen() {
   }>();
 
   const queryClient = useQueryClient();
-  const insets = useSafeAreaInsets();
   const router = useRouter();
 
   const noteCreateMutation = useMutation({
@@ -48,19 +47,14 @@ export default function CreateNoteScreen() {
   };
 
   return (
-    <View
-      className="flex-1 bg-white"
-      style={{
-        paddingBottom: insets.bottom,
-      }}
-    >
+    <View className="flex-1 bg-white">
       <ContentForm
         defaultValues={{
           title: "",
-          content: "",
           url: "",
-          todo: null,
+          content: "",
           remarks: "",
+          todo: null,
           position: null
         }}
         onSubmit={handleContentSubmit}

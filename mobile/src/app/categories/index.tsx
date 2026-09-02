@@ -2,9 +2,8 @@ import { createCategory, deleteCategory, getCategories, updateCategory } from '@
 import { ActivityIndicator, FlatList, Modal, Pressable, Text, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowLeft, Plus, SearchX } from 'lucide-react-native';
 import { CategoryFormData } from '@/schemas/category.schema';
-import { router } from 'expo-router';
+import { Plus, SearchX } from 'lucide-react-native';
 import { useState } from 'react';
 
 import CategoryForm from '@/components/categories/CategoryForm';
@@ -122,14 +121,9 @@ export default function CategoryScreen() {
   return (
     <View
       className="flex-1 bg-white"
-      style={{
-        paddingBottom: insets.bottom,
-      }}
+      style={{ paddingBottom: insets.bottom }}
     >
-      <Header
-        title="Edit Categories"
-        back={true}
-      />
+      <Header title="Edit Categories" back={true} />
 
       {isLoading ? (
         <View className="flex-1 justify-center items-center">
@@ -164,13 +158,14 @@ export default function CategoryScreen() {
         </View>
       )}
 
-      <View className="absolute bottom-6 right-6 items-end">
+      <View
+        className="absolute right-6 items-end"
+        style={{ bottom: insets.bottom + 24 }}
+      >
         <Pressable
           onPress={() => setModalVisible((prev) => !prev)}
           className="h-14 w-14 items-center justify-center rounded-full bg-white active:bg-gray-50"
-          style={{
-            boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)',
-          }}
+          style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
         >
           <Plus size={24} color="#4b5563" />
         </Pressable>
@@ -217,12 +212,14 @@ export default function CategoryScreen() {
                     }}
                     className="rounded-full px-5 py-2 active:bg-gray-100"
                   >
-                    <Text className="font-semibold text-gray-600">Cancel</Text>
+                    <Text className="font-semibold text-gray-600">
+                      Cancel
+                    </Text>
                   </Pressable>
 
                   <Pressable
-                    disabled={deleteCategoryMutation.isPending}
                     onPress={handleConfirmDelete}
+                    disabled={deleteCategoryMutation.isPending}
                     className="rounded-full bg-red-500 px-5 py-2 active:bg-red-400"
                   >
                     <Text className="font-semibold text-white">
@@ -239,7 +236,7 @@ export default function CategoryScreen() {
                 isEditing={isEditing}
                 onSubmit={handleCategoryFormSubmit}
                 defaultValues={{
-                  name: selectedCategory?.name ?? '',
+                  name: selectedCategory?.name ?? "",
                 }}
               />
             )}

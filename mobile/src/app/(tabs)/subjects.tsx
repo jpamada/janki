@@ -1,9 +1,11 @@
 import { createSubject, deleteSubject, getSubjectsByCategory, updateSubject } from "@/repositories/subject.repository";
-import { ActivityIndicator, FlatList, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Animated, FlatList, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PenLine, Plus, SearchX, Trash2 } from "lucide-react-native";
 import { getCategories } from "@/repositories/category.repository";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SubjectFormData } from "@/schemas/subject.schema";
+import { useBottomSheet } from "@/hooks/UseBottomSheet";
 import { router } from "expo-router";
 import { useState } from "react";
 
@@ -13,11 +15,19 @@ import Header from "@/components/shared/Header";
 
 export default function SubjectsScreen() {
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
+
+  const {
+    backdropOpacity,
+    open: openBottomSheet,
+    close: closeBottomSheet,
+    visible: bottomSheetVisible,
+    translateY: bottomSheetTranslateY,
+  } = useBottomSheet();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
   
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -120,7 +130,7 @@ export default function SubjectsScreen() {
 
   const handleSubjectLongPress = (id: string) => {
     setSelectedSubjectId(id);
-    setBottomSheetVisible(true);
+    openBottomSheet();
   };
 
   return (
@@ -209,7 +219,9 @@ export default function SubjectsScreen() {
         ): (
           <View className='flex-1 justify-center items-center'>
             <SearchX size={64} color="#9ca3af" />
-            <Text className='text-gray-400 font-semibold'>No subjects found</Text>
+            <Text className='text-gray-400 font-semibold'>
+              No subjects found
+            </Text>
           </View>
         )}
       </View>
@@ -217,9 +229,7 @@ export default function SubjectsScreen() {
       <Pressable
         onPress={() => setModalVisible(true)}
         className="absolute bottom-6 right-6 items-center justify-center bg-white rounded-full h-14 w-14 active:bg-gray-50"
-        style={{
-          boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
-        }}
+        style={{ boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)" }}
       >
         <Text className="text-3xl text-gray-600">+</Text>
       </Pressable>
@@ -228,45 +238,61 @@ export default function SubjectsScreen() {
         transparent
         animationType="none"
         visible={bottomSheetVisible}
-        onRequestClose={() => setBottomSheetVisible(false)}
+        onRequestClose={() => closeBottomSheet()}
       >
-        <Pressable
-          className="flex-1 justify-end bg-black/30"
-          onPress={() => {
-            setSelectedSubjectId(null);
-            setBottomSheetVisible(false);
-          }}
-        >
-          <View className="bg-gray-50 rounded-t-3xl px-4 py-8 h-auto">
-            <View className="bg-white rounded-3xl">
+        <View className="flex-1 justify-end">
+          <Animated.View
+            className="absolute inset-0 bg-black/40"
+            style={{ opacity: backdropOpacity }}
+          >
+            <Pressable
+              className="flex-1"
+              onPress={() => {
+                setSelectedSubjectId(null);
+                closeBottomSheet();
+              }}
+            />
+          </Animated.View>
+
+          <Animated.View
+            style={{ transform: [{ translateY: bottomSheetTranslateY }] }}
+            className="rounded-t-3xl bg-gray-50 px-4 py-8"
+          >
+            <View className="rounded-3xl bg-white">
               <Pressable
                 onPress={() => {
                   setIsEditing(true);
-                  setBottomSheetVisible(false);
-                  setModalVisible(true);
+                  closeBottomSheet(() => {
+                    setModalVisible(true);
+                  });
                 }}
-                className="flex flex-row items-center gap-2 p-4 rounded-t-3xl active:bg-gray-100"
+                className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
               >
                 <PenLine size={16} />
-                <Text className="text-center text-xl">Update</Text>
+                <Text className="text-xl">
+                  Update
+                </Text>
               </Pressable>
 
               <Pressable
                 onPress={() => {
                   setIsDeleting(true);
-                  setModalVisible(true);
-                  setBottomSheetVisible(false);
+                  closeBottomSheet(() => {
+                    setModalVisible(true);
+                  });
                 }}
-                className="flex flex-row items-center gap-2 p-4 rounded-b-3xl active:bg-gray-100"
+                className="flex-row items-center gap-2 rounded-b-3xl p-4 active:bg-gray-100"
               >
                 <Trash2 color="#f87171" size={16} />
-                <Text className="text-red-400 text-center text-xl">
+                <Text className="text-xl text-red-400">
                   Delete
                 </Text>
               </Pressable>
             </View>
-          </View>
-        </Pressable>
+
+            <View style={{ height: insets.bottom }} />
+          </Animated.View>
+        </View>
       </Modal>
 
       <Modal
@@ -287,7 +313,9 @@ export default function SubjectsScreen() {
           >
             {isDeleting ? (
               <View>
-                <Text className="text-xl font-bold">Delete Subject</Text>
+                <Text className="text-xl font-bold">
+                  Delete Subject
+                </Text>
 
                 <Text className="mt-2 text-gray-500">
                   Are you sure you want to delete this Subject. This action cannot
@@ -303,12 +331,14 @@ export default function SubjectsScreen() {
                     }}
                     className="rounded-full px-5 py-2 active:bg-gray-100"
                   >
-                    <Text className="font-semibold text-gray-600">Cancel</Text>
+                    <Text className="font-semibold text-gray-600">
+                      Cancel
+                    </Text>
                   </Pressable>
 
                   <Pressable
-                    disabled={deleteSubjectMutation.isPending}
                     onPress={handleDelete}
+                    disabled={deleteSubjectMutation.isPending}
                     className="rounded-full bg-red-500 px-5 py-2 active:bg-red-400"
                   >
                     <Text className="font-semibold text-white">
@@ -319,8 +349,8 @@ export default function SubjectsScreen() {
               </View>
             ) : (
               <SubjectForm
-                onSubmit={handleSubjectSubmit}
                 isEditing={isEditing}
+                onSubmit={handleSubjectSubmit}
                 defaultValues={{
                   title: selectedSubject?.title ?? "",
                   categoryId: selectedSubject?.categoryId ?? selectedCategoryId ?? null

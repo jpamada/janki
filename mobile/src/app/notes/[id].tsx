@@ -65,14 +65,9 @@ export default function NoteScreen() {
   return (
     <View
       className="flex-1 bg-white"
-      style={{
-        paddingBottom: insets.bottom,
-      }}
+      style={{ paddingBottom: insets.bottom }}
     >
-      <Header
-        title={title}
-        back={true}
-      />
+      <Header title={title} back={true} />
 
       {isLoading ? (
         <View className="flex-1 justify-center items-center">
@@ -80,7 +75,7 @@ export default function NoteScreen() {
         </View>
 
       ) : error ? (
-        <Text>Failed to load notes.</Text>
+        <Text>Failed to load notes</Text>
 
       ) : contents.length > 0 ? (
         <FlatList
@@ -103,7 +98,9 @@ export default function NoteScreen() {
       ) : (
         <View className='flex-1 justify-center items-center'>
           <SearchX size={64} color="#9ca3af" />
-          <Text className='text-gray-400 font-semibold'>No contents found</Text>
+          <Text className='text-gray-400 font-semibold'>
+            No contents found
+          </Text>
         </View>
       )}
       
@@ -115,6 +112,7 @@ export default function NoteScreen() {
         className="absolute bottom-6 right-6 items-center justify-center bg-white rounded-full h-14 w-14 active:bg-gray-50"
         style={{
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
+          bottom: insets.bottom + 24 
         }}
       >
         <Text className="text-3xl text-gray-600">+</Text>

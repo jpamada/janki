@@ -32,7 +32,6 @@ export async function getQuestionsByLessonIdWithAnswers(
   const query = db.query.questions
   .findMany({
     where: eq(questions.lessonId, lessonId),
-
     with: {
       questionAnswers: {
         with: {

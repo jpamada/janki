@@ -12,20 +12,20 @@ export default function CreateQuestionScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
 
   const queryClient = useQueryClient();
-  const insets = useSafeAreaInsets();
+  
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [createSuccess, setCreateSuccess] = useState(false);
-  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const createQuestionMutation = useMutation({
     mutationFn: createQuestionWithAnswers,
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['questions'],
+        queryKey: ["questions", lessonId],
       });
       await queryClient.invalidateQueries({
-        queryKey: ['questions', lessonId],
+        queryKey: ["questionsWithAnswers", lessonId],
       });
       await handleSuccessMessage();
     },
@@ -64,12 +64,7 @@ export default function CreateQuestionScreen() {
   }, []);
 
   return (
-    <View
-      className="flex-1 bg-white"
-      style={{
-        paddingBottom: insets.bottom,
-      }}
-    >
+    <View className="flex-1 bg-white">
       <QuestionForm
         onSubmit={handleQuestionSubmit}
         onCreateSuccess={createSuccess}

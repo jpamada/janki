@@ -7,7 +7,7 @@ export default function CategoriesLayout() {
         headerShown: false
       }}
     >
-       <Stack.Screen 
+      <Stack.Screen 
         name="index" 
         options={{ 
           title: 'Edit Categories' 

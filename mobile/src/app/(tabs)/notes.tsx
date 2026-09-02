@@ -1,12 +1,14 @@
+import { FileText, FolderClosed, Folders, PenLine, Plus, SearchX, SquarePen, Trash2, X } from 'lucide-react-native';
 import { createFolder, deleteFolder, getFoldersByCategory, updateFolder } from '@/repositories/folder.repository';
-import { FileText, FolderClosed, Folders, PenLine, Plus, SearchX, SquarePen, StickyNote, Trash2, X } from 'lucide-react-native';
+import { ActivityIndicator, Animated, FlatList, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { createSubfolder, deleteSubfolder, updateSubfolder } from '@/repositories/subfolder.repository';
-import { ActivityIndicator, FlatList, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { createNote, deleteNote, getNotes, updateNote } from '@/repositories/note.repository';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getCategories } from '@/repositories/category.repository';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SubfolderFormData } from '@/schemas/subfolder.schema';
 import { FolderFormData } from '@/schemas/folder.schema';
+import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { NoteFormData } from '@/schemas/note.schema';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -20,12 +22,20 @@ import Header from '@/components/shared/Header';
 
 export default function NotesScreen() {
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
+
+  const {
+    backdropOpacity,
+    open: openBottomSheet,
+    close: closeBottomSheet,
+    visible: bottomSheetVisible,
+    translateY: bottomSheetTranslateY,
+  } = useBottomSheet();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [fabVisible, setFabVisible] = useState(false);
-  const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
 
   const [noteModalVisible, setNoteModalVisible] = useState(false);
   const [folderModalVisible, setFolderModalVisible] = useState(false);
@@ -206,12 +216,9 @@ export default function NotesScreen() {
         queryKey: ['folders', selectedCategoryId],
       });
       setNoteModalVisible(false);
-        router.push({
+      router.push({
         pathname: '/notes/[id]',
-        params: {
-          id: id,
-          title: title
-        },
+        params: { id: id, title: title }
       });
     },
 
@@ -323,18 +330,18 @@ export default function NotesScreen() {
   const handleFolderLongPress = (id: string) => {
     setSelectedFolderId(id);
     setSelectedSubfolderId(null);
-    setBottomSheetVisible(true);
+    openBottomSheet();
   };
 
   const handleSubfolderLongPress = (id: string) => {
     setSelectedSubfolderId(id);
     setSelectedFolderId(null);
-    setBottomSheetVisible(true);
+    openBottomSheet();
   };
 
   const handleNoteLongPress = (id: string) => {
     setSelectedNoteId(id);
-    setBottomSheetVisible(true);
+    openBottomSheet();
   };
 
   const handleDelete = async () => {
@@ -412,13 +419,12 @@ export default function NotesScreen() {
 
         ) : notesError || foldersError ? (
           <View className="flex-1 justify-center items-center">
-            <Text>Failed to load notes.</Text>
+            <Text>Failed to load notes</Text>
           </View>
 
         ) : notes.length > 0 || folders.length > 0 ? (
           <FlatList
             data={notes}
-            keyExtractor={(item) => item.id}
             ListHeaderComponent={
               <View className="gap-2">
                 {folders.map((folder) => (
@@ -440,6 +446,7 @@ export default function NotesScreen() {
                 onLongPress={handleNoteLongPress}
               />
             )}
+            keyExtractor={(item) => item.id}
             contentContainerClassName="gap-2"
             showsVerticalScrollIndicator={false}
           />
@@ -447,7 +454,9 @@ export default function NotesScreen() {
         ) : (
           <View className="flex-1 items-center justify-center">
             <SearchX size={64} color="#9ca3af" />
-            <Text className="text-gray-400 font-semibold">No notes found</Text>
+            <Text className="text-gray-400 font-semibold">
+              No notes found
+            </Text>
           </View>
         )}
       </View>
@@ -485,7 +494,9 @@ export default function NotesScreen() {
               style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
             >
               <FileText size={20} color="#4b5563" />
-              <Text className="font-semibold text-gray-700">New Note</Text>
+              <Text className="font-semibold text-gray-700">
+                New Note
+              </Text>
             </Pressable>
           </View>
         )}
@@ -507,45 +518,59 @@ export default function NotesScreen() {
         transparent
         animationType="none"
         visible={bottomSheetVisible}
-        onRequestClose={() => setBottomSheetVisible(false)}
+        onRequestClose={() => closeBottomSheet()}
       >
-        <Pressable
-          className="flex-1 justify-end bg-black/30"
-          onPress={() => {
-            setSelectedNoteId(null);
-            setSelectedFolderId(null);
-            setBottomSheetVisible(false);
-          }}
-        >
-          <View className="bg-gray-50 rounded-t-3xl px-4 py-8 h-auto">
-            <View className="bg-white rounded-3xl">
+        <View className="flex-1 justify-end">
+          <Animated.View
+            className="absolute inset-0 bg-black/40"
+            style={{ opacity: backdropOpacity }}
+          >
+            <Pressable
+              className="flex-1"
+              onPress={() => {
+                setSelectedNoteId(null);
+                setSelectedFolderId(null);
+                closeBottomSheet();
+              }}
+            />
+          </Animated.View>
+
+          <Animated.View
+            style={{ transform: [{ translateY: bottomSheetTranslateY }] }}
+            className="rounded-t-3xl bg-gray-50 px-4 py-8"
+          >
+            <View className="rounded-3xl bg-white">
               {selectedFolderId && (
                 <View>
                   <Pressable
                     onPress={() => {
-                      setBottomSheetVisible(false);
-                      setNoteModalVisible(true);
+                      closeBottomSheet(() => {
+                        setNoteModalVisible(true);
+                      });
                     }}
-                    className="flex flex-row items-center gap-2 p-4 rounded-t-3xl active:bg-gray-100"
+                    className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
                   >
                     <SquarePen size={16} />
-                    <Text className="text-center text-xl">New Note</Text>
+                    <Text className="text-xl">
+                      New Note
+                    </Text>
                   </Pressable>
 
                   <Pressable
                     onPress={() => {
                       if (!selectedFolderId) return;
+                      setSelectedSubfolderId(null);
                       setIsEditing(false);
                       setIsDeleting(false);
                       setFabVisible(false);
-                      setSelectedSubfolderId(null);
-                      setBottomSheetVisible(false);
-                      setSubfolderModalVisible(true);
+                      closeBottomSheet(() => {
+                        setSubfolderModalVisible(true);
+                      });
                     }}
-                    className="flex flex-row items-center gap-2 p-4 active:bg-gray-100"
+                    className="flex-row items-center gap-2 p-4 active:bg-gray-100"
                   >
                     <Folders size={16} />
-                    <Text className="text-center text-xl">New Subfolder</Text>
+                    <Text className="text-xl">New Subfolder</Text>
                   </Pressable>
                 </View>
               )}
@@ -553,68 +578,77 @@ export default function NotesScreen() {
               {selectedSubfolderId && (
                 <Pressable
                   onPress={() => {
-                    setBottomSheetVisible(false);
-                    setNoteModalVisible(true);
+                    closeBottomSheet(() => {
+                      setNoteModalVisible(true);
+                    });
                   }}
-                  className="flex flex-row items-center gap-2 p-4 active:bg-gray-100"
+                  className="flex-row items-center gap-2 p-4 active:bg-gray-100"
                 >
                   <SquarePen size={16} />
-                  <Text className="text-center text-xl">New Note</Text>
+                  <Text className="text-xl">New Note</Text>
                 </Pressable>
               )}
 
               <Pressable
                 onPress={() => {
+                  setIsEditing(true);
+
                   if (selectedFolderId) {
-                    setIsEditing(true);
-                    setBottomSheetVisible(false);
-                    setFolderModalVisible(true);
+                    closeBottomSheet(() => {
+                      setFolderModalVisible(true);
+                    });
 
                   } else if (selectedSubfolderId) {
-                    setIsEditing(true);
-                    setBottomSheetVisible(false);
-                    setSubfolderModalVisible(true);
+                    closeBottomSheet(() => {
+                      setSubfolderModalVisible(true);
+                    });
 
                   } else if (selectedNoteId) {
-                    setIsEditing(true);
-                    setBottomSheetVisible(false);
-                    setNoteModalVisible(true);
+                    closeBottomSheet(() => {
+                      setNoteModalVisible(true);
+                    });
                   }
                 }}
-                className="flex flex-row items-center gap-2 p-4 active:bg-gray-100"
+                className="flex-row items-center gap-2 p-4 active:bg-gray-100"
               >
                 <PenLine size={16} />
-                <Text className="text-center text-xl">Update</Text>
+                <Text className="text-xl">
+                  Update
+                </Text>
               </Pressable>
 
               <Pressable
                 onPress={() => {
+                  setIsDeleting(true);
+
                   if (selectedFolderId) {
-                    setIsDeleting(true);
-                    setFolderModalVisible(true);
-                    setBottomSheetVisible(false);
+                    closeBottomSheet(() => {
+                      setFolderModalVisible(true);
+                    });
 
                   } else if (selectedSubfolderId) {
-                    setIsDeleting(true);
-                    setBottomSheetVisible(false);
-                    setSubfolderModalVisible(true);
+                    closeBottomSheet(() => {
+                      setSubfolderModalVisible(true);
+                    });
 
                   } else if (selectedNoteId) {
-                    setIsDeleting(true);
-                    setNoteModalVisible(true);
-                    setBottomSheetVisible(false);
+                    closeBottomSheet(() => {
+                      setNoteModalVisible(true);
+                    });
                   }
                 }}
-                className="flex flex-row items-center gap-2 p-4 rounded-b-3xl active:bg-gray-100"
+                className="flex-row items-center gap-2 rounded-b-3xl p-4 active:bg-gray-100"
               >
                 <Trash2 color="#f87171" size={16} />
-                <Text className="text-red-400 text-center text-xl">
+                <Text className="text-xl text-red-400">
                   Delete
                 </Text>
               </Pressable>
             </View>
-          </View>
-        </Pressable>
+
+            <View style={{ height: insets.bottom }} />
+          </Animated.View>
+        </View>
       </Modal>
 
       <Modal
@@ -638,7 +672,9 @@ export default function NotesScreen() {
           >
             {isDeleting ? (
               <View>
-                <Text className="text-xl font-bold">Delete Folder</Text>
+                <Text className="text-xl font-bold">
+                  Delete Folder
+                </Text>
 
                 <Text className="mt-2 text-gray-500">
                   Are you sure you want to delete this folder. This action
@@ -654,7 +690,9 @@ export default function NotesScreen() {
                     }}
                     className="rounded-full px-5 py-2 active:bg-gray-100"
                   >
-                    <Text className="font-semibold text-gray-600">Cancel</Text>
+                    <Text className="font-semibold text-gray-600">
+                      Cancel
+                    </Text>
                   </Pressable>
 
                   <Pressable
@@ -707,7 +745,9 @@ export default function NotesScreen() {
           >
             {isDeleting ? (
               <View>
-                <Text className="text-xl font-bold">Delete Subfolder</Text>
+                <Text className="text-xl font-bold">
+                  Delete Subfolder
+                </Text>
 
                 <Text className="mt-2 text-gray-500">
                   Are you sure you want to delete this subfolder. This action
@@ -724,7 +764,9 @@ export default function NotesScreen() {
                     }}
                     className="rounded-full px-5 py-2 active:bg-gray-100"
                   >
-                    <Text className="font-semibold text-gray-600">Cancel</Text>
+                    <Text className="font-semibold text-gray-600">
+                      Cancel
+                    </Text>
                   </Pressable>
 
                   <Pressable
@@ -746,8 +788,7 @@ export default function NotesScreen() {
                 isEditing={isEditing}
                 defaultValues={{
                   name: selectedSubfolder?.name ?? 'Untitled',
-                  folderId:
-                    selectedSubfolder?.folderId ?? selectedFolderId ?? '',
+                  folderId: selectedSubfolder?.folderId ?? selectedFolderId ?? '',
                 }}
               />
             )}
@@ -776,7 +817,9 @@ export default function NotesScreen() {
           >
             {isDeleting ? (
               <View>
-                <Text className="text-xl font-bold">Delete Note</Text>
+                <Text className="text-xl font-bold">
+                  Delete Note
+                </Text>
 
                 <Text className="mt-2 text-gray-500">
                   Are you sure you want to delete this note. This action cannot
@@ -792,7 +835,9 @@ export default function NotesScreen() {
                     }}
                     className="rounded-full px-5 py-2 active:bg-gray-100"
                   >
-                    <Text className="font-semibold text-gray-600">Cancel</Text>
+                    <Text className="font-semibold text-gray-600">
+                      Cancel
+                    </Text>
                   </Pressable>
 
                   <Pressable

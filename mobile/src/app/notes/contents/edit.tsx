@@ -1,6 +1,5 @@
 import { deleteContent, getContentById, updateContent } from "@/repositories/content.repository";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ActivityIndicator, Text, View } from "react-native";
 import { ContentFormData } from "@/schemas/content.schema";
@@ -15,7 +14,6 @@ export default function ContentScreen() {
   }>();
 
   const queryClient = useQueryClient();
-  const insets = useSafeAreaInsets();
   const router = useRouter();
 
   const { data: content, isLoading, error } = useQuery({
@@ -72,8 +70,8 @@ export default function ContentScreen() {
       id: contentId,
       data: {
         title: data.title,
-        content: data.content,
         url: data.url ?? "",
+        content: data.content,
         todo: data.todo ?? null,
         remarks: data.remarks ?? "",
         position: data.position ?? null,
@@ -86,12 +84,7 @@ export default function ContentScreen() {
   }
 
   return (
-    <View
-      className="flex-1 bg-white"
-      style={{
-        paddingBottom: insets.bottom,
-      }}
-    >
+    <View className="flex-1 bg-white">
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="small" color="#4b5563" />
@@ -99,7 +92,7 @@ export default function ContentScreen() {
 
       ) : error ? (
         <View className="flex-1 items-center justify-center">
-          <Text> Failed to load content</Text>
+          <Text>Failed to load content</Text>
         </View>
 
       ) : !content ? (

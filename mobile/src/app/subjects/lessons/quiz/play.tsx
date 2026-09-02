@@ -3,8 +3,9 @@ import { getQuestionsByLessonIdWithAnswers } from '@/repositories/question.repos
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { FileQuestionMark, X } from 'lucide-react-native';
-import { useEffect, useRef, useState } from 'react';
+import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 
 import EmptyStateScreen from '@/components/shared/EmptyState';
 import QuizResults from './results';
@@ -18,19 +19,25 @@ export type UserAnswer = {
 
 export default function QuizScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
+
+  const {
+    backdropOpacity,
+    open: openBottomSheet,
+    close: closeBottomSheet,
+    visible: bottomSheetVisible,
+    translateY: bottomSheetTranslateY,
+  } = useBottomSheet();
+
   const insets = useSafeAreaInsets();
 
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
-  const [showFeedback, setShowFeedback] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
 
-  const translateY = useRef(new Animated.Value(300)).current;
-
   const { data: questions = [], isLoading, error } = useQuery({
-    queryKey: ['questions', lessonId],
+    queryKey: ["questionsWithAnswers", lessonId],
     queryFn: () => getQuestionsByLessonIdWithAnswers(lessonId),
     enabled: !!lessonId,
   });
@@ -42,7 +49,7 @@ export default function QuizScreen() {
     : 0;
 
   const handleSelectAnswer = (answerId: string) => {
-    if (!currentQuestion || showFeedback) {
+    if (!currentQuestion || bottomSheetVisible) {
       return;
     }
 
@@ -73,11 +80,11 @@ export default function QuizScreen() {
       },
     ]);
 
-    setShowFeedback(true);
+    openBottomSheet();
   };
 
   const handleContinue = () => {
-    setShowFeedback(false);
+    closeBottomSheet();
 
     if (currentQuestionIndex < questions.length - 1) {
       setIsCorrect(null);
@@ -88,14 +95,6 @@ export default function QuizScreen() {
       setIsFinished(true);
     }
   };
-
-  useEffect(() => {
-    Animated.timing(translateY, {
-      toValue: showFeedback ? 0 : 300,
-      duration: 250,
-      useNativeDriver: true,
-    }).start();
-  }, [showFeedback, translateY]);
 
   if (isFinished) {
     return (
@@ -131,12 +130,12 @@ export default function QuizScreen() {
               onPress={() => router.back()}
               className='p-3 rounded-full active:bg-gray-100'
             >
-              <X strokeWidth={4} color="#1f2937" />
+              <X strokeWidth={4} color="#4a5462" />
             </Pressable>
 
             <View className="h-3 me-3 flex-1 overflow-hidden rounded-full bg-gray-200">
               <View
-                className="h-full bg-gray-800"
+                className="h-full bg-gray-600"
                 style={{ width: `${progress}%` }}
               />
             </View>
@@ -152,9 +151,9 @@ export default function QuizScreen() {
             {currentQuestion?.questionAnswers?.map((item) => (
               <Pressable
                 key={item?.answer?.id}
-                disabled={showFeedback}
+                disabled={bottomSheetVisible}
                 onPress={() => handleSelectAnswer(item?.answer?.id)}
-                className="rounded-xl bg-gray-800 p-4 active:bg-gray-700"
+                className="rounded-xl bg-gray-600 p-4 active:bg-gray-700"
               >
                 <Text className="text-center text-lg font-semibold text-white">
                   {item?.answer?.answer}
@@ -166,44 +165,58 @@ export default function QuizScreen() {
           <Modal
             transparent
             animationType="none"
-            visible={showFeedback}
+            visible={bottomSheetVisible}
             onRequestClose={handleContinue}
           >
-            <View className="flex-1 justify-end bg-black/40">
+            <View className="flex-1 justify-end">
               <Animated.View
-                style={{ transform: [{ translateY }] }}
-                className="rounded-t-3xl bg-white p-6"
+                className="absolute inset-0 bg-black/40"
+                style={{ opacity: backdropOpacity }}
               >
-                <Text className="text-3xl font-bold text-gray-800">
-                  {isCorrect ? "Correct!" : "Incorrect"}
-                </Text>
-
-                {!isCorrect && (
-                  <View className="mt-6">
-                    <Text className="text-lg font-semibold text-gray-400">
-                      Correct Answer
-                    </Text>
-
-                    <Text className="mt-2 text-lg font-semibold">
-                      {
-                        currentQuestion?.questionAnswers?.find(
-                          (item) => item?.isCorrect
-                        )?.answer?.answer
-                      }
-                    </Text>
-                  </View>
-                )}
-
                 <Pressable
+                  className="flex-1"
                   onPress={handleContinue}
-                  className="mt-8 rounded-lg bg-gray-800 p-4 active:bg-gray-700"
-                >
-                  <Text className="text-center text-lg font-semibold text-white">
-                    {currentQuestionIndex < questions.length - 1
-                      ? "Continue"
-                      : "Finish"}
+                />
+              </Animated.View>
+              
+              <Animated.View 
+                style={{ transform: [{ translateY: bottomSheetTranslateY }] }}
+                className="rounded-t-3xl bg-white"
+              >
+                <View className="p-6">
+                  <Text className="text-3xl font-bold text-gray-800">
+                    {isCorrect ? "Correct!" : "Incorrect"}
                   </Text>
-                </Pressable>
+
+                  {!isCorrect && (
+                    <View className="mt-6">
+                      <Text className="text-lg font-semibold text-gray-400">
+                        Correct Answer
+                      </Text>
+
+                      <Text className="mt-2 text-lg font-semibold">
+                        {
+                          currentQuestion?.questionAnswers?.find(
+                            (item) => item.isCorrect
+                          )?.answer.answer
+                        }
+                      </Text>
+                    </View>
+                  )}
+
+                  <Pressable
+                    onPress={handleContinue}
+                    className="mt-8 rounded-lg bg-gray-600 p-4 active:bg-gray-700"
+                  >
+                    <Text className="text-center text-lg font-semibold text-white">
+                      {currentQuestionIndex < questions.length - 1
+                        ? "Continue"
+                        : "Finish"}
+                    </Text>
+                  </Pressable>
+                </View>
+
+                <View style={{ height: insets.bottom }} />
               </Animated.View>
             </View>
           </Modal>
@@ -211,12 +224,12 @@ export default function QuizScreen() {
 
       ) : (
         <EmptyStateScreen
+          title="No Questions Available"
           icon={<FileQuestionMark color="#9ca3af" size={72} />}
           navigate={{
             pathname: "/subjects/lessons/questions/create",
             params: { lessonId },
           }}
-          title="No Questions Available"
         />
       )}
     </View>

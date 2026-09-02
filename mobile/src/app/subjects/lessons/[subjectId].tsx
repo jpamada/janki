@@ -1,10 +1,11 @@
 import { createLesson, deleteLesson, getLessonsBySubjectId, updateLesson } from '@/repositories/lesson.repository';
-import { ActivityIndicator, FlatList, Modal, Pressable, Text, View } from 'react-native';
-import { ArrowLeft, Lightbulb, PenLine, SearchX, Trash2 } from 'lucide-react-native';
+import { ActivityIndicator, Animated, FlatList, Modal, Pressable, Text, View } from 'react-native';
+import { Lightbulb, PenLine, Plus, SearchX, Trash2 } from 'lucide-react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { LessonFormData } from '@/schemas/lesson.schema';
+import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { useState } from 'react';
 
 import LessonItem from '@/components/lessons/LessonItem';
@@ -17,20 +18,23 @@ export default function LessonScreen() {
     subjectName: string;
   }>();
 
-  const queryClient = useQueryClient();
+  const {
+    backdropOpacity,
+    open: openBottomSheet,
+    close: closeBottomSheet,
+    visible: bottomSheetVisible,
+    translateY: bottomSheetTranslateY,
+  } = useBottomSheet();
+
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
 
-  const {
-    data: lessons = [],
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: lessons = [], isLoading, error } = useQuery({
     queryKey: ['lessons'],
     queryFn: () => getLessonsBySubjectId(subjectId),
     enabled: !!subjectId,
@@ -65,7 +69,7 @@ export default function LessonScreen() {
       });
       setIsEditing(false);
       setModalVisible(false);
-      setModalVisible(false);
+      setSelectedLessonId(null);
     },
 
     onError: (error) => {
@@ -115,140 +119,170 @@ export default function LessonScreen() {
 
   const handleLessonLongPress = (id: string) => {
     setSelectedLessonId(id);
-    setBottomSheetVisible(true);
+    openBottomSheet();
   };
 
-  return (
+return (
+  <View
+    className="flex-1 bg-white"
+    style={{ paddingBottom: insets.bottom }}
+  >
+    <Header title={subjectName} back={true} />
+
+    <View className="flex-1 p-4">
+      <Text className="text-gray-400 text-sm font-semibold mb-2">
+        {subjectName} lessons
+      </Text>
+
+      {isLoading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="small" color="#4b5563" />
+        </View>
+
+      ) : error ? (
+        <View className="flex-1 justify-center items-center">
+          <Text>Failed to load notes</Text>
+        </View>
+
+      ) : lessons?.length > 0 ? (
+        <FlatList
+          data={lessons}
+          keyExtractor={(item) => item.id}
+          contentContainerClassName="gap-2"
+          renderItem={({ item, index }) => (
+            <LessonItem
+              id={item.id}
+              index={index}
+              title={item.title}
+              onLongPress={handleLessonLongPress}
+            />
+          )}
+        />
+
+      ) : (
+        <View className="flex-1 justify-center items-center">
+          <SearchX size={64} color="#9ca3af" />
+          <Text className="text-gray-400 font-semibold">
+            No lessons found
+          </Text>
+        </View>
+      )}
+    </View>
+
     <View
-      className="flex-1 bg-white"
-      style={{
-        paddingBottom: insets.bottom,
-      }}
+      className="absolute right-6 items-end"
+      style={{ bottom: insets.bottom + 24 }}
     >
-      <Header
-        title={subjectName}
-        back={true}
-      />
-
-      <View className="flex-1 p-4">
-        <Text className="text-gray-400 text-sm font-semibold mb-2">
-          {subjectName} lessons
-        </Text>
-
-        {isLoading ? (
-          <View className="flex-1 justify-center items-center">
-            <ActivityIndicator size="small" color="#4b5563" />
-          </View>
-
-        ) : error ? (
-          <View className="flex-1 justify-center items-center">
-            <Text>Failed to load notes.</Text>
-          </View>
-
-        ) : lessons?.length > 0 ? (
-          <FlatList
-            data={lessons}
-            keyExtractor={(item) => item.id}
-            contentContainerClassName="gap-2"
-            renderItem={({ item, index }) => (
-              <LessonItem
-                id={item.id}
-                index={index}
-                title={item.title}
-                onLongPress={handleLessonLongPress}
-              />
-            )}
-          />
-
-        ) : (
-          <View className="flex-1 justify-center items-center">
-            <SearchX size={64} color="#9ca3af" />
-            <Text className="text-gray-400 font-semibold">No lessons found</Text>
-          </View>
-        )}
-      </View>
-
       <Pressable
         onPress={() => setModalVisible(true)}
-        className="absolute bottom-6 right-6 items-center justify-center bg-white rounded-full h-14 w-14 mt-auto active:bg-gray-50"
-        style={{
-          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)',
-        }}
+        style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
+        className="h-14 w-14 items-center justify-center rounded-full bg-white active:bg-gray-50"
       >
-        <Text className="text-3xl text-gray-600">+</Text>
+        <Plus size={24} color="#4b5563" />
       </Pressable>
+    </View>
 
-      <Modal
-        transparent
-        animationType="none"
-        visible={bottomSheetVisible}
-        onRequestClose={() => setBottomSheetVisible(false)}
-      >
-        <Pressable
-          className="flex-1 justify-end bg-black/30"
-          onPress={() => {
-            setSelectedLessonId(null);
-            setBottomSheetVisible(false);
-          }}
+    <Modal
+      transparent
+      animationType="none"
+      visible={bottomSheetVisible}
+      onRequestClose={() => closeBottomSheet()}
+    >
+      <View className="flex-1 justify-end">
+        <Animated.View
+          className="absolute inset-0 bg-black/40"
+          style={{ opacity: backdropOpacity }}
         >
-          <View className="bg-gray-50 rounded-t-3xl px-4 py-8 h-auto">
-            <View className="bg-white rounded-3xl">
-              <Pressable
-                onPress={() => {
-                  setBottomSheetVisible(false);
+          <Pressable
+            className="flex-1"
+            onPress={() => {
+              setSelectedLessonId(null);
+              setIsDeleting(false);
+              setIsEditing(false);
+              closeBottomSheet();
+            }}
+          />
+        </Animated.View>
+
+        <Animated.View
+          style={{
+            transform: [{
+              translateY: bottomSheetTranslateY,
+            }],
+          }}
+          className="rounded-t-3xl bg-gray-50 px-4 py-8"
+        >
+          <View className="rounded-3xl bg-white">
+            <Pressable
+              onPress={() => {
+                setSelectedLessonId(null);
+                closeBottomSheet(() => {
                   router.push({
-                    pathname: `/subjects/lessons/questions/create`,
-                    params: { lessonId: selectedLessonId },
-                  })}
-                }
-                className="flex flex-row items-center gap-2 p-4 rounded-t-3xl active:bg-gray-100"
-              >
-                <Lightbulb size={16} />
-                <Text className="text-center text-xl">Add Question</Text>
-              </Pressable>
+                    pathname: "/subjects/lessons/questions/create",
+                    params: { lessonId: selectedLessonId }
+                  });
+                });
+              }}
+              className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
+            >
+              <Lightbulb size={16} />
+              <Text className="text-xl">
+                Add Question
+              </Text>
+            </Pressable>
 
-              <Pressable
-                onPress={() => {
-                  setBottomSheetVisible(false);
+            <Pressable
+              onPress={() => {
+                setSelectedLessonId(null);
+                closeBottomSheet(() => {
                   router.push({
-                    pathname: `/subjects/lessons/questions/browse`,
-                    params: { lessonId: selectedLessonId },
-                  })}
-                }
-                className="flex flex-row items-center gap-2 p-4 active:bg-gray-100"
-              >
-                <Lightbulb size={16} />
-                <Text className="text-center text-xl">Browse Questions</Text>
-              </Pressable>
+                    pathname: "/subjects/lessons/questions/browse",
+                    params: { lessonId: selectedLessonId }
+                  });
+                });
+              }}
+              className="flex-row items-center gap-2 p-4 active:bg-gray-100"
+            >
+              <Lightbulb size={16} />
+              <Text className="text-xl">
+                Browse Questions
+              </Text>
+            </Pressable>
 
-              <Pressable
-                onPress={() => {
-                  setIsEditing(true);
-                  setBottomSheetVisible(false);
+            <Pressable
+              onPress={() => {
+                setIsEditing(true);
+                closeBottomSheet(() => {
                   setModalVisible(true);
-                }}
-                className="flex flex-row items-center gap-2 p-4 active:bg-gray-100"
-              >
-                <PenLine size={16} />
-                <Text className="text-center text-xl">Rename</Text>
-              </Pressable>
+                });
+              }}
+              className="flex-row items-center gap-2 p-4 active:bg-gray-100"
+            >
+              <PenLine size={16} />
+              <Text className="text-xl">
+                Rename
+              </Text>
+            </Pressable>
 
-              <Pressable
-                onPress={() => {
-                  setIsDeleting(true);
+            <Pressable
+              onPress={() => {
+                setIsDeleting(true);
+                closeBottomSheet(() => {
                   setModalVisible(true);
-                  setBottomSheetVisible(false);
-                }}
-                className="flex flex-row items-center gap-2 p-4 rounded-b-3xl active:bg-gray-100"
-              >
-                <Trash2 color="#f87171" size={16} />
-                <Text className="text-red-400 text-center text-xl">
-                  Delete
-                </Text>
-              </Pressable>
-            </View>
+                });
+              }}
+              className="flex-row items-center gap-2 rounded-b-3xl p-4 active:bg-gray-100"
+            >
+              <Trash2 color="#f87171" size={16} />
+              <Text className="text-center text-xl text-red-400">
+                Delete
+              </Text>
+            </Pressable>
           </View>
-        </Pressable>
+
+          <View style={{ height: insets.bottom }} />
+          </Animated.View>
+        </View>
       </Modal>
 
       <Modal
@@ -260,6 +294,9 @@ export default function LessonScreen() {
         <Pressable
           className="flex-1 items-center justify-center bg-black/40"
           onPress={() => {
+            setIsEditing(false);
+            setIsDeleting(false);
+            setSelectedLessonId(null);
             setModalVisible(false);
           }}
         >
@@ -269,7 +306,9 @@ export default function LessonScreen() {
           >
             {isDeleting ? (
               <View>
-                <Text className="text-xl font-bold">Delete Lesson</Text>
+                <Text className="text-xl font-bold">
+                  Delete Lesson
+                </Text>
 
                 <Text className="mt-2 text-gray-500">
                   Are you sure you want to delete this lesson. This action cannot
@@ -279,18 +318,21 @@ export default function LessonScreen() {
                 <View className="mt-6 flex-row justify-end gap-2">
                   <Pressable
                     onPress={() => {
+                      setIsEditing(false);
                       setIsDeleting(false);
                       setSelectedLessonId(null);
                       setModalVisible(false);
                     }}
                     className="rounded-full px-5 py-2 active:bg-gray-100"
                   >
-                    <Text className="font-semibold text-gray-600">Cancel</Text>
+                    <Text className="font-semibold text-gray-600">
+                      Cancel
+                    </Text>
                   </Pressable>
 
                   <Pressable
-                    disabled={deleteLessonMutation.isPending}
                     onPress={handleDelete}
+                    disabled={deleteLessonMutation.isPending}
                     className="rounded-full bg-red-500 px-5 py-2 active:bg-red-400"
                   >
                     <Text className="font-semibold text-white">

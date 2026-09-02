@@ -1,9 +1,9 @@
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { CircleCheck, CircleX } from 'lucide-react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Pressable, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { UserAnswer } from './play';
-import { CircleCheck, CircleX } from 'lucide-react-native';
 
 type QuizResultsProps = {
   questions: {
@@ -48,7 +48,7 @@ export default function QuizResults({
 
         <Pressable
           onPress={() => router.back()}
-          className="rounded-lg bg-gray-800 px-3 py-2 active:bg-gray-700"
+          className="rounded-lg bg-gray-600 px-3 py-2 active:bg-gray-700"
         >
           <Text className="text-center font-semibold text-white">
             Finish Quiz
@@ -95,7 +95,7 @@ export default function QuizResults({
                   let textClass = 'text-black'
 
                   if (isCorrectAnswer) {
-                    backgroundClass = 'bg-gray-800';
+                    backgroundClass = 'bg-gray-600';
                     textClass = "text-white"
                     
                   } else if (isSelected) {

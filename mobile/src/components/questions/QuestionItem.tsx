@@ -6,12 +6,14 @@ import * as Haptics from "expo-haptics";
 
 type QuestionItem = {
   id: string;
+  lessonId: string;
   question: string;
   onLongPress: (id: string) => void;
 };
 
 export default function QuestionItem({
   id,
+  lessonId,
   question,
   onLongPress
 }: QuestionItem) {
@@ -23,7 +25,10 @@ export default function QuestionItem({
         onLongPress(id);
       }}
       onPress={() => {
-        router.push(`/subjects/lessons/questions/${id}`);
+        router.push({
+          pathname: `/subjects/lessons/questions/[id]`,
+          params: { id: id, lessonId: lessonId }
+        });
       }}
       className="bg-gray-50 rounded-lg p-4 active:bg-gray-100"
     >

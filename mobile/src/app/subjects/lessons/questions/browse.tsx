@@ -1,9 +1,9 @@
-import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
 import { getQuestionsByLessonId } from "@/repositories/question.repository";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router, useLocalSearchParams } from "expo-router";
-import { ArrowLeft, SearchX } from "lucide-react-native";
+import { useLocalSearchParams } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
+import { SearchX } from "lucide-react-native";
 
 import QuestionItem from "@/components/questions/QuestionItem";
 import Header from "@/components/shared/Header";
@@ -24,18 +24,9 @@ export default function BrowseQuestionScreen() {
   return (
     <View
       className="flex-1 bg-white"
-      style={{
-        paddingBottom: insets.bottom,
-      }}
+      style={{ paddingBottom: insets.bottom }}
     >
-      <Header 
-        title="Questions"
-        back={
-          <Pressable onPress={() => router.back()}>
-            <ArrowLeft />
-          </Pressable>
-        }
-       />
+      <Header title="Questions" back={true} />
 
       <View className="flex-1 px-6 py-4">
         {isLoading ? (
@@ -57,6 +48,7 @@ export default function BrowseQuestionScreen() {
               <QuestionItem
                 key={item.id}
                 id={item.id}
+                lessonId={item.lessonId}
                 question={item.question}
                 onLongPress={handleQuestionLongPress}
               />

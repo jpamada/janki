@@ -1,10 +1,11 @@
-import { CalendarCheck, EllipsisVertical, Link, ScrollText, Square, SquareCheck, TextInitial, Trash2, X } from "lucide-react-native";
+import { CalendarCheck, EllipsisVertical, Link, ScrollText, Square, SquareCheck, TextInitial, Trash2 } from "lucide-react-native";
 import { KeyboardAwareScrollView, KeyboardStickyView } from "react-native-keyboard-controller";
+import { Animated, Modal, Pressable, Text, TextInput, View } from "react-native";
 import { ContentFormData, contentSchema } from "@/schemas/content.schema";
-import { Modal, Pressable, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useBottomSheet } from "@/hooks/UseBottomSheet";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
 import { useState } from "react";
 
 import Header from "../shared/Header";
@@ -29,7 +30,15 @@ export default function ContentForm({
   },
 }: ContentFormProps) {
 
-  const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
+  const insets = useSafeAreaInsets();
+
+  const {
+    visible: bottomSheetVisible,
+    translateY: bottomSheetTranslateY,
+    backdropOpacity,
+    open: openBottomSheet,
+    close: closeBottomSheet,
+  } = useBottomSheet();
 
   const [titleVisible, setTitleVisible] = useState(
     !!defaultValues?.title?.trim()
@@ -124,7 +133,7 @@ const handleToggleTodo = () => {
             )}
 
             <Pressable 
-              onPress={() => setBottomSheetVisible(true)}
+              onPress={openBottomSheet}
               className="p-3 rounded-full active:bg-gray-100"
             >
               <EllipsisVertical />
@@ -137,7 +146,7 @@ const handleToggleTodo = () => {
         bottomOffset={80}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="px-4 pb-4 pb-24"
+        contentContainerClassName="px-4 pb-32"
       >
         {titleVisible && (
           <Controller
@@ -244,8 +253,11 @@ const handleToggleTodo = () => {
         )}
       </KeyboardAwareScrollView>
 
-      <KeyboardStickyView>
-        <View className="flex-row items-center border-t border-gray-200 bg-white px-4 py-6">
+      <KeyboardStickyView offset={{ closed: 0, opened: insets.top }}>
+        <View 
+          className="flex-row items-center border-t border-gray-200 bg-white px-4 py-6"
+          style={{ paddingBottom: insets.bottom }}
+        >
           <Pressable
             disabled={isSubmitting}
             onPress={handleSubmit(handleFormSubmit)}
@@ -262,86 +274,98 @@ const handleToggleTodo = () => {
         transparent
         animationType="none"
         visible={bottomSheetVisible}
-        onRequestClose={() => setBottomSheetVisible(false)}
+        onRequestClose={() => closeBottomSheet()}
       >
-        <Pressable
-          className="flex-1 justify-end bg-black/30"
-          onPress={() => {
-            setBottomSheetVisible(false);
-          }}
-        >
-          <View className="bg-gray-50 rounded-t-3xl px-4 py-8 h-auto">
-            <View className="bg-white rounded-3xl">
-              <Pressable
-                onPress={() => {
-                  handleToggleTitle();
-                  setBottomSheetVisible(false);
-                }}
-                className="flex flex-row items-center gap-2 p-4 rounded-t-3xl active:bg-gray-100"
-              >
-                <TextInitial size={16} />
-                <Text className="text-center text-xl">
-                  {titleVisible ? "Remove title" : "Add title"}
-                </Text>
-              </Pressable>
+        <View className="flex-1 justify-end">
+          <Animated.View
+            className="absolute inset-0 bg-black/40"
+            style={{ opacity: backdropOpacity }}
+          >
+            <Pressable
+              className="flex-1"
+              onPress={() => {
+                closeBottomSheet();
+              }}
+            />
+          </Animated.View>
 
-              <Pressable
-                onPress={() => {
-                  handleToggleTodo();
-                  setBottomSheetVisible(false);
-                }}
-                className="flex flex-row items-center gap-2 p-4 active:bg-gray-100"
-              >
-                <CalendarCheck size={16} />
-                <Text className="text-center text-xl">
-                  {todoVisible ? "Remove Todo" : "Add Todo"}
-                </Text>
-              </Pressable>
+          <Animated.View 
+            style={{ transform: [{ translateY: bottomSheetTranslateY }] }}
+            className="rounded-t-3xl bg-gray-50 px-4 py-8"
+          >
+            <Pressable
+              onPress={() => {
+                handleToggleTitle();
+                closeBottomSheet();
+              }}
+              className="flex-row items-center gap-2 rounded-t-3xl bg-white p-4 active:bg-gray-100"
+            >
+              <TextInitial size={16} />
+              <Text className="text-xl">
+                {titleVisible ? "Remove title" : "Add title"}
+              </Text>
+            </Pressable>
 
-              <Pressable
-                onPress={() => {
-                  handleToggleUrl();
-                  setBottomSheetVisible(false);
-                }}
-                className="flex flex-row items-center gap-2 p-4 active:bg-gray-100"
-              >
-                <Link size={16} />
-                <Text className="text-center text-xl">
-                  {urlVisible ? "Remove URL link" : "Add URL link"}
-                </Text>
-              </Pressable>
+            <Pressable
+              onPress={() => {
+                handleToggleTodo();
+                closeBottomSheet();
+              }}
+              className="flex-row items-center gap-2 bg-white p-4 active:bg-gray-100"
+            >
+              <CalendarCheck size={16} />
+              <Text className="text-xl">
+                {todoVisible ? "Remove Todo" : "Add Todo"}
+              </Text>
+            </Pressable>
 
+            <Pressable
+              onPress={() => {
+                handleToggleUrl();
+                closeBottomSheet();
+              }}
+              className="flex-row items-center gap-2 bg-white p-4 active:bg-gray-100"
+            >
+              <Link size={16} />
+              <Text className="text-xl">
+                {urlVisible ? "Remove URL link" : "Add URL link"}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => {
+                handleToggleRemarks();
+                closeBottomSheet();
+              }}
+              className="flex-row items-center gap-2 bg-white p-4 active:bg-gray-100"
+            >
+              <ScrollText size={16} />
+              <Text className="text-xl">
+                {remarksVisible ? "Remove remarks" : "Add remarks"}
+              </Text>
+            </Pressable>
+
+            {defaultValues.id && onDelete && (
               <Pressable
                 onPress={() => {
-                  handleToggleRemarks();
-                  setBottomSheetVisible(false);
+                  const id = defaultValues.id;
+                  if (!id) return;
+                  closeBottomSheet(() => {
+                    onDelete(id);
+                  });
                 }}
-                className="flex flex-row items-center gap-2 p-4 active:bg-gray-100"
+                className="flex-row items-center gap-2 rounded-b-3xl bg-white p-4 active:bg-gray-100"
               >
-                <ScrollText size={16} />
-                <Text className="text-center text-xl">
-                  {remarksVisible ? "Remove remarks" : "Add remarks"}
+                <Trash2 color="#f87171" size={16} />
+                <Text className="text-center text-xl text-red-400">
+                  Delete Content
                 </Text>
               </Pressable>
-              
-              {(defaultValues.id && onDelete) && (
-                <Pressable
-                  onPress={() => {
-                    if (!defaultValues.id) return;
-                    setBottomSheetVisible(false);
-                    onDelete(defaultValues.id);
-                  }}
-                  className="flex flex-row items-center gap-2 p-4 rounded-b-3xl active:bg-gray-100"
-                >
-                  <Trash2 color="#f87171" size={16} />
-                  <Text className="text-red-400 text-center text-xl">
-                    Delete Content
-                  </Text>
-                </Pressable>
-              )}
-            </View>
-          </View>
-        </Pressable>
+            )}
+
+            <View style={{ height: insets.bottom }} />
+          </Animated.View>
+        </View>
       </Modal>
     </View>
   );
