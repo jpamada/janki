@@ -50,7 +50,7 @@ export default function CreateNoteScreen() {
     <View className="flex-1 bg-white">
       <ContentForm
         defaultValues={{
-          title: "",
+          title: "Untitled",
           url: "",
           content: "",
           remarks: "",

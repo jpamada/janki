@@ -33,7 +33,7 @@ export default function Header({
         {back && (
           <Pressable
             onPress={() => router.back()}
-            className="p-3 rounded-full active:bg-gray-100"
+            className="p-3 rounded-xl active:bg-gray-100"
           >
             <ArrowLeft />
           </Pressable>

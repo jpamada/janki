@@ -61,7 +61,7 @@ export const subfolders = sqliteTable("subfolders", {
         columns: [table.folderId],
         foreignColumns: [folders.id],
         name: "subfolders_folder_id_fk",
-    }).onDelete("restrict"),
+    }).onDelete("cascade"),
 
     index("subfolders_folder_id_idx").on(
         table.folderId
@@ -197,7 +197,7 @@ export const lessons = sqliteTable("lessons", {
         columns: [table.subjectId],
         foreignColumns: [subjects.id],
         name: "lessons_subject_id_fk",
-    }).onDelete("restrict"),
+    }).onDelete("cascade"),
 
     index("lessons_subject_id_idx").on(
         table.subjectId
@@ -228,7 +228,7 @@ export const questions = sqliteTable("questions", {
         columns: [table.lessonId],
         foreignColumns: [lessons.id],
         name: "quesions_lesson_id_fk",
-    }).onDelete("restrict"),
+    }).onDelete("cascade"),
 
     index("questions_lesson_id_idx").on(
         table.lessonId
@@ -259,7 +259,7 @@ export const answers = sqliteTable("answers", {
         columns: [table.lessonId],
         foreignColumns: [lessons.id],
         name: "answers_lesson_id_fk",
-    }).onDelete("restrict"),
+    }).onDelete("cascade"),
 
     index("answers_lesson_id_idx").on(
         table.lessonId
@@ -298,11 +298,11 @@ export const questionAnswers = sqliteTable("question_answers", {
         columns: [table.questionId],
         foreignColumns: [questions.id],
         name: "question_answers_question_id_fk",
-    }).onDelete("restrict"),
+    }).onDelete("cascade"),
 
     foreignKey({
         columns: [table.answerId],
         foreignColumns: [answers.id],
         name: "question_answers_answer_id_fk",
-    }).onDelete("restrict"),
+    }).onDelete("cascade"),
 ]);

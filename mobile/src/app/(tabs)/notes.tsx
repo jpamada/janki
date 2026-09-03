@@ -69,7 +69,14 @@ export default function NotesScreen() {
     .flatMap((folder) => folder.subfolders)
     .find((subfolder) => subfolder.id === selectedSubfolderId);
 
-  const selectedNote = notes.find(
+  const allNotes = [
+    ...notes,
+    ...folders.flatMap((folder) => folder.notes ?? []),
+    ...folders.flatMap((folder) => folder.subfolders.flatMap((subfolder) => subfolder.notes ?? [])
+    ),
+  ];
+
+  const selectedNote = allNotes.find(
     (note) => note.id === selectedNoteId
   );
 
@@ -313,8 +320,8 @@ export default function NotesScreen() {
         id: selectedNoteId,
         data: {
           title: data.title,
-          folderId: selectedFolderId ?? null,
-          subfolderId: selectedSubfolderId ?? null
+          folderId: selectedNote?.folderId ?? selectedFolderId ?? null,
+          subfolderId: selectedNote?.subfolderId ?? selectedSubfolderId ?? null
         },
       });
 

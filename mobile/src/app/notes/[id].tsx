@@ -79,8 +79,6 @@ export default function NoteScreen() {
 
       ) : contents.length > 0 ? (
         <FlatList
-          data={contents}
-          keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <ContentItem
               id={item.id}
@@ -91,8 +89,10 @@ export default function NoteScreen() {
               onPress={handleContentPress}
             />
           )}
-          contentContainerClassName="gap-3 p-4"
+          data={contents}
+          keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
+          contentContainerClassName="gap-3 p-4"
         />
 
       ) : (

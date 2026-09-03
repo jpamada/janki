@@ -112,7 +112,7 @@ export default function QuestionForm({
                       render={({ field: { onChange, value } }) => (
                         <Pressable 
                           onPress={() => onChange(!value)}
-                          className='px-4 py-2 rounded-full active:bg-gray-100'
+                          className='p-2 rounded-xl active:bg-gray-100'
                         >
                           {value ? (
                             <View className='flex flex-row items-center gap-1'>
@@ -136,7 +136,7 @@ export default function QuestionForm({
 
                     <Pressable 
                       onPress={() => remove(index)}
-                      className='px-4 py-2 rounded-full active:bg-gray-100'
+                      className='p-2 rounded-xl active:bg-gray-100'
                     >
                       <Trash2 color="#4b5563" size={24}/>
                     </Pressable>

@@ -128,7 +128,7 @@ export default function QuizScreen() {
           <View className="flex-row items-center gap-1 p-1">
             <Pressable 
               onPress={() => router.back()}
-              className='p-3 rounded-full active:bg-gray-100'
+              className='p-3 rounded-xl active:bg-gray-100'
             >
               <X strokeWidth={4} color="#4a5462" />
             </Pressable>

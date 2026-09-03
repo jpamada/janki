@@ -39,7 +39,7 @@ export default function ContentItem({
       <View>
         {!!title.trim() ? (
           <View className="flex-row items-center gap-2">
-            <Text className="flex-1 text-lg font-semibold text-gray-800">
+            <Text className="flex-1 text-medium font-semibold text-gray-800">
               {title}
             </Text>
 
@@ -48,9 +48,8 @@ export default function ContentItem({
 
         ) : (
           <View className="flex-row items-start gap-2">
-
             {content && (
-              <Text className="flex-1 text-sm text-gray-500">
+              <Text className="flex-1 text-sm text-gray-800">
                 {content}
               </Text>
             )}
@@ -60,13 +59,13 @@ export default function ContentItem({
         )}
 
         {!!title.trim() && content && (
-          <Text className="mt-1 text-sm text-gray-500">
+          <Text className="mt-1 text-sm text-gray-800">
             {content}
           </Text>
         )}
 
         {remarks && (
-          <Text className="mt-2 text-xs text-gray-400">
+          <Text className="mt-2 text-sm text-gray-400">
             {remarks}
           </Text>
         )}

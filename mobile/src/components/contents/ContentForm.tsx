@@ -1,4 +1,4 @@
-import { CalendarCheck, EllipsisVertical, Link, ScrollText, Square, SquareCheck, TextInitial, Trash2 } from "lucide-react-native";
+import { CalendarCheck, Copy, EllipsisVertical, Link, ScrollText, Square, SquareCheck, TextInitial, Trash2, Check } from "lucide-react-native";
 import { KeyboardAwareScrollView, KeyboardStickyView } from "react-native-keyboard-controller";
 import { Animated, Modal, Pressable, Text, TextInput, View } from "react-native";
 import { ContentFormData, contentSchema } from "@/schemas/content.schema";
@@ -6,9 +6,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Header from "../shared/Header";
+import * as Clipboard from "expo-clipboard";
 
 type ContentFormProps = {
   onSubmit: (data: ContentFormData) => Promise<void>;
@@ -39,6 +40,12 @@ export default function ContentForm({
     open: openBottomSheet,
     close: closeBottomSheet,
   } = useBottomSheet();
+
+  const [copiedField, setCopiedField] = useState<
+    "title" | "content" | "url" | "remarks" | null
+  >(null);
+
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [titleVisible, setTitleVisible] = useState(
     !!defaultValues?.title?.trim()
@@ -107,6 +114,33 @@ const handleToggleTodo = () => {
     });
   };
 
+  const handleCopy = async (
+    field: "title" | "content" | "url" | "remarks",
+    value: string
+  ) => {
+    if (!value.trim()) return;
+
+    await Clipboard.setStringAsync(value);
+
+    setCopiedField(field);
+
+    if (copyTimeoutRef.current) {
+      clearTimeout(copyTimeoutRef.current);
+    }
+
+    copyTimeoutRef.current = setTimeout(() => {
+      setCopiedField(null);
+    }, 1500);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <View className="flex-1 bg-white">
       <Header
@@ -120,7 +154,7 @@ const handleToggleTodo = () => {
                 render={({ field: { value, onChange } }) => (
                   <Pressable
                     onPress={() => onChange(!value)}
-                    className="p-3 rounded-full active:bg-gray-100"
+                    className="p-3 rounded-xl active:bg-gray-100"
                   >
                     {value ? (
                       <SquareCheck size={24} color="#4b5563" />
@@ -134,7 +168,7 @@ const handleToggleTodo = () => {
 
             <Pressable 
               onPress={openBottomSheet}
-              className="p-3 rounded-full active:bg-gray-100"
+              className="p-3 rounded-xl active:bg-gray-100"
             >
               <EllipsisVertical />
             </Pressable>
@@ -154,16 +188,30 @@ const handleToggleTodo = () => {
             control={control}
             render={({ field: { onChange, onBlur, value }}) => (
               <View className="mb-4">
-                <Text className="mb-2 text-sm font-semibold text-gray-600">
-                  Title
-                </Text>
+                <View className="flex flex-row justify-between items-center">
+                  <Text className="text-medium font-semibold text-gray-600">
+                    Title
+                  </Text>
+
+                  <Pressable
+                    onPress={() => handleCopy("title", value)}
+                    disabled={!value.trim()}
+                    className="rounded-xl p-2 active:bg-gray-100"
+                  >
+                    {copiedField === "title" ? (
+                      <Check color="#4b5563" size={18} />
+                    ) : (
+                      <Copy color="#4b5563" size={18} />
+                    )}
+                  </Pressable>
+                </View>
 
                 <TextInput
                   value={value}
                   onBlur={onBlur}
                   onChangeText={onChange}
                   placeholder="Enter title"
-                  className="rounded-xl bg-gray-50 px-3 py-4 font-semibold"
+                  className="rounded-xl bg-gray-50 px-3 py-4"
                 />
 
                 {errors.title && (
@@ -181,9 +229,23 @@ const handleToggleTodo = () => {
           control={control}
           render={({ field: { onChange, onBlur, value }}) => (
             <View className="mb-4">
-              <Text className="mb-2 text-sm font-semibold text-gray-600">
-                Content
-              </Text>
+               <View className="flex flex-row justify-between items-center">
+                <Text className="text-sm font-semibold text-gray-600">
+                  Content
+                </Text>
+
+                <Pressable
+                  onPress={() => handleCopy("content", value)}
+                  disabled={!value.trim()}
+                  className="rounded-xl p-2 active:bg-gray-100"
+                >
+                  {copiedField === "content" ? (
+                    <Check color="#4b5563" size={18} />
+                  ) : (
+                    <Copy color="#4b5563" size={18} />
+                  )}
+                </Pressable>
+               </View>
 
               <TextInput
                 multiline
@@ -191,6 +253,9 @@ const handleToggleTodo = () => {
                 value={value}
                 onBlur={onBlur}
                 onChangeText={onChange}
+                autoCapitalize="none"
+                autoCorrect={true}
+                spellCheck={true}
                 placeholder="Write your content..."
                 className="min-h-64 rounded-xl bg-gray-50 px-3 py-4"
               />
@@ -210,9 +275,23 @@ const handleToggleTodo = () => {
             control={control}
             render={({ field: { onChange, onBlur, value }}) => (
               <View className="mb-4">
-                <Text className="mb-2 text-sm font-semibold text-gray-600">
-                  URL
-                </Text>
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-sm font-semibold text-gray-600">
+                    URL
+                  </Text>
+
+                  <Pressable
+                    onPress={() => handleCopy("url", value ?? "")}
+                    disabled={!value?.trim()}
+                    className="rounded-xl p-2 active:bg-gray-100"
+                  >
+                    {copiedField === "url" ? (
+                      <Check color="#4b5563" size={18} />
+                    ) : (
+                      <Copy color="#4b5563" size={18} />
+                    )}
+                  </Pressable>
+                </View>
 
                 <TextInput
                   value={value}
@@ -223,6 +302,12 @@ const handleToggleTodo = () => {
                   keyboardType="url"
                   className="rounded-xl bg-gray-50 px-3 py-4"
                 />
+
+                {errors.url && (
+                  <Text className="text-red-400">
+                    {errors.url.message}
+                  </Text>
+                )}
               </View>
             )}
           />
@@ -234,9 +319,23 @@ const handleToggleTodo = () => {
             control={control}
             render={({ field: { onChange, onBlur, value }}) => (
               <View>
-                <Text className="mb-2 text-sm font-semibold text-gray-600">
-                  Remarks
-                </Text>
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-sm font-semibold text-gray-600">
+                    Remarks
+                  </Text>
+
+                  <Pressable
+                    onPress={() => handleCopy("remarks", value ?? "")}
+                    disabled={!value?.trim()}
+                    className="rounded-xl p-2 active:bg-gray-100"
+                  >
+                    {copiedField === "remarks" ? (
+                      <Check color="#4b5563" size={18} />
+                    ) : (
+                      <Copy color="#4b5563" size={18} />
+                    )}
+                  </Pressable>
+                </View>
 
                 <TextInput
                   multiline
@@ -247,6 +346,12 @@ const handleToggleTodo = () => {
                   placeholder="Add remarks..."
                   className="min-h-32 rounded-xl bg-gray-50 px-3 py-4"
                 />
+
+                {errors.remarks && (
+                  <Text className="text-red-400">
+                    {errors.remarks.message}
+                  </Text>
+                )}
               </View>
             )}
           />

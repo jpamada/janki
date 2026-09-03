@@ -31,14 +31,14 @@ export default function CategoryItem({
       <View className="flex flex-row items-center">
         <Pressable 
           onPress={() => onEdit(id)}
-          className="p-4 rounded-full active:bg-gray-100"
+          className="p-4 rounded-xl active:bg-gray-100"
         >
           <Pencil color="#1f2937" />
         </Pressable>
 
         <Pressable 
           onPress={() => onDelete(id)}
-          className="p-4 rounded-full active:bg-gray-100"
+          className="p-4 rounded-xl active:bg-gray-100"
         >
           <Trash2 color="#1f2937" />
         </Pressable>
