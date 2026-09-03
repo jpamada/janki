@@ -167,7 +167,7 @@ export default function CategoryScreen() {
           className="h-14 w-14 items-center justify-center rounded-full bg-white active:bg-gray-50"
           style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
         >
-          <Plus size={24} color="#4b5563" />
+          <Plus size={24} color="#4b5563" strokeWidth={2.5} />
         </Pressable>
       </View>
 
