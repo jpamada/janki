@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { createContent } from "@/repositories/content.repository";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ContentFormData } from "@/schemas/content.schema";

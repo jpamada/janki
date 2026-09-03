@@ -231,7 +231,7 @@ export default function SubjectsScreen() {
         className="absolute bottom-6 right-6 items-center justify-center bg-white rounded-full h-14 w-14 active:bg-gray-50"
         style={{ boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)" }}
       >
-        <Text className="text-3xl text-gray-600">+</Text>
+        <Plus size={24} color="#4b5563" strokeWidth={2.5} />
       </Pressable>
 
       <Modal

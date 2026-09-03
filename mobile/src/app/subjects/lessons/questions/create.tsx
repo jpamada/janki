@@ -1,6 +1,5 @@
 import { createQuestionWithAnswers } from '@/repositories/question.repository';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QuestionFormData } from '@/schemas/question.schema';
 import { useEffect, useRef, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';

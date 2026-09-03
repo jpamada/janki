@@ -514,9 +514,9 @@ export default function NotesScreen() {
           style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
         >
           {fabVisible ? (
-            <X size={24} color="#4b5563" />
+            <X size={24} color="#4b5563" strokeWidth={2.5} />
           ) : (
-            <Plus size={24} color="#4b5563" />
+            <Plus size={24} color="#4b5563" strokeWidth={2.5} />
           )}
         </Pressable>
       </View>

@@ -6,7 +6,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { updateNote } from '@/repositories/note.repository';
 import { type NoteFormData } from '@/schemas/note.schema';
 import { FlatList } from 'react-native-gesture-handler';
-import { SearchX } from 'lucide-react-native';
+import { Plus, SearchX } from 'lucide-react-native';
 
 import ContentItem from '@/components/contents/ContentItem';
 import Header from '@/components/shared/Header';
@@ -115,7 +115,7 @@ export default function NoteScreen() {
           bottom: insets.bottom + 24 
         }}
       >
-        <Text className="text-3xl text-gray-600">+</Text>
+        <Plus size={24} color="#4b5563" strokeWidth={2.5} />
       </Pressable>
     </View>
   );
