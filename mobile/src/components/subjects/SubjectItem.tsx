@@ -7,13 +7,13 @@ import * as Haptics from 'expo-haptics';
 
 type SubjectItem = {
   id: string;
-  title: string;
+  name: string;
   onLongPress: (id: string) => void;
 };
 
 export default function SubjectItem({
   id,
-  title,
+  name,
   onLongPress
 }: SubjectItem) {
 
@@ -25,8 +25,8 @@ export default function SubjectItem({
         onLongPress(id);
       }}
       onPress={() => router.push({
-        pathname: `/subjects/lessons/[subjectId]`,
-        params: { subjectId: id, subjectName: title }
+        pathname: `/lessons`,
+        params: { subjectId: id, subjectName: name }
       })}
       className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg active:bg-gray-100'
     >
@@ -35,7 +35,7 @@ export default function SubjectItem({
       </View>
       <View>
         <Text className='text-gray-600 font-bold'>
-          {title}
+          {name}
         </Text>
       </View>
     </Pressable>

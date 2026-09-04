@@ -110,14 +110,14 @@ export default function SubjectsScreen() {
       await updateSubjectMutation.mutateAsync({
         id: selectedSubjectId,
         data: {
-          title: data.title,
+          name: data.name,
           categoryId: data.categoryId
         }
       });
 
     } else {
       await createSubjectMutation.mutateAsync({
-        title: data.title,
+        name: data.name,
         categoryId: data.categoryId
       });
     }
@@ -210,7 +210,7 @@ export default function SubjectsScreen() {
             renderItem={({ item }) => (
               <SubjectItem
                 id={item.id}
-                title={item.title}
+                name={item.name}
                 onLongPress={handleSubjectLongPress}
               />
             )}
@@ -352,7 +352,7 @@ export default function SubjectsScreen() {
                 isEditing={isEditing}
                 onSubmit={handleSubjectSubmit}
                 defaultValues={{
-                  title: selectedSubject?.title ?? "",
+                  name: selectedSubject?.name ?? "",
                   categoryId: selectedSubject?.categoryId ?? selectedCategoryId ?? null
                 }}
               />

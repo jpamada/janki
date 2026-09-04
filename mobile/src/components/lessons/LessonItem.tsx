@@ -25,7 +25,7 @@ export default function LessonItem({
         onLongPress(id);
       }}
       onPress={() => router.push({
-        pathname: `/subjects/lessons/quiz/play`,
+        pathname: `/lessons/quiz/play`,
         params: { lessonId: id }
       })}
       className="flex flex-row items-center gap-2 bg-gray-50 rounded-lg p-4 active:bg-gray-100"

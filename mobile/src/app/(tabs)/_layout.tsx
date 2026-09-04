@@ -1,6 +1,6 @@
 import { BottomTabBarButtonProps } from 'expo-router/build/react-navigation/bottom-tabs';
-import { Home, Lightbulb, NotepadText, User } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Home, Lightbulb, User } from 'lucide-react-native';
 import { Pressable } from 'react-native';
 import { Tabs } from 'expo-router';
 
@@ -28,15 +28,6 @@ export default function TabsLayout() {
         options={{
           tabBarIcon: ({ color, size }) => (
             <Home color={color} size={size} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="notes"
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <NotepadText color={color} size={size} />
           ),
         }}
       />

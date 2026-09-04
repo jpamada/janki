@@ -99,14 +99,14 @@ export default function LessonScreen() {
       await updateLessonMutation.mutateAsync({
         id: selectedLessonId,
         data: {
-          title: data.title,
+          name: data.name,
           subjectId: subjectId
         }
       });
 
     } else {
       await createLessonMutation.mutateAsync({
-        title: data.title,
+        name: data.name,
         subjectId: subjectId
       });
     }
@@ -153,7 +153,7 @@ return (
             <LessonItem
               id={item.id}
               index={index}
-              title={item.title}
+              title={item.name}
               onLongPress={handleLessonLongPress}
             />
           )}
@@ -218,7 +218,7 @@ return (
                 setSelectedLessonId(null);
                 closeBottomSheet(() => {
                   router.push({
-                    pathname: "/subjects/lessons/questions/create",
+                    pathname: "/lessons/questions/create",
                     params: { lessonId: selectedLessonId }
                   });
                 });
@@ -236,7 +236,7 @@ return (
                 setSelectedLessonId(null);
                 closeBottomSheet(() => {
                   router.push({
-                    pathname: "/subjects/lessons/questions/browse",
+                    pathname: "/lessons/questions/browse",
                     params: { lessonId: selectedLessonId }
                   });
                 });
@@ -347,7 +347,7 @@ return (
                 onSubmit={handleSubjectSubmit}
                 isEditing={isEditing}
                 defaultValues={{
-                  title: selectedLesson?.title ?? "",
+                  name: selectedLesson?.name ?? "",
                   subjectId: selectedLesson?.subjectId ?? subjectId ?? ""
                 }}
               />

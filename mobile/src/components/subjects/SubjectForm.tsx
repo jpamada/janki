@@ -16,7 +16,7 @@ export default function SubjectForm({
   isEditing,
   onSubmit,
   defaultValues = {
-    title: '',
+    name: "",
     categoryId: null,
   },
 }: SubjectFormProps) {
@@ -42,11 +42,13 @@ export default function SubjectForm({
       </Text>
 
       <Controller
-        name="title"
+        name="name"
         control={control}
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
-            <Text className="text-gray-400 font-semibold mb-1">Title</Text>
+            <Text className="text-gray-400 font-semibold mb-1">
+              Name
+            </Text>
 
             <TextInput
               value={value}
@@ -56,8 +58,8 @@ export default function SubjectForm({
               className='bg-gray-100 rounded-xl text-lg text-gray-600 px-2 py-4'
             />
 
-            {errors.title && (
-              <Text className="text-red-400">{errors.title.message}</Text>
+            {errors.name && (
+              <Text className="text-red-400">{errors.name.message}</Text>
             )}
           </View>
         )}
@@ -68,7 +70,9 @@ export default function SubjectForm({
         control={control}
         render={({ field: { onChange, onBlur, value } }) => (
           <View className="flex flex-col gap-2">
-            <Text className="text-gray-400 font-semibold">Category</Text>
+            <Text className="text-gray-400 font-semibold">
+              Category
+            </Text>
 
             <View className="bg-gray-100 rounded-xl">
               <Picker selectedValue={value} onValueChange={onChange}>

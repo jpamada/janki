@@ -51,7 +51,7 @@ export async function getSubjectById(id: string) {
 
 export async function createSubject(
   input: {
-    title: string;
+    name: string;
     categoryId?: string | null;
 }) {
   const subjectId = Crypto.randomUUID();
@@ -60,7 +60,7 @@ export async function createSubject(
   .insert(subjects)
   .values({
     id: subjectId,
-    title: input.title,
+    name: input.name,
     categoryId: input.categoryId ?? null,
     createdAt: new Date()
   });
@@ -69,13 +69,13 @@ export async function createSubject(
 export async function updateSubject(
   id: string,
   input: {
-    title: string;
+    name: string;
     categoryId?: string | null;
 }) {
   await db
   .update(subjects)
   .set({
-    title: input.title,
+    name: input.name,
     categoryId: input.categoryId ?? null,
     updatedAt: new Date(),
   })

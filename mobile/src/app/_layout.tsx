@@ -36,13 +36,7 @@ export default function RootLayout() {
                   }}
                 />
                 <Stack.Screen
-                  name="notes"
-                  options={{ 
-                    headerShown: false 
-                  }}
-                />
-                <Stack.Screen
-                  name="subjects"
+                  name="lessons"
                   options={{ 
                     headerShown: false 
                   }}

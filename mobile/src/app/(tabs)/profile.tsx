@@ -3,31 +3,8 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { router } from "expo-router";
 
 import Header from "@/components/shared/Header";
-import { exportData, importData } from "@/db/backup";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function ProfileScreen() {
-  const queryClient = useQueryClient();
-
-  const handleBackup = async () => {
-    try {
-      await exportData();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleRestore = async () => {
-    try {
-      const result = await importData();
-      if (result.imported) {
-        await queryClient.invalidateQueries();
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   return (
     <View className="flex-1 bg-white">
       <Header title="Profile" />
@@ -51,7 +28,7 @@ export default function ProfileScreen() {
             </Text>
           </Pressable>
 
-          <Pressable onPress={handleBackup}>
+          <Pressable>
             <View className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg'>
               <View className='bg-white rounded-xl p-4'>
                 <CloudUpload color="#9ca3af" />
@@ -60,7 +37,7 @@ export default function ProfileScreen() {
             </View>
           </Pressable>
 
-          <Pressable onPress={handleRestore}>
+          <Pressable>
             <View className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg'>
               <View className='bg-white rounded-xl p-4'>
                 <CloudDownload color="#9ca3af" />

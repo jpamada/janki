@@ -1,44 +1,25 @@
-import { answers, categories, contents, folders, lessons, notes, questionAnswers, questions, subfolders } from "./schema";
+import { answers, categories, lessons, questionAnswers, questions, subjects } from "./schema";
 import { relations } from "drizzle-orm";
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
-    folders: many(folders),
+    subjects: many(subjects),
 }));
 
-export const foldersRelations = relations(folders, ({ one, many }) => ({
-    category: one(categories, {
-      fields: [folders.categoryId],
-      references: [categories.id],
-    }),
-    subfolders: many(subfolders),
-    notes: many(notes),
-}));
-
-export const subfoldersRelations = relations(subfolders, ({ one, many }) => ({
-    folder: one(folders, {
-      fields: [subfolders.folderId],
-      references: [folders.id],
-    }),
-    notes: many(notes),
-}));
-
-export const notesRelations = relations(notes, ({ one, many }) => ({
-    folder: one(folders, {
-      fields: [notes.folderId],
-      references: [folders.id],
-    }),
-    subfolder: one(subfolders, {
-      fields: [notes.subfolderId],
-      references: [subfolders.id],
-    }),
-    contents: many(contents),
-}));
-
-export const contentsRelations = relations(contents, ({ one }) => ({
-  note: one(notes, {
-    fields: [contents.noteId],
-    references: [notes.id],
+export const subjectsRelations = relations(subjects, ({ one, many }) => ({
+  category: one(categories, {
+    fields: [subjects.categoryId],
+    references: [categories.id]
   }),
+  lessons: many(lessons)
+}));
+
+export const lessonsRelations = relations(lessons, ({ one, many }) => ({
+  subject: one(subjects, {
+    fields: [lessons.subjectId],
+    references: [subjects.id]
+  }),
+  questions: many(questions),
+  answers: many(answers)
 }));
 
 export const questionsRelations = relations(questions, ({ one, many }) => ({

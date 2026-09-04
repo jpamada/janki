@@ -6,146 +6,10 @@ export const categories = sqliteTable("categories", {
     name: text("name").notNull(),
 });
 
-export const folders = sqliteTable("folders", {
-    id: text("id").primaryKey(),
-
-    categoryId: text("category_id"),
-
-    name: text("name").notNull(),
-
-    createdAt: integer("created_at", {
-        mode: "timestamp_ms"
-    }).notNull(),
-
-    updatedAt: integer("updated_at", {
-        mode: "timestamp_ms"
-    }),
-
-    deletedAt: integer("deleted_at", {
-        mode: "timestamp_ms"
-    }),
-
-}, (table) => [
-    foreignKey({
-        columns: [table.categoryId],
-        foreignColumns: [categories.id],
-        name: "folders_category_id_fk"
-    }).onDelete("set null"),
-
-    index("folders_category_id_idx").on(
-        table.categoryId
-    ),
-]);
-
-export const subfolders = sqliteTable("subfolders", {
-    id: text("id").primaryKey(),
-
-    folderId: text("folder_id").notNull(),
-
-    name: text("name").notNull(),
-
-    createdAt: integer("created_at", {
-        mode: "timestamp_ms"
-    }).notNull(),
-
-    updatedAt: integer("updated_at", {
-        mode: "timestamp_ms"
-    }),
-
-    deletedAt: integer("deleted_at", {
-        mode: "timestamp_ms"
-    }),
-
-}, (table) => [
-    foreignKey({
-        columns: [table.folderId],
-        foreignColumns: [folders.id],
-        name: "subfolders_folder_id_fk",
-    }).onDelete("cascade"),
-
-    index("subfolders_folder_id_idx").on(
-        table.folderId
-    ),
-]);
-
-export const notes = sqliteTable("notes", {
-    id: text("id").primaryKey(),
-
-    folderId: text("folder_id"),
-
-    subfolderId: text("subfolder_id"),
-
-    title: text("title").notNull(),
-
-    createdAt: integer("created_at", {
-        mode: "timestamp_ms"
-    }).notNull(),
-
-    updatedAt: integer("updated_at", {
-        mode: "timestamp_ms"
-    }),
-
-    deletedAt: integer("deleted_at", {
-        mode: "timestamp_ms"
-    }),
-
-}, (table) => [
-    foreignKey({
-        columns: [table.folderId],
-        foreignColumns: [folders.id],
-        name: "notes_folder_id_fk",
-    }).onDelete("cascade"),
-
-    foreignKey({
-        columns: [table.subfolderId],
-        foreignColumns: [subfolders.id],
-        name: "notes_subfolder_id_fk",
-    }).onDelete("cascade"),
-
-    index("notes_folder_id_idx").on(
-        table.folderId
-    ),
-
-    index("notes_subfolder_id_idx").on(
-        table.subfolderId
-    ),
-]);
-
-export const contents = sqliteTable("note_contents", {
-    id: text("id").primaryKey(),
-
-    noteId: text("note_id").notNull(),
-
-    title: text("title").notNull(),
-
-    content: text("content").notNull(),
-
-    url: text("url"),
-
-    todo: integer("todo", {
-        mode: "boolean"
-    }),
-
-    remarks: text("remarks"),
-
-    position: integer("position"),
-
-}, (table) => [
-    foreignKey({
-        columns: [table.noteId],
-        foreignColumns: [notes.id],
-        name: "contents_note_id_fk"
-    }).onDelete("cascade"),
-
-    index("contents_note_id_idx").on(
-        table.noteId
-    ),
-]);
-
 export const subjects = sqliteTable("subjects", {
     id: text("id").primaryKey(),
 
-    title: text("title").notNull(),
+    name: text("name").notNull(),
 
     categoryId: text("category_id"),
 
@@ -178,7 +42,7 @@ export const lessons = sqliteTable("lessons", {
 
     subjectId: text("subject_id").notNull(),
 
-    title: text("title").notNull(),
+    name: text("name").notNull(),
 
     createdAt: integer("created_at", {
         mode: "timestamp_ms"

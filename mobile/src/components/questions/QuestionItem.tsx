@@ -26,7 +26,7 @@ export default function QuestionItem({
       }}
       onPress={() => {
         router.push({
-          pathname: `/subjects/lessons/questions/[id]`,
+          pathname: `/lessons/questions/[id]`,
           params: { id: id, lessonId: lessonId }
         });
       }}

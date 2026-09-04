@@ -227,7 +227,7 @@ export default function QuizScreen() {
           title="No Questions Available"
           icon={<FileQuestionMark color="#4b5563" size={72} />}
           navigate={{
-            pathname: "/subjects/lessons/questions/create",
+            pathname: "/lessons/questions/create",
             params: { lessonId },
           }}
         />

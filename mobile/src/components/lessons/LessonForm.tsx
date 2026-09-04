@@ -13,8 +13,8 @@ export default function LessonForm({
   isEditing,
   onSubmit,
   defaultValues = {
-    title: '',
-    subjectId: '',
+    name: "",
+    subjectId: "",
   },
 }: LessonFormProps) {
 
@@ -35,11 +35,11 @@ export default function LessonForm({
 
       
       <Controller
-        name="title"
+        name="name"
         control={control}
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
-            <Text className="text-gray-400 font-semibold mb-1">Title</Text>
+            <Text className="text-gray-400 font-semibold mb-1">Name</Text>
             
             <TextInput
               value={value}
@@ -49,8 +49,8 @@ export default function LessonForm({
               className='bg-gray-100 rounded-xl text-lg text-gray-600 px-2 py-4'
             />
 
-            {errors.title && (
-              <Text className="text-red-400">{errors.title.message}</Text>
+            {errors.name && (
+              <Text className="text-red-400">{errors.name.message}</Text>
             )}
           </View>
         )}

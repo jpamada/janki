@@ -46,7 +46,7 @@ export async function getLessonById(id: string) {
 
 export async function createLesson(
   input: {
-    title: string;
+    name: string;
     subjectId: string;
 }) {
   const lessonId = Crypto.randomUUID();
@@ -55,7 +55,7 @@ export async function createLesson(
   .insert(lessons)
   .values({
     id: lessonId,
-    title: input.title,
+    name: input.name,
     subjectId: input.subjectId,
     createdAt: new Date()
   });
@@ -64,13 +64,13 @@ export async function createLesson(
 export async function updateLesson(
   id: string,
   input: {
-    title: string;
+    name: string;
     subjectId: string;
 }) {
   await db
   .update(lessons)
   .set({
-    title: input.title,
+    name: input.name,
     subjectId: input.subjectId,
     updatedAt: new Date(),
   })

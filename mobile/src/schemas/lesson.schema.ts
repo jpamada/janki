@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const lessonSchema = z.object({
-  title: z
+  name: z
     .string()
     .trim()
     .min(1, 'Title is required')
