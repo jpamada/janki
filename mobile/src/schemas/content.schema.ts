@@ -12,8 +12,7 @@ export const contentSchema = z.object({
     .max(50, "Title is too long"),
 
   content: z
-    .string()
-    .trim(),
+    .string(),
 
   todo: z
     .boolean()

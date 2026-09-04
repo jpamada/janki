@@ -228,7 +228,7 @@ export default function SubjectsScreen() {
 
       <Pressable
         onPress={() => setModalVisible(true)}
-        className="absolute bottom-6 right-6 items-center justify-center bg-white rounded-full h-14 w-14 active:bg-gray-50"
+        className="absolute bottom-6 right-6 items-center justify-center bg-white rounded-full h-16 w-16 active:bg-gray-50"
         style={{ boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)" }}
       >
         <Plus size={24} color="#4b5563" strokeWidth={2.5} />
@@ -329,7 +329,7 @@ export default function SubjectsScreen() {
                       setSelectedSubjectId(null);
                       setModalVisible(false);
                     }}
-                    className="rounded-full px-5 py-2 active:bg-gray-100"
+                    className="rounded-full px-6 py-3 active:bg-gray-100"
                   >
                     <Text className="font-semibold text-gray-600">
                       Cancel
@@ -339,7 +339,7 @@ export default function SubjectsScreen() {
                   <Pressable
                     onPress={handleDelete}
                     disabled={deleteSubjectMutation.isPending}
-                    className="rounded-full bg-red-500 px-5 py-2 active:bg-red-400"
+                    className="rounded-full bg-red-500 px-6 py-3 active:bg-red-400"
                   >
                     <Text className="font-semibold text-white">
                       {deleteSubjectMutation.isPending ? 'Deleting...' : 'Delete'}

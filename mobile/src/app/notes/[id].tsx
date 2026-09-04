@@ -109,7 +109,7 @@ export default function NoteScreen() {
           pathname: `/notes/contents/create`,
           params: { noteId: id, title: title }
         })}
-        className="absolute bottom-6 right-6 items-center justify-center bg-white rounded-full h-14 w-14 active:bg-gray-50"
+        className="absolute bottom-6 right-6 items-center justify-center bg-white rounded-full h-16 w-16 active:bg-gray-50"
         style={{
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.25)",
           bottom: insets.bottom + 24 

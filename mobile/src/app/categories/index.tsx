@@ -164,7 +164,7 @@ export default function CategoryScreen() {
       >
         <Pressable
           onPress={() => setModalVisible((prev) => !prev)}
-          className="h-14 w-14 items-center justify-center rounded-full bg-white active:bg-gray-50"
+          className="h-16 w-16 items-center justify-center rounded-full bg-white active:bg-gray-50"
           style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
         >
           <Plus size={24} color="#4b5563" strokeWidth={2.5} />
@@ -210,7 +210,7 @@ export default function CategoryScreen() {
                       setModalVisible(false);
                       setSelectedCategoryId(null);
                     }}
-                    className="rounded-full px-5 py-2 active:bg-gray-100"
+                    className="rounded-full px-6 py-3 active:bg-gray-100"
                   >
                     <Text className="font-semibold text-gray-600">
                       Cancel
@@ -220,7 +220,7 @@ export default function CategoryScreen() {
                   <Pressable
                     onPress={handleConfirmDelete}
                     disabled={deleteCategoryMutation.isPending}
-                    className="rounded-full bg-red-500 px-5 py-2 active:bg-red-400"
+                    className="rounded-full bg-red-500 px-6 py-3 active:bg-red-400"
                   >
                     <Text className="font-semibold text-white">
                       {deleteCategoryMutation.isPending

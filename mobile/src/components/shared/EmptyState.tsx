@@ -24,7 +24,7 @@ export default function EmptyStateScreen({
         )}
 
         {title && (
-          <Text className="text-gray-400 text-2xl font-semibold">
+          <Text className="text-gray-600 text-2xl font-semibold">
             {title}
           </Text>
         )}

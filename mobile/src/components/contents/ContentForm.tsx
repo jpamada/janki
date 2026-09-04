@@ -1,5 +1,5 @@
-import { CalendarCheck, Copy, EllipsisVertical, Link, ScrollText, Square, SquareCheck, TextInitial, Trash2, Check } from "lucide-react-native";
-import { KeyboardAwareScrollView, KeyboardStickyView } from "react-native-keyboard-controller";
+import { CalendarCheck, Copy, EllipsisVertical, Link, ScrollText, Square, SquareCheck, TextInitial, Trash2, Check, ListIndentIncrease, ListIndentDecrease } from "lucide-react-native";
+import { KeyboardAwareScrollView, KeyboardStickyView, useKeyboardState } from "react-native-keyboard-controller";
 import { Animated, Modal, Pressable, Text, TextInput, View } from "react-native";
 import { ContentFormData, contentSchema } from "@/schemas/content.schema";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -47,6 +47,13 @@ export default function ContentForm({
 
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const keyboardActive = useKeyboardState((state) => state.isVisible);
+
+  const [selection, setSelection] = useState({
+    start: 0,
+    end: 0,
+  });
+
   const [titleVisible, setTitleVisible] = useState(
     !!defaultValues?.title?.trim()
   );
@@ -63,7 +70,7 @@ export default function ContentForm({
     !!defaultValues?.remarks?.trim()
   );
 
-  const { control, handleSubmit, setValue, formState: { errors, isSubmitting }} = useForm<ContentFormData>({
+  const { control, handleSubmit, setValue, getValues, formState: { errors, isSubmitting }} = useForm<ContentFormData>({
     resolver: zodResolver(contentSchema),
     defaultValues,
   });
@@ -82,17 +89,17 @@ export default function ContentForm({
     });
   };
 
-const handleToggleTodo = () => {
-  setTodoVisible((prev) => {
-    const next = !prev;
-    if (next) {
-      setValue("todo", false);
-    } else {
-      setValue("todo", null);
-    }
-    return next;
-  });
-};
+  const handleToggleTodo = () => {
+    setTodoVisible((prev) => {
+      const next = !prev;
+      if (next) {
+        setValue("todo", false);
+      } else {
+        setValue("todo", null);
+      }
+      return next;
+    });
+  };
 
   const handleToggleUrl = () => {
     setUrlVisible((prev) => {
@@ -132,6 +139,91 @@ const handleToggleTodo = () => {
       setCopiedField(null);
     }, 1500);
   };
+
+  const INDENT = "  ";
+
+  const indentSelection = (dedent: boolean) => {
+    const value = getValues("content");
+
+    let { start, end } = selection;
+
+    if (start > end) {
+      [start, end] = [end, start];
+    }
+
+    const firstLineStart = value.lastIndexOf("\n", start - 1) + 1;
+    const selectionEnd = end > start && value[end - 1] === "\n" ? end - 1 : end;
+
+    let lastLineEnd = value.indexOf("\n", selectionEnd);
+    if (lastLineEnd === -1) lastLineEnd = value.length;
+
+    const before = value.slice(0, firstLineStart);
+    const block = value.slice(firstLineStart, lastLineEnd);
+    const after = value.slice(lastLineEnd);
+
+    const lines = block.split("\n");
+
+    const oldLineStarts: number[] = [];
+    const newLineStarts: number[] = [];
+
+    let oldOffset = 0;
+    let newOffset = 0;
+
+    const newLines = lines.map((line) => {
+      oldLineStarts.push(oldOffset);
+      newLineStarts.push(newOffset);
+
+      const newLine = dedent
+        ? (line.startsWith(INDENT) ? line.slice(INDENT.length) : line)
+        : INDENT + line;
+
+      oldOffset += line.length + 1;
+      newOffset += newLine.length + 1;
+
+      return newLine;
+    });
+
+    const newBlock = newLines.join("\n");
+    const newValue = before + newBlock + after;
+
+    const mapOffset = (absoluteOffset: number) => {
+      const relative = absoluteOffset - firstLineStart;
+
+      let lineIndex = 0;
+      for (let i = oldLineStarts.length - 1; i >= 0; i--) {
+        if (relative >= oldLineStarts[i]) {
+          lineIndex = i;
+          break;
+        }
+      }
+
+      const lineOffset = relative - oldLineStarts[lineIndex];
+      const line = lines[lineIndex];
+
+      let mappedLineOffset = lineOffset;
+      
+      if (dedent && line.startsWith(INDENT)) {
+        mappedLineOffset = Math.max(0, lineOffset - INDENT.length);
+
+      } else if (!dedent) {
+        mappedLineOffset = lineOffset + INDENT.length;
+      }
+
+      return firstLineStart + newLineStarts[lineIndex] + mappedLineOffset;
+    };
+
+    setValue("content", newValue);
+
+    requestAnimationFrame(() => {
+      setSelection({
+        start: mapOffset(start),
+        end: mapOffset(end),
+      });
+    });
+  };
+
+  const indentRight = () => indentSelection(false);
+  const indentLeft = () => indentSelection(true);
 
   useEffect(() => {
     return () => {
@@ -229,7 +321,7 @@ const handleToggleTodo = () => {
           control={control}
           render={({ field: { onChange, onBlur, value }}) => (
             <View className="mb-4">
-               <View className="flex flex-row justify-between items-center">
+              <View className="flex flex-row justify-between items-center">
                 <Text className="text-sm font-semibold text-gray-600">
                   Content
                 </Text>
@@ -245,17 +337,21 @@ const handleToggleTodo = () => {
                     <Copy color="#4b5563" size={18} />
                   )}
                 </Pressable>
-               </View>
+              </View>
 
               <TextInput
                 multiline
                 textAlignVertical="top"
                 value={value}
+                selection={selection}
                 onBlur={onBlur}
                 onChangeText={onChange}
+                onSelectionChange={({ nativeEvent }) => {
+                  setSelection(nativeEvent.selection);
+                }}
                 autoCapitalize="none"
-                autoCorrect={true}
-                spellCheck={true}
+                autoCorrect
+                spellCheck
                 placeholder="Write your content..."
                 className="min-h-64 rounded-xl bg-gray-50 px-3 py-4"
               />
@@ -358,7 +454,25 @@ const handleToggleTodo = () => {
         )}
       </KeyboardAwareScrollView>
 
-      <KeyboardStickyView offset={{ closed: 0, opened: insets.top }}>
+      <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
+        {keyboardActive && (
+          <View className="flex-row items-center gap-1 bg-white border-t border-gray-200 px-4 py-1">
+            <Pressable 
+              onPress={indentLeft} 
+              className="p-3 rounded-xl active:bg-gray-100"
+            >
+              <ListIndentDecrease size={18} />
+            </Pressable>
+
+            <Pressable 
+              onPress={indentRight} 
+              className="p-3 rounded-xl active:bg-gray-100"
+            >
+              <ListIndentIncrease size={18}/>
+            </Pressable>
+          </View>
+        )}
+
         <View 
           className="flex-row items-center border-t border-gray-200 bg-white px-4 py-6"
           style={{ paddingBottom: insets.bottom }}
