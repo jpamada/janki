@@ -1,8 +1,8 @@
 import type { ExpoConfig } from "expo/config";
 
 const config: ExpoConfig = {
-  name: "mobile",
-  slug: "mobile",
+  name: "Janki",
+  slug: "janki",
   version: "1.0.0",
   orientation: "portrait",
 
@@ -50,6 +50,7 @@ const config: ExpoConfig = {
     "expo-sqlite",
     "expo-image",
     "expo-sharing",
+    "@actualwave/react-native-codeditor",
   ],
 
   experiments: {
@@ -60,7 +61,7 @@ const config: ExpoConfig = {
   extra: {
     router: {},
     eas: {
-      projectId: "d30106cc-4128-43f8-bdeb-a80bcebe3052",
+      projectId: "b5985079-f0b0-4e05-9ca3-c55b6b6e1af5",
     },
   },
 };

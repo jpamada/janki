@@ -31,10 +31,6 @@ export default function LessonItem({
       className="flex flex-row items-center gap-2 bg-gray-50 rounded-lg p-4 active:bg-gray-100"
     >
       <Text className="text-gray-600 text-xl font-bold">
-        {index + 1}
-      </Text>
-
-      <Text className="text-gray-600 text-xl font-bold">
         {title}
       </Text>
     </Pressable>

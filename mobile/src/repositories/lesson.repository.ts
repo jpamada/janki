@@ -66,11 +66,13 @@ export async function updateLesson(
   input: {
     name: string;
     subjectId: string;
+    favorite: boolean;
 }) {
   await db
   .update(lessons)
   .set({
     name: input.name,
+    favorite: input.favorite,
     subjectId: input.subjectId,
     updatedAt: new Date(),
   })
@@ -78,6 +80,32 @@ export async function updateLesson(
     eq(lessons.id, id)
   );
 };
+
+export async function toggleLessonFavorite(
+  id: string,
+  favorite: boolean,
+) {
+  await db
+  .update(lessons)
+  .set({
+    favorite,
+    updatedAt: new Date(),
+  })
+  .where(
+    eq(lessons.id, id)
+  );
+}
+
+export async function getFavoriteLessons() {
+  const query = await db
+  .select()
+  .from(lessons)
+  .where(
+    eq(lessons.favorite, true)
+  );
+
+  return query;
+}
 
 export async function deleteLesson(id: string) {
   await db

@@ -15,6 +15,7 @@ export default function LessonForm({
   defaultValues = {
     name: "",
     subjectId: "",
+    favorite: false
   },
 }: LessonFormProps) {
 

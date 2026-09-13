@@ -1,6 +1,6 @@
-import { createLesson, deleteLesson, getLessonsBySubjectId, updateLesson } from '@/repositories/lesson.repository';
+import { createLesson, deleteLesson, getLessonsBySubjectId, toggleLessonFavorite, updateLesson } from '@/repositories/lesson.repository';
 import { ActivityIndicator, Animated, FlatList, Modal, Pressable, Text, View } from 'react-native';
-import { Lightbulb, PenLine, Plus, SearchX, Trash2 } from 'lucide-react-native';
+import { Lightbulb, PenLine, Plus, SearchX, StarMinus, StarPlus, Trash2 } from 'lucide-react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -77,6 +77,22 @@ export default function LessonScreen() {
     },
   });
 
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: ({ id, favorite }: {
+      id: string;
+      favorite: boolean;
+    }) => toggleLessonFavorite(id, favorite),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["lessons", subjectId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["favorites"],
+      });
+    },
+  });
+
   const deleteLessonMutation = useMutation({
     mutationFn: deleteLesson,
 
@@ -100,7 +116,8 @@ export default function LessonScreen() {
         id: selectedLessonId,
         data: {
           name: data.name,
-          subjectId: subjectId
+          subjectId: subjectId,
+          favorite: data.favorite
         }
       });
 
@@ -131,7 +148,7 @@ return (
 
     <View className="flex-1 p-4">
       <Text className="text-gray-400 text-sm font-semibold mb-2">
-        {subjectName} lessons
+        lessons
       </Text>
 
       {isLoading ? (
@@ -251,6 +268,33 @@ return (
 
             <Pressable
               onPress={() => {
+                if (!selectedLesson) return;
+                toggleFavoriteMutation.mutate({
+                  id: selectedLesson.id,
+                  favorite: !selectedLesson.favorite,
+                });
+                closeBottomSheet();
+              }}
+              className="flex-row items-center gap-2 p-4 active:bg-gray-100"
+            >
+              {selectedLesson?.favorite ? 
+                <>
+                  <StarMinus size={16} />
+                  <Text className="text-xl">
+                    Remove From Favorites
+                  </Text>
+                </>
+              : <>
+                  <StarPlus size={16} />
+                  <Text className="text-xl">
+                    Add to Favorites
+                  </Text>
+                </>
+              }  
+            </Pressable>
+
+            <Pressable
+              onPress={() => {
                 setIsEditing(true);
                 closeBottomSheet(() => {
                   setModalVisible(true);
@@ -260,7 +304,7 @@ return (
             >
               <PenLine size={16} />
               <Text className="text-xl">
-                Rename
+                Update
               </Text>
             </Pressable>
 
@@ -348,7 +392,8 @@ return (
                 isEditing={isEditing}
                 defaultValues={{
                   name: selectedLesson?.name ?? "",
-                  subjectId: selectedLesson?.subjectId ?? subjectId ?? ""
+                  subjectId: selectedLesson?.subjectId ?? subjectId ?? "",
+                  favorite: selectedLesson?.favorite ?? false,
                 }}
               />
             )}

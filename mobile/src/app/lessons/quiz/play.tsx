@@ -1,20 +1,23 @@
-import { ActivityIndicator, Animated, Modal, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Animated, Modal, Pressable, Text, TextInput, View } from 'react-native';
 import { getQuestionsByLessonIdWithAnswers } from '@/repositories/question.repository';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { FileQuestionMark, X } from 'lucide-react-native';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import EmptyStateScreen from '@/components/shared/EmptyState';
 import QuizResults from './results';
+import { logReview } from '@/repositories/logs.repository';
 
 export type UserAnswer = {
   questionId: string;
-  answerId: string;
+  answerId: string | null;
+  answerText: string;
   isCorrect: boolean;
-  correctAnswerId: string;
+  correctAnswerId: string | null;
+  correctAnswerText: string;
 };
 
 export default function QuizScreen() {
@@ -31,6 +34,7 @@ export default function QuizScreen() {
   const insets = useSafeAreaInsets();
 
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
+  const [identificationInput, setIdentificationInput] = useState('');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
@@ -42,13 +46,27 @@ export default function QuizScreen() {
     enabled: !!lessonId,
   });
 
+  const queryClient = useQueryClient();
+  const logReviewMutation = useMutation({
+    mutationFn: logReview,
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['reviewHeatmap'] });
+      await queryClient.invalidateQueries({ queryKey: ['reviewStats'] });
+    },
+
+    onError: (error) => {
+      console.error(error.message);
+    },
+  });
+
   const currentQuestion = questions[currentQuestionIndex];
 
   const progress = questions.length > 0
     ? ((currentQuestionIndex + 1) / questions.length) * 100
     : 0;
 
-  const handleSelectAnswer = (answerId: string) => {
+  const handleSelectAnswer = async (answerId: string) => {
     if (!currentQuestion || bottomSheetVisible) {
       return;
     }
@@ -75,10 +93,60 @@ export default function QuizScreen() {
       {
         isCorrect: correct,
         answerId: selectedAnswer.answer.id,
+        answerText: selectedAnswer.answer.answer,
         questionId: currentQuestion.id,
         correctAnswerId: correctAnswer.answer.id,
+        correctAnswerText: correctAnswer.answer.answer,
       },
     ]);
+
+    await logReviewMutation.mutateAsync({
+      questionId: currentQuestion.id,
+      isCorrect: correct,
+    });
+
+    openBottomSheet();
+  };
+
+  const handleSubmitIdentification = async () => {
+    if (
+      !currentQuestion ||
+      bottomSheetVisible ||
+      !identificationInput.trim()
+    ) {
+      return;
+    }
+
+    const correctAnswer = currentQuestion.questionAnswers.find(
+      (item) => item.isCorrect
+    );
+
+    if (!correctAnswer) {
+      return;
+    }
+
+    const correct =
+      identificationInput.trim().toLowerCase() ===
+      correctAnswer.answer.answer.trim().toLowerCase();
+
+    setIsCorrect(correct);
+
+    setUserAnswers((previous) => [
+      ...previous,
+      {
+        isCorrect: correct,
+        answerId: null,
+        answerText: identificationInput.trim(),
+        questionId: currentQuestion.id,
+        correctAnswerId: correctAnswer.answer.id,
+        correctAnswerText: correctAnswer.answer.answer,
+      },
+    ]);
+
+    await logReviewMutation.mutateAsync({
+      questionId: currentQuestion.id,
+      isCorrect: correct,
+    });
 
     openBottomSheet();
   };
@@ -89,8 +157,9 @@ export default function QuizScreen() {
     if (currentQuestionIndex < questions.length - 1) {
       setIsCorrect(null);
       setSelectedAnswerId(null);
+      setIdentificationInput('');
       setCurrentQuestionIndex((previous) => previous + 1);
-      
+
     } else {
       setIsFinished(true);
     }
@@ -126,7 +195,7 @@ export default function QuizScreen() {
           }}
         >
           <View className="flex-row items-center gap-1 p-1">
-            <Pressable 
+            <Pressable
               onPress={() => router.back()}
               className='p-3 rounded-xl active:bg-gray-100'
             >
@@ -147,19 +216,53 @@ export default function QuizScreen() {
             </Text>
           </View>
 
-          <View className="mt-auto gap-4 p-4">
-            {currentQuestion?.questionAnswers?.map((item) => (
-              <Pressable
-                key={item?.answer?.id}
-                disabled={bottomSheetVisible}
-                onPress={() => handleSelectAnswer(item?.answer?.id)}
-                className="rounded-xl bg-gray-600 p-4 active:bg-gray-700"
+          {currentQuestion.code && (
+            <View className="mx-4 mb-8 rounded-lg bg-gray-400 p-4">
+              <Text
+                style={{ fontFamily: 'monospace' }}
+                className="text-sm text-gray-100"
               >
-                <Text className="text-center text-lg font-semibold text-white">
-                  {item?.answer?.answer}
-                </Text>
-              </Pressable>
-            ))}
+                {currentQuestion.code}
+              </Text>
+            </View>
+          )}
+
+          <View className="mt-auto gap-4 p-4">
+            {currentQuestion.type === 'multiple_choice' ? (
+              currentQuestion.questionAnswers.map((item) => (
+                <Pressable
+                  key={item.answer.id}
+                  disabled={bottomSheetVisible}
+                  onPress={() => handleSelectAnswer(item.answer.id)}
+                  className="rounded-xl bg-gray-600 p-4 active:bg-gray-700"
+                >
+                  <Text className="text-center text-lg font-semibold text-white">
+                    {item.answer.answer}
+                  </Text>
+                </Pressable>
+              ))
+            ) : (
+              <>
+                <TextInput
+                  value={identificationInput}
+                  onChangeText={setIdentificationInput}
+                  editable={!bottomSheetVisible}
+                  placeholder="Type your answer"
+                  autoCapitalize="none"
+                  className="rounded-xl bg-gray-100 px-4 py-4 text-lg font-semibold"
+                />
+
+                <Pressable
+                  disabled={bottomSheetVisible || !identificationInput.trim()}
+                  onPress={handleSubmitIdentification}
+                  className="rounded-xl bg-gray-600 p-4 active:bg-gray-700 disabled:bg-gray-300"
+                >
+                  <Text className="text-center text-lg font-semibold text-white">
+                    Submit
+                  </Text>
+                </Pressable>
+              </>
+            )}
           </View>
 
           <Modal
@@ -178,8 +281,8 @@ export default function QuizScreen() {
                   onPress={handleContinue}
                 />
               </Animated.View>
-              
-              <Animated.View 
+
+              <Animated.View
                 style={{ transform: [{ translateY: bottomSheetTranslateY }] }}
                 className="rounded-t-3xl bg-white"
               >
@@ -196,7 +299,7 @@ export default function QuizScreen() {
 
                       <Text className="mt-2 text-lg font-semibold">
                         {
-                          currentQuestion?.questionAnswers?.find(
+                          currentQuestion.questionAnswers.find(
                             (item) => item.isCorrect
                           )?.answer.answer
                         }

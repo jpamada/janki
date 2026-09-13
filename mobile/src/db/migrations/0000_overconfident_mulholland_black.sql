@@ -18,6 +18,7 @@ CREATE TABLE `lessons` (
 	`id` text PRIMARY KEY NOT NULL,
 	`subject_id` text NOT NULL,
 	`name` text NOT NULL,
+	`favorite` integer DEFAULT false NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer,
 	`deleted_at` integer,
@@ -25,6 +26,16 @@ CREATE TABLE `lessons` (
 );
 --> statement-breakpoint
 CREATE INDEX `lessons_subject_id_idx` ON `lessons` (`subject_id`);--> statement-breakpoint
+CREATE TABLE `logs` (
+	`id` text PRIMARY KEY NOT NULL,
+	`question_id` text NOT NULL,
+	`is_correct` integer NOT NULL,
+	`reviewed_at` integer NOT NULL,
+	FOREIGN KEY (`question_id`) REFERENCES `questions`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `logs_question_id_idx` ON `logs` (`question_id`);--> statement-breakpoint
+CREATE INDEX `logs_reviewed_at_idx` ON `logs` (`reviewed_at`);--> statement-breakpoint
 CREATE TABLE `question_answers` (
 	`id` text PRIMARY KEY NOT NULL,
 	`question_id` text NOT NULL,
@@ -41,7 +52,10 @@ CREATE UNIQUE INDEX `question_answer_unique` ON `question_answers` (`question_id
 CREATE TABLE `questions` (
 	`id` text PRIMARY KEY NOT NULL,
 	`lesson_id` text NOT NULL,
+	`type` text DEFAULT 'multiple_choice' NOT NULL,
 	`question` text NOT NULL,
+	`code` text,
+	`language` text,
 	`created_at` integer NOT NULL,
 	`updated_at` integer,
 	`deleted_at` integer,

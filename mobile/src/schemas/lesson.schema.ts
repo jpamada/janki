@@ -7,6 +7,9 @@ export const lessonSchema = z.object({
     .min(1, 'Title is required')
     .max(200, 'Title is too long'),
   
+  favorite: z
+    .boolean(),
+
   subjectId: z
     .string(),
 });

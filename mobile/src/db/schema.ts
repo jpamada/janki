@@ -44,6 +44,10 @@ export const lessons = sqliteTable("lessons", {
 
     name: text("name").notNull(),
 
+    favorite: integer("favorite", {
+        mode: "boolean"
+    }).notNull().default(false),
+
     createdAt: integer("created_at", {
         mode: "timestamp_ms"
     }).notNull(),
@@ -73,30 +77,39 @@ export const questions = sqliteTable("questions", {
 
     lessonId: text("lesson_id").notNull(),
 
+    type: text("type", {
+        enum: [
+            "multiple_choice",
+            "identification",
+        ],
+    }).notNull().default("multiple_choice"),
+
     question: text("question").notNull(),
 
+    code: text("code"),
+
+    language: text("language"),
+
     createdAt: integer("created_at", {
-        mode: "timestamp_ms"
+        mode: "timestamp_ms",
     }).notNull(),
 
     updatedAt: integer("updated_at", {
-        mode: "timestamp_ms"
+        mode: "timestamp_ms",
     }),
 
     deletedAt: integer("deleted_at", {
-        mode: "timestamp_ms"
+        mode: "timestamp_ms",
     }),
 
 }, (table) => [
     foreignKey({
         columns: [table.lessonId],
         foreignColumns: [lessons.id],
-        name: "quesions_lesson_id_fk",
+        name: "questions_lesson_id_fk",
     }).onDelete("cascade"),
 
-    index("questions_lesson_id_idx").on(
-        table.lessonId
-    )
+    index("questions_lesson_id_idx").on(table.lessonId),
 ]);
 
 export const answers = sqliteTable("answers", {
@@ -169,4 +182,32 @@ export const questionAnswers = sqliteTable("question_answers", {
         foreignColumns: [answers.id],
         name: "question_answers_answer_id_fk",
     }).onDelete("cascade"),
+]);
+
+export const logs = sqliteTable("logs", {
+    id: text("id").primaryKey(),
+
+    questionId: text("question_id").notNull(),
+
+    isCorrect: integer("is_correct", { 
+        mode: "boolean" 
+    }).notNull(),
+
+    reviewedAt: integer("reviewed_at", { 
+        mode: "timestamp_ms" 
+    }).notNull(),
+
+}, (table) => [
+    foreignKey({
+        columns: [table.questionId],
+        foreignColumns: [questions.id],
+        name: "logs_question_id_fk",
+    }).onDelete("cascade"),
+
+    index("logs_question_id_idx").on(
+        table.questionId
+    ),
+    index("logs_reviewed_at_idx").on(
+        table.reviewedAt
+    ),
 ]);

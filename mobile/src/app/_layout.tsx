@@ -7,7 +7,7 @@ import { queryClient } from '@/providers/query-provider';
 import { Stack } from 'expo-router';
 import { db } from '@/db/client';
 
-import migrations from '../../drizzle/migrations';
+import migrations from '@/db/migrations/migrations';
 import '../../global.css';
 
 export default function RootLayout() {

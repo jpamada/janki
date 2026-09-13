@@ -8,7 +8,10 @@ import { UserAnswer } from './play';
 type QuizResultsProps = {
   questions: {
     id: string;
+    type: 'multiple_choice' | 'identification';
     question: string;
+    code: string | null;
+    language: string | null;
     questionAnswers: {
       id: string;
       answerId: string;
@@ -76,44 +79,70 @@ export default function QuizResults({
                   Question {index + 1}
                 </Text>
 
-                <Text>
-                  {userAnswer?.isCorrect 
-                    ? <CircleCheck size={18}/>
-                    : <CircleX size={18} />}
-                </Text>
+                {userAnswer?.isCorrect
+                  ? <CircleCheck size={18} />
+                  : <CircleX size={18} />}
               </View>
 
               <Text className="mb-4 font-semibold">
                 {question.question}
               </Text>
 
-              <View className="gap-2">
-                {question.questionAnswers.map((questionAnswer) => {
-                  const isCorrectAnswer = questionAnswer.isCorrect;
-                  const isSelected = questionAnswer.answerId === userAnswer?.answerId;
-                  let backgroundClass = 'bg-white';
-                  let textClass = 'text-black'
+              {question.code && (
+                <View className="mb-4 rounded-lg bg-gray-900 p-3">
+                  <Text style={{ fontFamily: 'monospace' }} className="text-sm text-gray-100">
+                    {question.code}
+                  </Text>
+                </View>
+              )}
 
-                  if (isCorrectAnswer) {
-                    backgroundClass = 'bg-gray-600';
-                    textClass = "text-white"
-                    
-                  } else if (isSelected) {
-                    textClass = "text-red-400"
-                  }
+              {question.type === 'multiple_choice' ? (
+                <View className="gap-2">
+                  {question.questionAnswers.map((questionAnswer) => {
+                    const isCorrectAnswer = questionAnswer.isCorrect;
+                    const isSelected = questionAnswer.answerId === userAnswer?.answerId;
+                    let backgroundClass = 'bg-white';
+                    let textClass = 'text-black';
 
-                  return (
-                    <View
-                      key={questionAnswer.id}
-                      className={`rounded-lg p-3 ${backgroundClass}`}
-                    >
-                      <Text className={`font-semibold ${textClass}`}>
-                        {questionAnswer.answer.answer}
+                    if (isCorrectAnswer) {
+                      backgroundClass = 'bg-gray-600';
+                      textClass = 'text-white';
+
+                    } else if (isSelected) {
+                      textClass = 'text-red-400';
+                    }
+
+                    return (
+                      <View
+                        key={questionAnswer.id}
+                        className={`rounded-lg p-3 ${backgroundClass}`}
+                      >
+                        <Text className={`font-semibold ${textClass}`}>
+                          {questionAnswer.answer.answer}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              ) : (
+                <View className="gap-2">
+                  <View className="rounded-lg bg-white p-3">
+                    <Text className="text-xs font-semibold text-gray-400">Your answer</Text>
+                    <Text className={`font-semibold ${userAnswer?.isCorrect ? 'text-gray-800' : 'text-red-400'}`}>
+                      {userAnswer?.answerText || '—'}
+                    </Text>
+                  </View>
+
+                  {!userAnswer?.isCorrect && (
+                    <View className="rounded-lg bg-gray-600 p-3">
+                      <Text className="text-xs font-semibold text-gray-200">Correct answer</Text>
+                      <Text className="font-semibold text-white">
+                        {userAnswer?.correctAnswerText}
                       </Text>
                     </View>
-                  );
-                })}
-              </View>
+                  )}
+                </View>
+              )}
             </View>
           );
         })}

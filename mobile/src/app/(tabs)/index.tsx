@@ -1,53 +1,206 @@
+import { getFavoriteLessons, toggleLessonFavorite } from '@/repositories/lesson.repository';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Lightbulb, Star, StarMinus, StarPlus } from 'lucide-react-native';
+import { Animated, Modal, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Pressable, ScrollView, Text, View } from 'react-native';
-import { Lightbulb } from 'lucide-react-native';
+import { useBottomSheet } from '@/hooks/UseBottomSheet';
+import { FlatList } from 'react-native-gesture-handler';
 import { router } from 'expo-router';
+import { useState } from 'react';
 
+import FavoriteItem from '@/components/lessons/FavoriteItem';
+import ReviewHeatmap from '@/components/logs/LogsHeatmap';
+import ReviewStats from '@/components/logs/ReviewStats';
 import Header from '@/components/shared/Header';
 
 export default function HomeScreen() {
-  const insets = useSafeAreaInsets()
-  
+
+  const {
+    backdropOpacity,
+    open: openBottomSheet,
+    close: closeBottomSheet,
+    visible: bottomSheetVisible,
+    translateY: bottomSheetTranslateY,
+  } = useBottomSheet();
+
+  const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
+
+  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+
+  const { data: favorites = [] } = useQuery({
+    queryKey: ["favorites"],
+    queryFn: getFavoriteLessons
+  });
+
+  const selectedLesson = favorites.find(
+    (lesson) => lesson.id === selectedLessonId,
+  );
+
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: ({ id, favorite }: {
+      id: string;
+      favorite: boolean;
+    }) => toggleLessonFavorite(id, favorite),
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["lessons"],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["favorites"],
+      });
+    },
+
+    onError: (error) => {
+      console.error(error);
+    }
+  });
+
+  const handleLessonLongPress = (id: string) => {
+    setSelectedLessonId(id);
+    openBottomSheet();
+  };
+
   return (
     <View 
       className='flex-1 bg-white'
-      style={{ paddingBottom: insets.bottom }}
     >
       <Header title="Home" />
 
-      <ScrollView 
-        overScrollMode="always"
+      <View
         className="flex-1 px-6 py-4"
-        showsVerticalScrollIndicator={false}
       >
-        <View className='flex justify-between gap-4'>
-          <View className='flex flex-col gap-4 p-6 bg-gray-50 rounded-lg'>
-            <View className='flex flex-row items-center gap-4'>
-              <View className='bg-white rounded-xl p-4'>
-                <Lightbulb color="#9ca3af" />
-              </View>
+        <ReviewStats />
+        <ReviewHeatmap />
 
-              <View className='flex flex-col'>
-                <Text className='text-gray-600 text-xl font-semibold'>
-                  Quiz
-                </Text>
-                <Text className='text-gray-400'>
-                  Test and prove your skills
-                </Text>
-              </View>
-            </View>
+        <View className='bg-white rounded-xl p-4 min-h-60 mb-16'>
+          <Text className='text-gray-600 text-lg font-bold mb-2'>
+            Favorites
+          </Text>
 
-            <Pressable 
-              onPress={() => router.push(`/subjects`)}
-              className='bg-gray-200 rounded-full p-4 active:bg-gray-100'
-            >
-              <Text className='text-gray-500 text-center font-semibold'>
-                Create quizzes
+          {favorites.length > 0 ? (
+            <FlatList
+              data={favorites}
+              keyExtractor={(item) => item.id}
+              contentContainerClassName="gap-2"
+              renderItem={({ item, index }) => (
+                <FavoriteItem
+                  id={item.id}
+                  index={index}
+                  title={item.name}
+                  onLongPress={handleLessonLongPress}
+                />
+              )}
+            />
+          ) : (
+            <View className='flex-1 justify-center items-center'>
+              <Star size={64} color="#d1d5db" />
+              <Text className='text-gray-300 font-semibold'>
+                No Favorites found
               </Text>
-            </Pressable>
-          </View>
+            </View>
+          )}
         </View>
-      </ScrollView>
+
+      <Modal
+        transparent
+        animationType="none"
+        visible={bottomSheetVisible}
+        onRequestClose={() => closeBottomSheet()}
+      >
+        <View className="flex-1 justify-end">
+          <Animated.View
+            className="absolute inset-0 bg-black/40"
+            style={{ opacity: backdropOpacity }}
+          >
+            <Pressable
+              className="flex-1"
+              onPress={() => {
+                setSelectedLessonId(null);
+                closeBottomSheet();
+              }}
+            />
+          </Animated.View>
+
+          <Animated.View
+            style={{
+              transform: [{
+                translateY: bottomSheetTranslateY,
+              }],
+            }}
+            className="rounded-t-3xl bg-gray-50 px-4 py-8"
+          >
+            <View className="rounded-3xl bg-white">
+              <Pressable
+                onPress={() => {
+                  setSelectedLessonId(null);
+                  closeBottomSheet(() => {
+                    router.push({
+                      pathname: "/lessons/questions/create",
+                      params: { lessonId: selectedLessonId }
+                    });
+                  });
+                }}
+                className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
+              >
+                <Lightbulb size={16} />
+                <Text className="text-xl">
+                  Add Question
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
+                  setSelectedLessonId(null);
+                  closeBottomSheet(() => {
+                    router.push({
+                      pathname: "/lessons/questions/browse",
+                      params: { lessonId: selectedLessonId }
+                    });
+                  });
+                }}
+                className="flex-row items-center gap-2 p-4 active:bg-gray-100"
+              >
+                <Lightbulb size={16} />
+                <Text className="text-xl">
+                  Browse Questions
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
+                  if (!selectedLesson) return;
+                  toggleFavoriteMutation.mutate({
+                    id: selectedLesson.id,
+                    favorite: !selectedLesson.favorite,
+                  });
+                  closeBottomSheet();
+                }}
+                className="flex-row items-center gap-2 p-4 active:bg-gray-100"
+              >
+                {selectedLesson?.favorite ? 
+                  <>
+                    <StarMinus size={16} />
+                    <Text className="text-xl">
+                      Remove From Favorites
+                    </Text>
+                  </>
+                : <>
+                    <StarPlus size={16} />
+                    <Text className="text-xl">
+                      Add to Favorites
+                    </Text>
+                  </>
+                }  
+              </Pressable>
+              </View>
+
+              <View style={{ height: insets.bottom }} />
+            </Animated.View>
+          </View>
+        </Modal>
+      </View>
     </View>
   );
 }
