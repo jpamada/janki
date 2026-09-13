@@ -221,10 +221,12 @@ export default function QuizScreen() {
               </View>
 
               {currentQuestion.code && (
-                <CodeBlock
+                <View className='p-2'>
+                  <CodeBlock
                   code={currentQuestion.code}
                   language={currentQuestion.language}
                 />
+                </View>
               )}
             </View>
           </View>
@@ -294,51 +296,61 @@ export default function QuizScreen() {
           title="No Questions Available"
           icon={<FileQuestionMark color="#4b5563" size={72} />}
           navigate={{
-            pathname: "/lessons/questions/create",
+            pathname: "/questions/create",
             params: { lessonId },
           }}
         />
       )}
 
-      <KeyboardStickyView offset={{ closed: 0, opened: insets.top }}>
-        <View className="gap-4 p-4" style={{ paddingBottom: insets.bottom }}>
-          {currentQuestion.type === 'multiple_choice' ? (
-            currentQuestion.questionAnswers.map((item) => (
-              <Pressable
-                key={item.answer.id}
-                disabled={bottomSheetVisible}
-                onPress={() => handleSelectAnswer(item.answer.id)}
-                className="rounded-xl bg-gray-600 p-4 active:bg-gray-700"
-              >
-                <Text className="text-center text-lg font-semibold text-white">
-                  {item.answer.answer}
-                </Text>
-              </Pressable>
-            ))
-          ) : (
-            <>
-              <TextInput
-                value={identificationInput}
-                onChangeText={setIdentificationInput}
-                editable={!bottomSheetVisible}
-                placeholder="Type your answer"
-                autoCapitalize="none"
-                className="rounded-xl bg-gray-100 px-4 py-4 text-lg font-semibold"
-              />
+      {currentQuestion && (
+        <KeyboardStickyView
+          offset={{ closed: 0, opened: insets.top }}
+        >
+          <View
+            className="gap-4 p-4"
+            style={{ paddingBottom: insets.bottom }}
+          >
+            {currentQuestion.type === 'multiple_choice' ? (
+              currentQuestion.questionAnswers.map((item) => (
+                <Pressable
+                  key={item.answer.id}
+                  disabled={bottomSheetVisible}
+                  onPress={() => handleSelectAnswer(item.answer.id)}
+                  className="rounded-xl bg-gray-600 p-4 active:bg-gray-700"
+                >
+                  <Text className="text-center text-lg font-semibold text-white">
+                    {item.answer.answer}
+                  </Text>
+                </Pressable>
+              ))
+            ) : (
+              <>
+                <TextInput
+                  value={identificationInput}
+                  onChangeText={setIdentificationInput}
+                  editable={!bottomSheetVisible}
+                  placeholder="Type your answer"
+                  autoCapitalize="none"
+                  className="rounded-xl bg-gray-100 px-4 py-4 text-lg font-semibold"
+                />
 
-              <Pressable
-                disabled={bottomSheetVisible || !identificationInput.trim()}
-                onPress={handleSubmitIdentification}
-                className="rounded-xl bg-gray-600 p-4 active:bg-gray-700 disabled:bg-gray-300"
-              >
-                <Text className="text-center text-lg font-semibold text-white">
-                  Submit
-                </Text>
-              </Pressable>
-            </>
-          )}
-        </View>
-      </KeyboardStickyView>
+                <Pressable
+                  disabled={
+                    bottomSheetVisible ||
+                    !identificationInput.trim()
+                  }
+                  onPress={handleSubmitIdentification}
+                  className="rounded-xl bg-gray-600 p-4 active:bg-gray-700 disabled:bg-gray-300"
+                >
+                  <Text className="text-center text-lg font-semibold text-white">
+                    Submit
+                  </Text>
+                </Pressable>
+              </>
+            )}
+          </View>
+        </KeyboardStickyView>
+      )}
     </View>
   );
 }

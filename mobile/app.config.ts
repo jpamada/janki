@@ -67,7 +67,7 @@ const config: ExpoConfig = {
 };
 
 if (process.env.APP_VARIANT === "development") {
-  config.name = "Mobile Dev";
+  config.name = "Janki Dev";
 
   config.android = {
     ...config.android,

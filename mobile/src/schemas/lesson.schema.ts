@@ -11,7 +11,8 @@ export const lessonSchema = z.object({
     .boolean(),
 
   subjectId: z
-    .string(),
+    .string()
+    .min(1, "Please select a subject"),
 });
 
 export type LessonFormData = z.infer<typeof lessonSchema>;

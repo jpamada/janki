@@ -12,7 +12,6 @@ type LessonItemProps = {
   index: number;
   onLongPress: (id: string) => void;
 
-  // Opens the confirmation modal
   onToggleFavorite: (id: string, favorite: boolean) => void;
 };
 
@@ -34,10 +33,8 @@ export default function LessonItem({
       }}
       onPress={() =>
         router.push({
-          pathname: "/lessons/quiz/play",
-          params: {
-            lessonId: id,
-          },
+          pathname: "/quiz/play",
+          params: { lessonId: id },
         })
       }
       className="flex-row items-center justify-between gap-2 rounded-lg bg-gray-50 px-4 py-2 active:bg-gray-100"

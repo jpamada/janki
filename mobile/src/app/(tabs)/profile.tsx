@@ -13,8 +13,9 @@ export default function ProfileScreen() {
   const handleBackup = async () => {
     try {
       await exportData();
+
     } catch (error) {
-      Toast.show({ type: 'error', text1: 'Backup failed', text2: (error as Error).message });
+      console.error(error);
     }
   };
 
@@ -23,10 +24,10 @@ export default function ProfileScreen() {
       const result = await importData();
       if (result.imported) {
         await queryClient.invalidateQueries();
-        Toast.show({ type: 'success', text1: 'Restore complete' });
       }
+
     } catch (error) {
-      Toast.show({ type: 'error', text1: 'Restore failed', text2: (error as Error).message });
+      console.error(error);
     }
   };
 

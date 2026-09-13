@@ -6,7 +6,9 @@ import { EllipsisVertical, Square, SquareCheck, Trash2, Code2 } from 'lucide-rea
 import { Animated, Modal, Pressable, Text, TextInput, View } from 'react-native';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRef, useState } from 'react';
-import CodeEditor from '@actualwave/react-native-codeditor';
+import { lazy, Suspense } from "react";
+
+const CodeEditor = lazy(() => import('@actualwave/react-native-codeditor'));
 import type { WebViewAPI } from '@actualwave/react-native-codeditor';
 
 import Header from '../shared/Header';
@@ -87,21 +89,37 @@ export default function QuestionForm({
   };
 
   const handleFormSubmit = async (data: QuestionFormData) => {
-    await onSubmit(data);
-    setCodeVisible(false);
+  await onSubmit(data);
 
-    reset({
-      type: "multiple_choice",
-      question: "",
-      code: "",
-      language: null,
-      lessonId: data.lessonId,
-      answers: [
-        { answer: "", isCorrect: false },
-        { answer: "", isCorrect: false },
-      ],
-    });
-  };
+  setCodeVisible(false);
+
+  reset({
+    type: data.type,
+    question: "",
+    code: "",
+    language: null,
+    lessonId: data.lessonId,
+
+    answers:
+      data.type === "identification"
+        ? [
+            {
+              answer: "",
+              isCorrect: true,
+            },
+          ]
+        : [
+            {
+              answer: "",
+              isCorrect: false,
+            },
+            {
+              answer: "",
+              isCorrect: false,
+            },
+          ],
+  });
+};
 
   return (
     <View className="flex-1">
@@ -311,8 +329,8 @@ export default function QuestionForm({
 
       <KeyboardStickyView offset={{ closed: 0, opened: insets.top }}>
         {onCreateSuccess && (
-          <View className="h-12 flex-row items-center bg-gray-600 rounded-xl px-4 mx-2 my-2">
-            <Text className="text-white font-medium">1 question added</Text>
+          <View className="h-12 flex-row items-center bg-gray-100 rounded-xl px-4 mx-2 my-2">
+            <Text className="text-gray-600 font-medium">1 question added</Text>
           </View>
         )}
 

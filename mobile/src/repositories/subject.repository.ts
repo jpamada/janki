@@ -1,5 +1,5 @@
 import { and, eq, isNull } from "drizzle-orm";
-import { subjects } from "@/db/schema";
+import { lessons, subjects } from "@/db/schema";
 import { db } from "@/db/client";
 
 import * as Crypto from "expo-crypto";
@@ -18,20 +18,22 @@ export async function getSubjectsByCategory(
   let query;
 
   if (categoryId?.trim()) {
-    query = await db
-    .select()
-    .from(subjects)
-    .where(
-      eq(subjects.categoryId, categoryId)
-    );
+    query = await db.query.subjects
+    .findMany({
+      where: eq(subjects.categoryId, categoryId),
+      with: {
+        lessons: true
+      }
+    })
 
   } else {
-    query = await db
-    .select()
-    .from(subjects)
-    .where(
-      isNull(subjects.categoryId)
-    );
+   query = await db.query.subjects
+    .findMany({
+      where: isNull(subjects.categoryId),
+      with: {
+        lessons: true
+      }
+    })
   }
 
   return query;

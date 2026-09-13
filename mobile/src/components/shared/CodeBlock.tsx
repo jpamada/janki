@@ -1,4 +1,4 @@
-import SyntaxHighlighter from "react-native-syntax-highlighter";
+import CodeHighlighter from "react-native-code-highlighter";
 import { atomOneLight } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 type CodeBlockProps = {
@@ -11,12 +11,12 @@ export default function CodeBlock({
   language,
 }: CodeBlockProps) {
   return (
-    <SyntaxHighlighter
+    <CodeHighlighter
+      hljsStyle={atomOneLight}
       language={language ?? "text"}
-      style={atomOneLight}
-      highlighter="hljs"
+      textStyle={{ fontSize: 14 }}
     >
       {code}
-    </SyntaxHighlighter>
+    </CodeHighlighter>
   );
 }

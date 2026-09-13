@@ -21,7 +21,7 @@ export default function SubjectForm({
   },
 }: SubjectFormProps) {
   
-  const { control, handleSubmit, formState: { errors, isSubmitting }} = useForm<SubjectFormData>({
+  const { control, handleSubmit, reset, formState: { errors, isSubmitting }} = useForm<SubjectFormData>({
     resolver: zodResolver(subjectSchema),
     defaultValues,
   });
@@ -32,7 +32,13 @@ export default function SubjectForm({
   });
 
   const handleSubjectSubmit = async (data: SubjectFormData) => {
-    await onSubmit(data);
+    try {
+      await onSubmit(data);
+      reset();
+
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -78,7 +84,7 @@ export default function SubjectForm({
               <Picker selectedValue={value} onValueChange={onChange}>
                 <Picker.Item 
                   label="Default" 
-                  value={undefined}
+                  value={null}
                   style={{
                     fontSize: 16,
                     color: "#6b7280",

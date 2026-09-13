@@ -8,7 +8,6 @@ import { Stack } from 'expo-router';
 import { db } from '@/db/client';
 
 import migrations from '@/db/migrations/migrations';
-import Toast from "react-native-toast-message";
 import '../../global.css';
 
 export default function RootLayout() {
@@ -37,13 +36,19 @@ export default function RootLayout() {
                   }}
                 />
                 <Stack.Screen
-                  name="lessons"
+                  name="categories"
                   options={{ 
                     headerShown: false 
                   }}
                 />
-                <Stack.Screen
-                  name="categories"
+                 <Stack.Screen
+                  name="questions"
+                  options={{ 
+                    headerShown: false 
+                  }}
+                />
+                 <Stack.Screen
+                  name="quiz"
                   options={{ 
                     headerShown: false 
                   }}
