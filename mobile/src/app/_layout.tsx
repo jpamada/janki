@@ -8,6 +8,7 @@ import { Stack } from 'expo-router';
 import { db } from '@/db/client';
 
 import migrations from '@/db/migrations/migrations';
+import Toast from "react-native-toast-message";
 import '../../global.css';
 
 export default function RootLayout() {
