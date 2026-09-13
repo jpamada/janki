@@ -97,12 +97,12 @@ export async function toggleLessonFavorite(
 }
 
 export async function getFavoriteLessons() {
-  const query = await db
-  .select()
-  .from(lessons)
-  .where(
-    eq(lessons.favorite, true)
-  );
+  const query = await db.query.lessons.findMany({
+    where: eq(lessons.favorite, true),
+    with: {
+      subject: true,
+    },
+  });
 
   return query;
 }

@@ -77,7 +77,7 @@ export default function ReviewHeatmap() {
   const height = weeks.length * (cellSize + CELL_GAP) - CELL_GAP;
 
   return (
-    <View className="gap-3 rounded-xl px-4 py-6">
+    <View className="gap-3 rounded-xl py-6">
       <View className='flex flex-row items-center justify-between'>
         <Text className='text-gray-600 text-lg font-bold'>
           Summary

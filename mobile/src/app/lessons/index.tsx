@@ -32,6 +32,7 @@ export default function LessonScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [favoriteConfirmVisible, setFavoriteConfirmVisible] = useState(false);
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
 
   const { data: lessons = [], isLoading, error } = useQuery({
@@ -139,6 +140,18 @@ export default function LessonScreen() {
     openBottomSheet();
   };
 
+  const handleToggleFavorite = (id: string, favorite: boolean) => {
+    toggleFavoriteMutation.mutate({
+      id,
+      favorite,
+    });
+  };
+
+  const handleRemoveFavorite = (id: string) => {
+    setSelectedLessonId(id);
+    setModalVisible(true);
+  };
+
 return (
   <View
     className="flex-1 bg-white"
@@ -171,7 +184,9 @@ return (
               id={item.id}
               index={index}
               title={item.name}
+              favorite={item.favorite}
               onLongPress={handleLessonLongPress}
+              onToggleFavorite={handleToggleFavorite}
             />
           )}
         />
@@ -397,6 +412,69 @@ return (
                 }}
               />
             )}
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        transparent
+        animationType="fade"
+        visible={favoriteConfirmVisible}
+        onRequestClose={() => {
+          setFavoriteConfirmVisible(false);
+        }}
+      >
+        <Pressable
+          className="flex-1 items-center justify-center bg-black/40"
+          onPress={() => {
+            setFavoriteConfirmVisible(false);
+          }}
+        >
+          <Pressable
+            className="w-[90%] rounded-2xl bg-white p-6"
+            onPress={(event) => event.stopPropagation()}
+          >
+            <Text className="text-xl font-bold text-gray-700">
+              Confirm Action
+            </Text>
+
+            <Text className="mt-2 text-gray-500">
+              {selectedLesson?.favorite
+                ? "Are you sure you want to add this lesson to your favorites?"
+                : "Are you sure you want to remove this lesson from your favorites?"}
+            </Text>
+
+            <View className="mt-6 flex-row justify-end gap-2">
+              <Pressable
+                onPress={() => {
+                  setFavoriteConfirmVisible(false);
+                }}
+                className="rounded-full px-6 py-3 active:bg-gray-100"
+              >
+                <Text className="font-semibold text-gray-600">
+                  Cancel
+                </Text>
+              </Pressable>
+
+              <Pressable
+                disabled={
+                  !selectedLesson ||
+                  toggleFavoriteMutation.isPending
+                }
+                onPress={() => {
+                  if (!selectedLesson) return;
+                  toggleFavoriteMutation.mutate({
+                    id: selectedLesson.id,
+                    favorite: selectedLesson.favorite,
+                  });
+                }}
+                className="rounded-full bg-gray-600 px-6 py-3 active:bg-gray-500 disabled:bg-gray-300"
+              >
+                <Text className="font-semibold text-white">
+                  Confirm
+                </Text>
+              </Pressable>
+            </View>
           </Pressable>
         </Pressable>
       </Modal>

@@ -10,6 +10,8 @@ import { useState } from 'react';
 import EmptyStateScreen from '@/components/shared/EmptyState';
 import QuizResults from './results';
 import { logReview } from '@/repositories/logs.repository';
+import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
+import CodeBlock from '@/components/shared/CodeBlock';
 
 export type UserAnswer = {
   questionId: string;
@@ -175,7 +177,7 @@ export default function QuizScreen() {
   }
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-white">
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="small" color="#4b5563" />
@@ -187,17 +189,17 @@ export default function QuizScreen() {
         </View>
 
       ) : questions.length > 0 && currentQuestion ? (
-        <View
-          className="flex-1 bg-white"
-          style={{
-            paddingTop: insets.top,
-            paddingBottom: insets.bottom,
-          }}
+        <KeyboardAwareScrollView
+          bottomOffset={20}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          className="flex-1 mt-8"
+          contentContainerStyle={{ flexGrow: 1 }}
         >
           <View className="flex-row items-center gap-1 p-1">
             <Pressable
               onPress={() => router.back()}
-              className='p-3 rounded-xl active:bg-gray-100'
+              className="p-3 rounded-xl active:bg-gray-100"
             >
               <X strokeWidth={4} color="#4a5462" />
             </Pressable>
@@ -210,59 +212,21 @@ export default function QuizScreen() {
             </View>
           </View>
 
-          <View className="mb-8 mt-auto rounded-lg bg-gray-100 p-6 mx-4">
-            <Text className="text-center text-xl font-semibold">
-              {currentQuestion.question}
-            </Text>
-          </View>
+          <View className="flex-1 justify-center">
+            <View className="gap-4 px-4">
+              <View className="rounded-lg bg-gray-100 p-6">
+                <Text className="text-center text-xl font-semibold">
+                  {currentQuestion.question}
+                </Text>
+              </View>
 
-          {currentQuestion.code && (
-            <View className="mx-4 mb-8 rounded-lg bg-gray-400 p-4">
-              <Text
-                style={{ fontFamily: 'monospace' }}
-                className="text-sm text-gray-100"
-              >
-                {currentQuestion.code}
-              </Text>
-            </View>
-          )}
-
-          <View className="mt-auto gap-4 p-4">
-            {currentQuestion.type === 'multiple_choice' ? (
-              currentQuestion.questionAnswers.map((item) => (
-                <Pressable
-                  key={item.answer.id}
-                  disabled={bottomSheetVisible}
-                  onPress={() => handleSelectAnswer(item.answer.id)}
-                  className="rounded-xl bg-gray-600 p-4 active:bg-gray-700"
-                >
-                  <Text className="text-center text-lg font-semibold text-white">
-                    {item.answer.answer}
-                  </Text>
-                </Pressable>
-              ))
-            ) : (
-              <>
-                <TextInput
-                  value={identificationInput}
-                  onChangeText={setIdentificationInput}
-                  editable={!bottomSheetVisible}
-                  placeholder="Type your answer"
-                  autoCapitalize="none"
-                  className="rounded-xl bg-gray-100 px-4 py-4 text-lg font-semibold"
+              {currentQuestion.code && (
+                <CodeBlock
+                  code={currentQuestion.code}
+                  language={currentQuestion.language}
                 />
-
-                <Pressable
-                  disabled={bottomSheetVisible || !identificationInput.trim()}
-                  onPress={handleSubmitIdentification}
-                  className="rounded-xl bg-gray-600 p-4 active:bg-gray-700 disabled:bg-gray-300"
-                >
-                  <Text className="text-center text-lg font-semibold text-white">
-                    Submit
-                  </Text>
-                </Pressable>
-              </>
-            )}
+              )}
+            </View>
           </View>
 
           <Modal
@@ -323,7 +287,7 @@ export default function QuizScreen() {
               </Animated.View>
             </View>
           </Modal>
-        </View>
+        </KeyboardAwareScrollView>
 
       ) : (
         <EmptyStateScreen
@@ -335,6 +299,46 @@ export default function QuizScreen() {
           }}
         />
       )}
+
+      <KeyboardStickyView offset={{ closed: 0, opened: insets.top }}>
+        <View className="gap-4 p-4" style={{ paddingBottom: insets.bottom }}>
+          {currentQuestion.type === 'multiple_choice' ? (
+            currentQuestion.questionAnswers.map((item) => (
+              <Pressable
+                key={item.answer.id}
+                disabled={bottomSheetVisible}
+                onPress={() => handleSelectAnswer(item.answer.id)}
+                className="rounded-xl bg-gray-600 p-4 active:bg-gray-700"
+              >
+                <Text className="text-center text-lg font-semibold text-white">
+                  {item.answer.answer}
+                </Text>
+              </Pressable>
+            ))
+          ) : (
+            <>
+              <TextInput
+                value={identificationInput}
+                onChangeText={setIdentificationInput}
+                editable={!bottomSheetVisible}
+                placeholder="Type your answer"
+                autoCapitalize="none"
+                className="rounded-xl bg-gray-100 px-4 py-4 text-lg font-semibold"
+              />
+
+              <Pressable
+                disabled={bottomSheetVisible || !identificationInput.trim()}
+                onPress={handleSubmitIdentification}
+                className="rounded-xl bg-gray-600 p-4 active:bg-gray-700 disabled:bg-gray-300"
+              >
+                <Text className="text-center text-lg font-semibold text-white">
+                  Submit
+                </Text>
+              </Pressable>
+            </>
+          )}
+        </View>
+      </KeyboardStickyView>
     </View>
   );
 }

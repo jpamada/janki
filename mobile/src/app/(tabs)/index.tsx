@@ -26,6 +26,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
 
+  const [modalVisible, setModalVisible] = useState(false);
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
 
   const { data: favorites = [] } = useQuery({
@@ -50,6 +51,8 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["favorites"],
       });
+      setModalVisible(false);
+      setSelectedLessonId(null);
     },
 
     onError: (error) => {
@@ -60,6 +63,18 @@ export default function HomeScreen() {
   const handleLessonLongPress = (id: string) => {
     setSelectedLessonId(id);
     openBottomSheet();
+  };
+
+  const handleToggleFavorite = (id: string, favorite: boolean) => {
+    toggleFavoriteMutation.mutate({
+      id,
+      favorite,
+    });
+  };
+
+  const handleRemoveFavorite = (id: string) => {
+    setSelectedLessonId(id);
+    setModalVisible(true);
   };
 
   return (
@@ -74,7 +89,7 @@ export default function HomeScreen() {
         <ReviewStats />
         <ReviewHeatmap />
 
-        <View className='bg-white rounded-xl p-4 min-h-60 mb-16'>
+        <View className='bg-white rounded-xl py-4 min-h-60 mb-16'>
           <Text className='text-gray-600 text-lg font-bold mb-2'>
             Favorites
           </Text>
@@ -84,12 +99,14 @@ export default function HomeScreen() {
               data={favorites}
               keyExtractor={(item) => item.id}
               contentContainerClassName="gap-2"
-              renderItem={({ item, index }) => (
+              renderItem={({ item }) => (
                 <FavoriteItem
                   id={item.id}
-                  index={index}
                   title={item.name}
+                  subject={item.subject}
+                  favorite={item.favorite}
                   onLongPress={handleLessonLongPress}
+                  onRemoveFavorite={handleRemoveFavorite}
                 />
               )}
             />
@@ -170,12 +187,10 @@ export default function HomeScreen() {
 
               <Pressable
                 onPress={() => {
-                  if (!selectedLesson) return;
-                  toggleFavoriteMutation.mutate({
-                    id: selectedLesson.id,
-                    favorite: !selectedLesson.favorite,
+                  closeBottomSheet(() => {
+                    if (!selectedLessonId) return;
+                    setModalVisible(true);
                   });
-                  closeBottomSheet();
                 }}
                 className="flex-row items-center gap-2 p-4 active:bg-gray-100"
               >
@@ -199,6 +214,68 @@ export default function HomeScreen() {
               <View style={{ height: insets.bottom }} />
             </Animated.View>
           </View>
+        </Modal>
+
+        <Modal
+          transparent
+          animationType="fade"
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <Pressable
+            className="flex-1 items-center justify-center bg-black/40"
+            onPress={() => {
+              setSelectedLessonId(null);
+              setModalVisible(false);
+            }}
+          >
+            <Pressable
+              className="w-[90%] rounded-2xl bg-white p-6"
+              onPress={(event) => event.stopPropagation()}
+            >
+              <View>
+                <Text className="text-xl font-bold">
+                  Confirm Action
+                </Text>
+
+                <Text className="mt-2 text-gray-500">
+                    Are you sure you want to remove this lesson from your favorites?
+                </Text>
+
+                <View className="mt-6 flex-row justify-end gap-2">
+                  <Pressable
+                    onPress={() => {
+                      setSelectedLessonId(null);
+                      setModalVisible(false);
+                    }}
+                    className="rounded-full px-6 py-3 active:bg-gray-100"
+                  >
+                    <Text className="font-semibold text-gray-600">
+                      Cancel
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => {
+                      if (!selectedLesson) return;
+                      handleToggleFavorite(
+                        selectedLesson.id,
+                        false
+                      );
+                    }}
+                    disabled={toggleFavoriteMutation.isPending}
+                    className="rounded-full bg-red-500 px-6 py-3 active:bg-red-400"
+                  >
+                    <Text className="font-semibold text-white">
+                      {toggleFavoriteMutation.isPending
+                        ? "Removing..."
+                        : "Remove"}
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            </Pressable>
+          </Pressable>
         </Modal>
       </View>
     </View>
