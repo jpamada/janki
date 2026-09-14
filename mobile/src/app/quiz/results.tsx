@@ -63,7 +63,10 @@ export default function QuizResults({
         Score: {score} / {questions.length}
       </Text>
 
-      <ScrollView className="flex-1">
+      <ScrollView 
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+      >
         {questions.map((question, index) => {
           const userAnswer = userAnswers.find(
             (answer) => answer.questionId === question.id,

@@ -14,7 +14,16 @@ import type { WebViewAPI } from '@actualwave/react-native-codeditor';
 import Header from '../shared/Header';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { LANGUAGES } from '@/constants/languages';
+import { setEditorLanguage } from '@/providers/setEditorLanguage';
 
+const LINE_HEIGHT = 21;
+const MIN_HEIGHT = 280;
+const MAX_HEIGHT = 500;
+
+function getEditorHeight(content: string) {
+  const lines = content ? content.split("\n").length : 1;
+  return Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, lines * LINE_HEIGHT + 24));
+}
 
 type QuestionFormProps = {
   onCreateSuccess?: boolean;
@@ -41,8 +50,6 @@ export default function QuestionForm({
   const insets = useSafeAreaInsets();
   const editorApiRef = useRef<WebViewAPI | null>(null);
 
-  const [codeVisible, setCodeVisible] = useState(!!defaultValues?.code?.trim());
-
   const {
     backdropOpacity,
     open: openBottomSheet,
@@ -50,6 +57,9 @@ export default function QuestionForm({
     visible: bottomSheetVisible,
     translateY: bottomSheetTranslateY,
   } = useBottomSheet();
+
+  const [codeVisible, setCodeVisible] = useState(!!defaultValues?.code?.trim());
+  const [modalVisible, setModalVisible] = useState(false);
 
   const { control, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
@@ -90,37 +100,25 @@ export default function QuestionForm({
   };
 
   const handleFormSubmit = async (data: QuestionFormData) => {
-  await onSubmit(data);
-
-  setCodeVisible(false);
-
-  reset({
-    type: data.type,
-    question: "",
-    code: "",
-    language: null,
-    lessonId: data.lessonId,
-
-    answers:
-      data.type === "identification"
+    await onSubmit(data);
+    setCodeVisible(false);
+    reset({
+      type: data.type,
+      question: "",
+      code: "",
+      language: null,
+      lessonId: data.lessonId,
+      answers:
+        data.type === "identification"
         ? [
-            {
-              answer: "",
-              isCorrect: true,
-            },
+            { answer: "", isCorrect: true },
           ]
         : [
-            {
-              answer: "",
-              isCorrect: false,
-            },
-            {
-              answer: "",
-              isCorrect: false,
-            },
+            { answer: "", isCorrect: false },
+            { answer: "", isCorrect: false },
           ],
-  });
-};
+    });
+  };
 
   return (
     <View className="flex-1">
@@ -192,7 +190,7 @@ export default function QuestionForm({
                       key={lang}
                       onPress={() => {
                         setValue('language', lang);
-                        void editorApiRef.current?.editor.setLanguage(lang);
+                        void setEditorLanguage(editorApiRef.current, lang);
                       }}
                       className={`px-3 py-1 rounded-full ${language === lang ? 'bg-gray-600' : 'bg-gray-100'}`}
                     >
@@ -208,12 +206,17 @@ export default function QuestionForm({
                 name="code"
                 control={control}
                 render={({ field: { onChange, value } }) => (
-                  <View style={{ minHeight: 280, borderRadius: 12, overflow: 'hidden' }}>
+                  <View style={{ height: getEditorHeight(value ?? ''), borderRadius: 12, overflow: 'hidden' }}>
                     <CodeEditor
                       content={value ?? ''}
-                      language={defaultValues.language ?? 'javascript'}
+                      language={defaultValues.language === 'csharp' ? 'javascript' : (defaultValues.language ?? 'javascript')}
                       theme="basic"
-                      onInitialized={(api) => { editorApiRef.current = api; }}
+                      onInitialized={async (api) => {
+                        editorApiRef.current = api;
+                        if (defaultValues.language) {
+                          await setEditorLanguage(api, defaultValues.language);
+                        }
+                      }}
                       onContentUpdate={onChange}
                       onHistorySizeUpdate={() => {}}
                       onLog={(...args) => console.log('[editor]', ...args)}

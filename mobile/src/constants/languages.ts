@@ -1,5 +1,8 @@
 export const LANGUAGES = [
-  'javascript', 
-  'python', 
-  'sql'
+  'javascript',
+  'python',
+  'sql',
+  'csharp',
 ] as const;
+
+export type Language = (typeof LANGUAGES)[number];

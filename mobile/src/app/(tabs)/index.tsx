@@ -67,7 +67,7 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
       });
-      setSubjectModalVisible(false);
+      resetForm();
     },
 
     onError: (error) => {
@@ -85,9 +85,7 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
       });
-      setIsEditing(false);
-      setSubjectModalVisible(false);
-      setSelectedSubjectId(null);
+      resetForm();
     },
 
     onError: (error) => {
@@ -102,9 +100,7 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
       });
-      setIsDeleting(false);
-      setSubjectModalVisible(false);
-      setSelectedSubjectId(null);
+      resetForm();
     },
     onError: (error) => {
       console.error(error.message);
@@ -115,10 +111,10 @@ export default function HomeScreen() {
     mutationFn: createLesson,
 
     onSuccess: async () => {
-      queryClient.invalidateQueries({ 
+      await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
       });
-      setLessonModalVisible(false);
+      resetForm();
     },
 
     onError: (error) => {
@@ -136,9 +132,7 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
       });
-      setIsEditing(false);
-      setLessonModalVisible(false);
-      setSelectedLessonId(null);
+      resetForm();
     },
     
     onError: (error) => {
@@ -156,7 +150,7 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
       });
-      queryClient.invalidateQueries({ 
+      await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });
       if (variables.favorite) {
@@ -165,6 +159,7 @@ export default function HomeScreen() {
       } else {
         showSnackbar({ message: "Removed from favorites" });
       }
+      resetForm();
     },
   });
 
@@ -175,9 +170,10 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
       });
-      setIsDeleting(false);
-      setLessonModalVisible(false);
-      setSelectedLessonId(null);
+      await queryClient.invalidateQueries({
+        queryKey: ["favorites"]
+      });
+      resetForm();
     },
 
     onError: (error) => {
@@ -240,6 +236,18 @@ export default function HomeScreen() {
     setSelectedLessonId(id);
     lessonSheet.open();
   };
+
+  const resetForm = () => {
+    lessonSheet.close();
+    subjectSheet.close();
+    setIsEditing(false);
+    setFabVisible(false);
+    setIsDeleting(false);
+    setSelectedLessonId(null);
+    setSelectedSubjectId(null);
+    setLessonModalVisible(false);
+    setSubjectModalVisible(false);
+  }
 
   return (
     <View className="flex-1 bg-white">
@@ -349,8 +357,6 @@ export default function HomeScreen() {
             <Pressable
               onPress={() => {
                 setFabVisible(false);
-                setIsEditing(false);
-                setSelectedSubjectId(null);
                 setSubjectModalVisible(true);
               }}
               className="flex-row items-center gap-2 rounded-full bg-white px-4 py-3 active:bg-gray-50"
@@ -380,7 +386,7 @@ export default function HomeScreen() {
 
         <Pressable
           onPress={() => setFabVisible((prev) => !prev)}
-          className="h-14 w-14 items-center justify-center rounded-full bg-white active:bg-gray-50"
+          className="h-16 w-16 items-center justify-center rounded-full bg-white active:bg-gray-50"
           style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
         >
           {fabVisible ? (
@@ -404,10 +410,7 @@ export default function HomeScreen() {
           >
             <Pressable
               className="flex-1"
-              onPress={() => {
-                setSelectedSubjectId(null);
-                subjectSheet.close();
-              }}
+              onPress={resetForm}
             />
           </Animated.View>
 
@@ -416,6 +419,17 @@ export default function HomeScreen() {
             className="rounded-t-3xl bg-gray-50 px-4 py-8"
           >
             <View className="rounded-3xl bg-white">
+              <Pressable
+                onPress={() => {
+                  setLessonModalVisible(true);
+                  subjectSheet.close();
+                }}
+                className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
+              >
+                <Lightbulb size={16} />
+                <Text className="text-xl">Add Lesson</Text>
+              </Pressable>
+
               <Pressable
                 onPress={() => {
                   setIsEditing(true);
@@ -457,12 +471,7 @@ export default function HomeScreen() {
           >
             <Pressable
               className="flex-1"
-              onPress={() => {
-                setSelectedLessonId(null);
-                setIsDeleting(false);
-                setIsEditing(false);
-                lessonSheet.close();
-              }}
+              onPress={resetForm}
             />
           </Animated.View>
 
@@ -564,7 +573,7 @@ export default function HomeScreen() {
       >
         <Pressable
           className="flex-1 items-center justify-center bg-black/40"
-          onPress={() => setSubjectModalVisible(false)}
+          onPress={resetForm}
         >
           <Pressable
             className="w-[90%] rounded-2xl bg-white p-6"
@@ -578,11 +587,7 @@ export default function HomeScreen() {
                 </Text>
                 <View className="mt-6 flex-row justify-end gap-2">
                   <Pressable
-                    onPress={() => {
-                      setIsDeleting(false);
-                      setSelectedSubjectId(null);
-                      setSubjectModalVisible(false);
-                    }}
+                    onPress={resetForm}
                     className="rounded-full px-6 py-3 active:bg-gray-100"
                   >
                     <Text className="font-semibold text-gray-600">Cancel</Text>
@@ -621,12 +626,7 @@ export default function HomeScreen() {
       >
         <Pressable
           className="flex-1 items-center justify-center bg-black/40"
-          onPress={() => {
-            setIsEditing(false);
-            setIsDeleting(false);
-            setSelectedLessonId(null);
-            setLessonModalVisible(false);
-          }}
+          onPress={resetForm}
         >
           <Pressable
             className="w-[90%] rounded-2xl bg-white p-6"
@@ -640,12 +640,7 @@ export default function HomeScreen() {
                 </Text>
                 <View className="mt-6 flex-row justify-end gap-2">
                   <Pressable
-                    onPress={() => {
-                      setIsEditing(false);
-                      setIsDeleting(false);
-                      setSelectedLessonId(null);
-                      setLessonModalVisible(false);
-                    }}
+                    onPress={resetForm}
                     className="rounded-full px-6 py-3 active:bg-gray-100"
                   >
                     <Text className="font-semibold text-gray-600">Cancel</Text>

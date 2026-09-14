@@ -2,7 +2,7 @@ import { ActivityIndicator, Animated, Modal, Pressable, Text, TextInput, View } 
 import { getQuestionsByLessonIdWithAnswers } from '@/repositories/question.repository';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
-import { FileQuestionMark, X } from 'lucide-react-native';
+import { FileQuestionMark, Lightbulb, LogOut, Settings, X } from 'lucide-react-native';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -26,12 +26,14 @@ export default function QuizScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
 
   const {
-    backdropOpacity,
-    open: openBottomSheet,
-    close: closeBottomSheet,
-    visible: bottomSheetVisible,
-    translateY: bottomSheetTranslateY,
+    backdropOpacity: resultBackdropOpacity,
+    open: openResultSheet,
+    close: closeResultSheet,
+    visible: resultSheetVisible,
+    translateY: resultSheetTranslateY,
   } = useBottomSheet();
+
+  const settingSheet = useBottomSheet();
 
   const insets = useSafeAreaInsets();
 
@@ -69,7 +71,7 @@ export default function QuizScreen() {
     : 0;
 
   const handleSelectAnswer = async (answerId: string) => {
-    if (!currentQuestion || bottomSheetVisible) {
+    if (!currentQuestion || resultSheetVisible) {
       return;
     }
 
@@ -107,13 +109,13 @@ export default function QuizScreen() {
       isCorrect: correct,
     });
 
-    openBottomSheet();
+    openResultSheet();
   };
 
   const handleSubmitIdentification = async () => {
     if (
       !currentQuestion ||
-      bottomSheetVisible ||
+      resultSheetVisible ||
       !identificationInput.trim()
     ) {
       return;
@@ -150,11 +152,11 @@ export default function QuizScreen() {
       isCorrect: correct,
     });
 
-    openBottomSheet();
+    openResultSheet();
   };
 
   const handleContinue = () => {
-    closeBottomSheet();
+    closeResultSheet();
 
     if (currentQuestionIndex < questions.length - 1) {
       setIsCorrect(null);
@@ -192,13 +194,13 @@ export default function QuizScreen() {
         <>
           <View className="flex-row items-center gap-1 p-1 mt-8">
             <Pressable
-              onPress={() => router.back()}
+              onPress={() => settingSheet.open()}
               className="p-3 rounded-xl active:bg-gray-100"
             >
-              <X strokeWidth={4} color="#4a5462" />
+              <Settings strokeWidth={2} color="#4a5462" />
             </Pressable>
 
-            <View className="h-3 me-3 flex-1 overflow-hidden rounded-full">
+            <View className="h-3 me-3 flex-1 overflow-hidden rounded-full bg-gray-100">
               <View
                 className="h-full bg-gray-600"
                 style={{ width: `${progress}%` }}
@@ -243,13 +245,13 @@ export default function QuizScreen() {
             <Modal
               transparent
               animationType="none"
-              visible={bottomSheetVisible}
+              visible={resultSheetVisible}
               onRequestClose={handleContinue}
             >
               <View className="flex-1 justify-end">
                 <Animated.View
                   className="absolute inset-0 bg-black/40"
-                  style={{ opacity: backdropOpacity }}
+                  style={{ opacity: resultBackdropOpacity }}
                 >
                   <Pressable
                     className="flex-1"
@@ -258,7 +260,7 @@ export default function QuizScreen() {
                 </Animated.View>
 
                 <Animated.View
-                  style={{ transform: [{ translateY: bottomSheetTranslateY }] }}
+                  style={{ transform: [{ translateY: resultSheetTranslateY }] }}
                   className="rounded-t-3xl bg-white"
                 >
                   <View className="p-6">
@@ -298,6 +300,77 @@ export default function QuizScreen() {
                 </Animated.View>
               </View>
             </Modal>
+
+           <Modal
+              transparent
+              animationType="none"
+              visible={settingSheet.visible}
+              onRequestClose={() => settingSheet.close()}
+            >
+              <View className="flex-1 justify-end">
+                <Animated.View
+                  className="absolute inset-0 bg-black/40"
+                  style={{ opacity: settingSheet.backdropOpacity }}
+                >
+                  <Pressable
+                    className="flex-1"
+                    onPress={() => settingSheet.close()}
+                  />
+                </Animated.View>
+
+                <Animated.View
+                  style={{ transform: [{ translateY: settingSheet.translateY }] }}
+                  className="rounded-3xl bg-gray-50 px-4 py-6"
+                >
+                  <Pressable
+                    onPress={() => {
+                      settingSheet.close();
+                      router.push({
+                        pathname: `/questions/create`,
+                        params: { lessonId: lessonId }
+                      })
+                    }}
+                    className="flex-row items-center gap-2 p-4 bg-white rounded-t-xl active:bg-gray-100"
+                  >
+                    <Lightbulb size={16} />
+                    <Text className="text-xl">
+                      Add Question
+                    </Text>
+                  </Pressable>
+                  
+                  <Pressable
+                    onPress={() => {
+                      settingSheet.close();
+                      router.push({
+                        pathname: `/questions/browse`,
+                        params: { lessonId: lessonId }
+                      })
+                    }}
+                    className="flex-row items-center gap-2 p-4 bg-white active:bg-gray-100"
+                  >
+                    <Lightbulb size={16} />
+                    <Text className="text-xl">
+                      Browse Questions
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => {
+                      settingSheet.close();
+                      router.back();
+                    }}
+                    className="flex-row items-center gap-2 p-4 bg-white rounded-b-xl active:bg-gray-100"
+                  >
+                    <LogOut size={16} />
+                    <Text className="text-xl">
+                      Give Up
+                    </Text>
+                  </Pressable>
+
+                  <View style={{ height: insets.bottom }} />
+                </Animated.View>
+              </View>
+            </Modal>
           </KeyboardAwareScrollView>
         </>
       ) : (
@@ -316,14 +389,14 @@ export default function QuizScreen() {
           offset={{ closed: 0, opened: insets.top }}
         >
           <View
-            className="gap-4 p-4"
+            className="gap-4 p-4 bg-white"
             style={{ paddingBottom: insets.bottom }}
           >
             {currentQuestion.type === 'multiple_choice' ? (
               currentQuestion.questionAnswers.map((item) => (
                 <Pressable
                   key={item.answer.id}
-                  disabled={bottomSheetVisible}
+                  disabled={resultSheetVisible}
                   onPress={() => handleSelectAnswer(item.answer.id)}
                   className="rounded-xl bg-gray-600 p-4 active:bg-gray-700"
                 >
@@ -337,7 +410,7 @@ export default function QuizScreen() {
                 <TextInput
                   value={identificationInput}
                   onChangeText={setIdentificationInput}
-                  editable={!bottomSheetVisible}
+                  editable={!resultSheetVisible}
                   placeholder="Type your answer"
                   autoCapitalize="none"
                   className="rounded-xl bg-gray-100 px-4 py-4 text-lg font-semibold"
@@ -345,7 +418,7 @@ export default function QuizScreen() {
 
                 <Pressable
                   disabled={
-                    bottomSheetVisible ||
+                    resultSheetVisible ||
                     !identificationInput.trim()
                   }
                   onPress={handleSubmitIdentification}

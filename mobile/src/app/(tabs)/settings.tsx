@@ -7,7 +7,7 @@ import { router } from 'expo-router';
 
 import Header from '../../components/shared/Header';
 
-export default function ProfileScreen() {
+export default function SettingsScreen() {
   const { showSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
 
@@ -38,7 +38,7 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <Header title="Profile" />
+      <Header title="Settings" />
 
       <ScrollView
         overScrollMode="always"

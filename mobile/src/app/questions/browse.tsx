@@ -1,17 +1,27 @@
-import { getQuestionsByLessonId } from "@/repositories/question.repository";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import { deleteQuestion, getQuestionsByLessonId } from "@/repositories/question.repository";
+import { ActivityIndicator, Animated, FlatList, Modal, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLocalSearchParams } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
-import { SearchX } from "lucide-react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { PenLine, Plus, SearchX, Trash2 } from "lucide-react-native";
 
 import QuestionItem from "@/components/questions/QuestionItem";
 import Header from "@/components/shared/Header";
+import { useMemo, useState } from "react";
+import { useBottomSheet } from "@/hooks/UseBottomSheet";
+import { useSnackbar } from "@/providers/SnackbarContext";
 
 export default function BrowseQuestionScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
+  const { showSnackbar } = useSnackbar();
   
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
+  const questionSheet = useBottomSheet();
+
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
 
   const { data: questions = [], isLoading, error } = useQuery({
     queryKey: ["questions", lessonId],
@@ -19,7 +29,38 @@ export default function BrowseQuestionScreen() {
     enabled: !!lessonId,
   });
 
-  const handleQuestionLongPress = (id: string) => {};
+  const selectedQuestion = useMemo(() => {
+    return questions.find(
+      (question) => question.id === selectedQuestionId
+    );
+  }, [selectedQuestionId]);
+
+  const deleteQuestionMutation = useMutation({
+    mutationFn: deleteQuestion,
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["questions", lessonId]
+      });
+      setModalVisible(false);
+      setSelectedQuestionId(null);
+      showSnackbar({ message: "Question deleted successfully" });
+    },
+
+    onError: (error) => {
+      console.error(error);
+    }
+  })
+  
+  const handleQuestionLongPress = (id: string) => {
+    setSelectedQuestionId(id);
+    questionSheet.open();
+  };
+
+  const handleDelete = async () => {
+    if (!selectedQuestionId) return;
+    await deleteQuestionMutation.mutateAsync(selectedQuestionId);
+  }
 
   return (
     <View
@@ -28,7 +69,7 @@ export default function BrowseQuestionScreen() {
     >
       <Header title="Questions" back={true} />
 
-      <View className="flex-1 px-6 py-4">
+      <View className="flex-1">
         {isLoading ? (
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="small" color="#4b5563" />
@@ -43,7 +84,9 @@ export default function BrowseQuestionScreen() {
           <FlatList
             data={questions}
             keyExtractor={(item) => item.id}
-            contentContainerClassName="gap-2"
+            contentContainerClassName="gap-2 pb-6"
+            className="px-6 py-2"
+            showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
               <QuestionItem
                 key={item.id}
@@ -61,6 +104,128 @@ export default function BrowseQuestionScreen() {
             <Text className='text-gray-400 font-semibold'>No questions found</Text>
           </View>
         )}
+
+        <Pressable
+          onPress={() => router.push({
+            pathname: `/questions/create`,
+            params: { lessonId: lessonId}
+          })}
+          className="absolute bottom-6 right-6 h-16 w-16 items-center justify-center rounded-full bg-white active:bg-gray-50"
+          style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
+        >
+          <Plus size={24} color="#4b5563" />
+        </Pressable>
+
+        <Modal
+          transparent
+          animationType="none"
+          visible={questionSheet.visible}
+          onRequestClose={() => questionSheet.close()}
+        >
+          <View className="flex-1 justify-end">
+            <Animated.View
+              className="absolute inset-0 bg-black/40"
+              style={{ opacity: questionSheet.backdropOpacity }}
+            >
+              <Pressable
+                className="flex-1"
+                onPress={() => {
+                  setSelectedQuestionId(null);
+                  questionSheet.close();
+                }}
+              />
+            </Animated.View>
+
+            <Animated.View
+              style={{ transform: [{ translateY: questionSheet.translateY }] }}
+              className="rounded-t-3xl bg-gray-50 px-4 py-8"
+            >
+              <View className="rounded-3xl bg-white">
+                <Pressable
+                  onPress={() => {
+                    if (!selectedQuestionId) return;
+                    questionSheet.close();
+                    router.push({
+                      pathname: `/questions/[id]`,
+                      params: { 
+                        id: selectedQuestionId, 
+                        lessonId: selectedQuestion?.lessonId 
+                      }
+                    })
+                  }}
+                  className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
+                >
+                  <PenLine size={16} />
+                  <Text className="text-xl">Update</Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={() => {
+                    questionSheet.close(() => setModalVisible(true));
+                  }}
+                  className="flex-row items-center gap-2 rounded-b-3xl p-4 active:bg-gray-100"
+                >
+                  <Trash2 color="#f87171" size={16} />
+                  <Text className="text-xl text-red-400">Delete</Text>
+                </Pressable>
+              </View>
+
+              <View style={{ height: insets.bottom }} />
+            </Animated.View>
+          </View>
+        </Modal>
+
+        <Modal
+          transparent
+          animationType="fade"
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <Pressable
+            className="flex-1 items-center justify-center bg-black/40"
+            onPress={() => {
+              setSelectedQuestionId(null);
+              setModalVisible(false);
+            }}
+          >
+            <Pressable
+              className="w-[90%] rounded-2xl bg-white p-6"
+              onPress={(event) => event.stopPropagation()}
+            >
+              <Text className="text-xl font-bold">
+                Delete Lesson
+              </Text>
+
+              <Text className="mt-2 text-gray-500">
+                Are you sure you want to delete this lesson. This action cannot be undone.
+              </Text>
+
+              <View className="mt-6 flex-row justify-end gap-2">
+                <Pressable
+                  onPress={() => {
+                    setSelectedQuestionId(null);
+                    setModalVisible(false);
+                  }}
+                  className="rounded-full px-6 py-3 active:bg-gray-100"
+                >
+                  <Text className="font-semibold text-gray-600">
+                    Cancel
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={handleDelete}
+                  disabled={deleteQuestionMutation.isPending}
+                  className="rounded-full bg-red-500 px-6 py-3 active:bg-red-400"
+                >
+                  <Text className="font-semibold text-white">
+                    {deleteQuestionMutation.isPending ? 'Deleting...' : 'Delete'}
+                  </Text>
+                </Pressable>
+              </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
       </View>
     </View>
   )

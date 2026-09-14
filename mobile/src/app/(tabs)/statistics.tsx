@@ -89,7 +89,7 @@ export default function StatisticsScreen() {
     <View 
       className='flex-1 bg-white'
     >
-      <Header title="Home" />
+      <Header title="Stats" />
 
       <View
         className="flex-1 px-6 py-4"

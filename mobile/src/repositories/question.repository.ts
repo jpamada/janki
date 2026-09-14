@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { answers, questionAnswers, questions } from "@/db/schema";
 import { db } from "@/db/client";
 
@@ -39,6 +39,7 @@ export async function getQuestionsByLessonIdWithAnswers(
         },
       },
     },
+    orderBy: sql`random()`
   });
 
   return query;

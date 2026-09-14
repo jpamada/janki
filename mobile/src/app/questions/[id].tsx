@@ -6,12 +6,15 @@ import { ActivityIndicator, Text, View } from "react-native";
 import { SearchX } from "lucide-react-native";
 
 import QuestionForm from "@/components/questions/QuestionForm";
+import { useSnackbar } from "@/providers/SnackbarContext";
 
 export default function QuestionsScreen() {
   const { id, lessonId } = useLocalSearchParams<{ 
     id: string;
     lessonId: string;
   }>();
+
+  const { showSnackbar } = useSnackbar();
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -31,8 +34,12 @@ export default function QuestionsScreen() {
           queryKey: ["question", id],
         });
         await queryClient.invalidateQueries({
+          queryKey: ["questions", lessonId]
+        });
+        await queryClient.invalidateQueries({
           queryKey: ["questionsWithAnswers", lessonId],
         });
+        showSnackbar({ message: "Question updated successfully" })
         router.back();
       },
 
