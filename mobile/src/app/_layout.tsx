@@ -9,6 +9,7 @@ import { db } from '@/db/client';
 
 import migrations from '@/db/migrations/migrations';
 import '../../global.css';
+import { SnackbarProvider } from '@/providers/SnackbarContext';
 
 export default function RootLayout() {
   const { success, error } = useMigrations(db, migrations);
@@ -26,35 +27,37 @@ export default function RootLayout() {
       <KeyboardProvider>
         <GestureHandlerRootView
           style={{ flex: 1 }}>
-            <QueryClientProvider 
-              client={queryClient}>
-              <Stack>
-                <Stack.Screen
-                  name="(tabs)"
-                  options={{
-                    headerShown: false
-                  }}
-                />
-                <Stack.Screen
-                  name="categories"
-                  options={{ 
-                    headerShown: false 
-                  }}
-                />
-                 <Stack.Screen
-                  name="questions"
-                  options={{ 
-                    headerShown: false 
-                  }}
-                />
-                 <Stack.Screen
-                  name="quiz"
-                  options={{ 
-                    headerShown: false 
-                  }}
-                />
-              </Stack>
-          </QueryClientProvider>
+            <SnackbarProvider>
+              <QueryClientProvider 
+                client={queryClient}>
+                <Stack>
+                  <Stack.Screen
+                    name="(tabs)"
+                    options={{
+                      headerShown: false
+                    }}
+                  />
+                  <Stack.Screen
+                    name="categories"
+                    options={{ 
+                      headerShown: false 
+                    }}
+                  />
+                  <Stack.Screen
+                    name="questions"
+                    options={{ 
+                      headerShown: false 
+                    }}
+                  />
+                  <Stack.Screen
+                    name="quiz"
+                    options={{ 
+                      headerShown: false 
+                    }}
+                  />
+                </Stack>
+            </QueryClientProvider>
+          </SnackbarProvider>
         </GestureHandlerRootView>
       </KeyboardProvider>
     </SafeAreaProvider>

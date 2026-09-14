@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Lightbulb, Star, StarMinus, StarPlus } from 'lucide-react-native';
 import { Animated, Modal, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSnackbar } from '@/providers/SnackbarContext';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { FlatList } from 'react-native-gesture-handler';
 import { router } from 'expo-router';
@@ -14,6 +15,7 @@ import ReviewStats from '@/components/logs/ReviewStats';
 import Header from '@/components/shared/Header';
 
 export default function StatisticsScreen() {
+  const { showSnackbar } = useSnackbar();
 
   const {
     backdropOpacity,
@@ -44,7 +46,7 @@ export default function StatisticsScreen() {
       favorite: boolean;
     }) => toggleLessonFavorite(id, favorite),
 
-    onSuccess: async () => {
+    onSuccess: async (_, variables) => {
       await queryClient.invalidateQueries({
         queryKey: ["lessons"],
       });
@@ -53,6 +55,12 @@ export default function StatisticsScreen() {
       });
       setModalVisible(false);
       setSelectedLessonId(null);
+      if (variables.favorite) {
+        showSnackbar({ message: "Added to favorites" });
+
+      } else {
+        showSnackbar({ message: "Removed from favorites" });
+      }
     },
 
     onError: (error) => {

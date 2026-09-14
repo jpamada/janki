@@ -6,10 +6,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCategories } from "@/repositories/category.repository";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SubjectFormData } from "@/schemas/subject.schema";
+import { useSnackbar } from "@/providers/SnackbarContext";
 import { LessonFormData } from "@/schemas/lesson.schema";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
-import { router } from "expo-router";
 import { useMemo, useState } from "react";
+import { router } from "expo-router";
 
 import SubjectItem from "@/components/subjects/SubjectItem";
 import SubjectForm from "@/components/subjects/SubjectForm";
@@ -17,6 +18,8 @@ import LessonForm from "@/components/lessons/LessonForm";
 import Header from "@/components/shared/Header";
 
 export default function HomeScreen() {
+  const { showSnackbar } = useSnackbar();
+
   const subjectSheet = useBottomSheet();
   const lessonSheet = useBottomSheet();
 
@@ -149,13 +152,19 @@ export default function HomeScreen() {
       favorite: boolean 
     }) => toggleLessonFavorite(id, favorite),
 
-    onSuccess: async () => {
+    onSuccess: async (_, variables) => {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
       });
       queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });
+      if (variables.favorite) {
+        showSnackbar({ message: "Added to favorites" });
+
+      } else {
+        showSnackbar({ message: "Removed from favorites" });
+      }
     },
   });
 
@@ -353,7 +362,10 @@ export default function HomeScreen() {
 
             <Pressable
               onPress={() => {
-                if (subjects.length === 0) return;
+                if (subjects.length === 0) {
+                  showSnackbar({ message: "Create a subject first." });
+                  return;
+                }
                 setFabVisible(false);
                 setLessonModalVisible(true);
               }}

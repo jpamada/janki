@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@actualwave/react-native-codeditor": "^1.1.0",
+    "@expo-google-fonts/jetbrains-mono": "^0.4.1",
     "@expo/ui": "~57.0.17",
     "@hookform/resolvers": "^5.7.1",
     "@react-native-picker/picker": "2.11.4",
@@ -21,7 +22,7 @@
     "expo-device": "~57.0.1",
     "expo-document-picker": "~57.0.1",
     "expo-file-system": "~57.0.5",
-    "expo-font": "~57.0.1",
+    "expo-font": "~57.0.4",
     "expo-glass-effect": "~57.0.2",
     "expo-haptics": "~57.0.2",
     "expo-image": "~57.0.4",

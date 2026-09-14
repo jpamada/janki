@@ -189,14 +189,8 @@ export default function QuizScreen() {
         </View>
 
       ) : questions.length > 0 && currentQuestion ? (
-        <KeyboardAwareScrollView
-          bottomOffset={20}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          className="flex-1 mt-8"
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
-          <View className="flex-row items-center gap-1 p-1">
+        <>
+          <View className="flex-row items-center gap-1 p-1 mt-8">
             <Pressable
               onPress={() => router.back()}
               className="p-3 rounded-xl active:bg-gray-100"
@@ -204,93 +198,108 @@ export default function QuizScreen() {
               <X strokeWidth={4} color="#4a5462" />
             </Pressable>
 
-            <View className="h-3 me-3 flex-1 overflow-hidden rounded-full bg-gray-200">
+            <View className="h-3 me-3 flex-1 overflow-hidden rounded-full">
               <View
                 className="h-full bg-gray-600"
                 style={{ width: `${progress}%` }}
               />
             </View>
           </View>
+        
+          <KeyboardAwareScrollView
+            bottomOffset={20}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            className="p-4"
+          >
+            {currentQuestion.code ? (
+              <View className="gap-4">
+                <View className="rounded-lg ">
+                  <Text className="text-xl font-semibold">
+                    {currentQuestion.question}
+                  </Text>
+                </View>
 
-          <View className="flex-1 justify-center">
-            <View className="gap-4 px-4">
-              <View className="rounded-lg bg-gray-100 p-6">
-                <Text className="text-center text-xl font-semibold">
-                  {currentQuestion.question}
-                </Text>
+                {currentQuestion.code && (
+                  <View className='p-2 w-auto'>
+                    <CodeBlock
+                    code={currentQuestion.code}
+                    language={currentQuestion.language}
+                  />
+                  </View>
+                )}
               </View>
 
-              {currentQuestion.code && (
-                <View className='p-2'>
-                  <CodeBlock
-                  code={currentQuestion.code}
-                  language={currentQuestion.language}
-                />
-                </View>
-              )}
-            </View>
-          </View>
-
-          <Modal
-            transparent
-            animationType="none"
-            visible={bottomSheetVisible}
-            onRequestClose={handleContinue}
-          >
-            <View className="flex-1 justify-end">
-              <Animated.View
-                className="absolute inset-0 bg-black/40"
-                style={{ opacity: backdropOpacity }}
-              >
-                <Pressable
-                  className="flex-1"
-                  onPress={handleContinue}
-                />
-              </Animated.View>
-
-              <Animated.View
-                style={{ transform: [{ translateY: bottomSheetTranslateY }] }}
-                className="rounded-t-3xl bg-white"
-              >
-                <View className="p-6">
-                  <Text className="text-3xl font-bold text-gray-800">
-                    {isCorrect ? "Correct!" : "Incorrect"}
+            ) : (
+              <View className="flex-1 justify-center">
+                <View className="rounded-lg bg-white p-6">
+                  <Text className="text-center text-xl font-semibold">
+                    {currentQuestion.question}
                   </Text>
-
-                  {!isCorrect && (
-                    <View className="mt-6">
-                      <Text className="text-lg font-semibold text-gray-400">
-                        Correct Answer
-                      </Text>
-
-                      <Text className="mt-2 text-lg font-semibold">
-                        {
-                          currentQuestion.questionAnswers.find(
-                            (item) => item.isCorrect
-                          )?.answer.answer
-                        }
-                      </Text>
-                    </View>
-                  )}
-
-                  <Pressable
-                    onPress={handleContinue}
-                    className="mt-8 rounded-lg bg-gray-600 p-4 active:bg-gray-700"
-                  >
-                    <Text className="text-center text-lg font-semibold text-white">
-                      {currentQuestionIndex < questions.length - 1
-                        ? "Continue"
-                        : "Finish"}
-                    </Text>
-                  </Pressable>
                 </View>
+              </View>
+            )}
 
-                <View style={{ height: insets.bottom }} />
-              </Animated.View>
-            </View>
-          </Modal>
-        </KeyboardAwareScrollView>
+            <Modal
+              transparent
+              animationType="none"
+              visible={bottomSheetVisible}
+              onRequestClose={handleContinue}
+            >
+              <View className="flex-1 justify-end">
+                <Animated.View
+                  className="absolute inset-0 bg-black/40"
+                  style={{ opacity: backdropOpacity }}
+                >
+                  <Pressable
+                    className="flex-1"
+                    onPress={handleContinue}
+                  />
+                </Animated.View>
 
+                <Animated.View
+                  style={{ transform: [{ translateY: bottomSheetTranslateY }] }}
+                  className="rounded-t-3xl bg-white"
+                >
+                  <View className="p-6">
+                    <Text className="text-3xl font-bold text-gray-800">
+                      {isCorrect ? "Correct!" : "Incorrect"}
+                    </Text>
+
+                    {!isCorrect && (
+                      <View className="mt-6">
+                        <Text className="text-lg font-semibold text-gray-400">
+                          Correct Answer
+                        </Text>
+
+                        <Text className="mt-2 text-lg font-semibold">
+                          {
+                            currentQuestion.questionAnswers.find(
+                              (item) => item.isCorrect
+                            )?.answer.answer
+                          }
+                        </Text>
+                      </View>
+                    )}
+
+                    <Pressable
+                      onPress={handleContinue}
+                      className="mt-8 rounded-lg bg-gray-600 p-4 active:bg-gray-700"
+                    >
+                      <Text className="text-center text-lg font-semibold text-white">
+                        {currentQuestionIndex < questions.length - 1
+                          ? "Continue"
+                          : "Finish"}
+                      </Text>
+                    </Pressable>
+                  </View>
+
+                  <View style={{ height: insets.bottom }} />
+                </Animated.View>
+              </View>
+            </Modal>
+          </KeyboardAwareScrollView>
+        </>
       ) : (
         <EmptyStateScreen
           title="No Questions Available"

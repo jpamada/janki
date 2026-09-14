@@ -15,6 +15,7 @@ import Header from '../shared/Header';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { LANGUAGES } from '@/constants/languages';
 
+
 type QuestionFormProps = {
   onCreateSuccess?: boolean;
   onSubmit: (data: QuestionFormData) => Promise<void>;
@@ -207,7 +208,7 @@ export default function QuestionForm({
                 name="code"
                 control={control}
                 render={({ field: { onChange, value } }) => (
-                  <View style={{ height: 240, borderRadius: 12, overflow: 'hidden' }}>
+                  <View style={{ minHeight: 280, borderRadius: 12, overflow: 'hidden' }}>
                     <CodeEditor
                       content={value ?? ''}
                       language={defaultValues.language ?? 'javascript'}

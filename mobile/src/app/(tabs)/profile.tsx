@@ -1,21 +1,24 @@
 import { LayoutGrid, CloudUpload, CloudDownload } from 'lucide-react-native';
 import { View, ScrollView, Pressable, Text } from 'react-native';
+import { useSnackbar } from '@/providers/SnackbarContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { exportData, importData } from '@/db/backup';
 import { router } from 'expo-router';
 
 import Header from '../../components/shared/Header';
-import Toast from 'react-native-toast-message';
 
 export default function ProfileScreen() {
+  const { showSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
 
   const handleBackup = async () => {
     try {
       await exportData();
+      showSnackbar({ message: "Backup successful" });
 
     } catch (error) {
       console.error(error);
+      showSnackbar({ message: "There is an error trying to backup data" });
     }
   };
 
@@ -24,10 +27,12 @@ export default function ProfileScreen() {
       const result = await importData();
       if (result.imported) {
         await queryClient.invalidateQueries();
+        showSnackbar({ message: "Data restored sucessfully" });
       }
 
     } catch (error) {
       console.error(error);
+      showSnackbar({ message: "There is an error restoring backup" });
     }
   };
 
