@@ -1,6 +1,6 @@
 import { BottomTabBarButtonProps } from 'expo-router/build/react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChartColumn, Home, Settings, User } from 'lucide-react-native';
+import { ChartColumn, Home, Settings,  } from 'lucide-react-native';
 import { Pressable } from 'react-native';
 import { Tabs } from 'expo-router';
 
@@ -11,11 +11,11 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#3d3d4a",
         tabBarShowLabel: false,
+        tabBarActiveTintColor: "#3d3d4a",
         tabBarStyle: {
-          height: 60 + insets.bottom,
           paddingTop: 8,
+          height: 60 + insets.bottom,
           paddingBottom: insets.bottom + 8,
         },
         tabBarButton: ({ ref, ...rest }: BottomTabBarButtonProps) => (

@@ -247,7 +247,7 @@ export default function StatisticsScreen() {
                 </Text>
 
                 <Text className="mt-2 text-gray-500">
-                    Are you sure you want to remove this lesson from your favorites?
+                  Are you sure you want to remove this lesson from your favorites?
                 </Text>
 
                 <View className="mt-6 flex-row justify-end gap-2">

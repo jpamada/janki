@@ -1,26 +1,42 @@
-import { answers, categories, lessons, questionAnswers, questions, subjects } from "./schema";
+import { answers, categories, lessons, logs, questionAnswers, questions, progress, subjects } from "./schema";
 import { relations } from "drizzle-orm";
 
-export const categoriesRelations = relations(categories, ({ many }) => ({
+export const categoriesRelations = relations(
+  categories, 
+
+  ({ many }) => ({
     subjects: many(subjects),
 }));
 
-export const subjectsRelations = relations(subjects, ({ one, many }) => ({
+export const subjectsRelations = relations(
+  subjects, 
+
+  ({ one, many }) => ({
   category: one(categories, {
     fields: [subjects.categoryId],
     references: [categories.id]
   }),
+  
   lessons: many(lessons)
 }));
 
-export const lessonsRelations = relations(lessons, ({ one, many }) => ({
-  subject: one(subjects, {
-    fields: [lessons.subjectId],
-    references: [subjects.id]
+export const lessonsRelations = relations(
+  lessons,
+  ({ one, many }) => ({
+    subject: one(subjects, {
+      fields: [lessons.subjectId],
+      references: [subjects.id],
+    }),
+
+    questions: many(questions),
+
+    answers: many(answers),
+
+    progress: many(progress),
+
+    logs: many(logs),
   }),
-  questions: many(questions),
-  answers: many(answers)
-}));
+);
 
 export const questionsRelations = relations(questions, ({ one, many }) => ({
   lesson: one(lessons, {
@@ -39,6 +55,21 @@ export const answersRelations = relations(answers, ({ one, many }) => ({
 
   questionAnswers: many(questionAnswers),
 }));
+
+export const progressRelations = relations(
+  progress,
+  ({ one }) => ({
+    question: one(questions, {
+      fields: [progress.questionId],
+      references: [questions.id],
+    }),
+
+    lesson: one(lessons, {
+      fields: [progress.lessonId],
+      references: [lessons.id],
+    }),
+  }),
+);
 
 export const questionAnswersRelations = relations(
   questionAnswers,

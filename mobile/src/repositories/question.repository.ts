@@ -174,40 +174,40 @@ export async function updateQuestionWithAnswers(
 ): Promise<void> {
   await db.transaction(async (tx) => {
     await tx
-      .update(questions)
-      .set({
-        type: input.type,
-        question: input.question,
-        code: input.code,
-        language: input.language,
-        lessonId: input.lessonId,
-        updatedAt: new Date(),
-      })
-      .where(
-        eq(questions.id, questionId),
-      );
+    .update(questions)
+    .set({
+      type: input.type,
+      question: input.question,
+      code: input.code,
+      language: input.language,
+      lessonId: input.lessonId,
+      updatedAt: new Date(),
+    })
+    .where(
+      eq(questions.id, questionId),
+    );
 
     const existingQuestionAnswers = await tx
-      .select({
-        answerId: questionAnswers.answerId,
-      })
-      .from(questionAnswers)
-      .where(
-        eq(questionAnswers.questionId, questionId),
-      );
+    .select({
+      answerId: questionAnswers.answerId,
+    })
+    .from(questionAnswers)
+    .where(
+      eq(questionAnswers.questionId, questionId),
+    );
 
     await tx
-      .delete(questionAnswers)
-      .where(
-        eq(questionAnswers.questionId, questionId),
-      );
+    .delete(questionAnswers)
+    .where(
+      eq(questionAnswers.questionId, questionId),
+    );
 
     for (const item of existingQuestionAnswers) {
       await tx
-        .delete(answers)
-        .where(
-          eq(answers.id, item.answerId),
-        );
+      .delete(answers)
+      .where(
+        eq(answers.id, item.answerId),
+      );
     }
 
     for (const answer of input.answers) {

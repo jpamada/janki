@@ -36,8 +36,6 @@ const config: ExpoConfig = {
   },
 
   plugins: [
-    "expo-router",
-
     [
       "expo-splash-screen",
       {
@@ -47,9 +45,12 @@ const config: ExpoConfig = {
       },
     ],
 
+    "expo-router",
     "expo-sqlite",
     "expo-image",
+    "expo-audio",
     "expo-sharing",
+    "expo-web-browser",
     "@actualwave/react-native-codeditor",
   ],
 

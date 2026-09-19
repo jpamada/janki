@@ -10,7 +10,9 @@ export async function logReview(
     questionId: string; 
     isCorrect: boolean 
 }) {
-  await db.insert(logs).values({
+  await db
+  .insert(logs)
+  .values({
     id: Crypto.randomUUID(),
     questionId: input.questionId,
     isCorrect: input.isCorrect,
@@ -18,7 +20,10 @@ export async function logReview(
   });
 }
 
-export async function getReviewHeatmapData(start: Date, end: Date) {
+export async function getReviewHeatmapData(
+  start: Date, 
+  end: Date
+) {
   const rows = await db
     .select({
       day: sql<string>`

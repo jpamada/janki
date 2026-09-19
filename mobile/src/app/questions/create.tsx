@@ -26,6 +26,9 @@ export default function CreateQuestionScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["questionsWithAnswers", lessonId],
       });
+      await queryClient.invalidateQueries({
+        queryKey: ["subjects"],
+      });
       await handleSuccessMessage();
     },
 

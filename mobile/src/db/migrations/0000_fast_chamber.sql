@@ -36,6 +36,19 @@ CREATE TABLE `logs` (
 --> statement-breakpoint
 CREATE INDEX `logs_question_id_idx` ON `logs` (`question_id`);--> statement-breakpoint
 CREATE INDEX `logs_reviewed_at_idx` ON `logs` (`reviewed_at`);--> statement-breakpoint
+CREATE TABLE `progress` (
+	`id` text PRIMARY KEY NOT NULL,
+	`question_id` text NOT NULL,
+	`lesson_id` text NOT NULL,
+	`session_date` text NOT NULL,
+	`status` text DEFAULT 'unanswered' NOT NULL,
+	`answered_at` integer,
+	FOREIGN KEY (`question_id`) REFERENCES `questions`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`lesson_id`) REFERENCES `lessons`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `progress_lesson_session_idx` ON `progress` (`lesson_id`,`session_date`);--> statement-breakpoint
+CREATE UNIQUE INDEX `progress_question_session_unique` ON `progress` (`question_id`,`session_date`);--> statement-breakpoint
 CREATE TABLE `question_answers` (
 	`id` text PRIMARY KEY NOT NULL,
 	`question_id` text NOT NULL,

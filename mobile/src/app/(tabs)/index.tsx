@@ -9,8 +9,8 @@ import { SubjectFormData } from "@/schemas/subject.schema";
 import { useSnackbar } from "@/providers/SnackbarContext";
 import { LessonFormData } from "@/schemas/lesson.schema";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
-import { useMemo, useState } from "react";
-import { router } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
 
 import SubjectItem from "@/components/subjects/SubjectItem";
 import SubjectForm from "@/components/subjects/SubjectForm";
@@ -47,8 +47,10 @@ export default function HomeScreen() {
   });
 
   const selectedSubject = useMemo(() => {
-    return subjects.find((subject) => subject.id === selectedSubjectId)
-  }, [subjects, selectedLessonId]);
+    return subjects.find(
+      (subject) => subject.id === selectedSubjectId
+    )
+  }, [subjects, selectedSubjectId]);
 
   const selectedLesson = useMemo(() => {
     return subjects.flatMap(
@@ -153,6 +155,7 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });
+      
       if (variables.favorite) {
         showSnackbar({ message: "Added to favorites" });
 
@@ -248,6 +251,12 @@ export default function HomeScreen() {
     setLessonModalVisible(false);
     setSubjectModalVisible(false);
   }
+
+  useFocusEffect(
+    useCallback(() => {
+      queryClient.invalidateQueries({ queryKey: ["subjects"] });
+    }, [queryClient])
+  );
 
   return (
     <View className="flex-1 bg-white">

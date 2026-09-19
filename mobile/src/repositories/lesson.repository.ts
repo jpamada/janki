@@ -15,35 +15,6 @@ export async function getLessons() {
   return query;
 }
 
-export async function getLessonsBySubjectId(subjectId: string) {
-  const query = await db
-  .select()
-  .from(lessons)
-  .where(
-    and(
-      eq(lessons.subjectId, subjectId), 
-      isNull(lessons.deletedAt)
-    )
-  );
-
-  return query;
-}
-
-export async function getLessonById(id: string) {
-  const query = await db
-  .select()
-  .from(lessons)
-  .where(
-    and(
-      eq(lessons.id, id), 
-      isNull(lessons.deletedAt)
-    )
-  )
-  .limit(1);
-
-  return query[0];
-}
-
 export async function createLesson(
   input: {
     name: string;

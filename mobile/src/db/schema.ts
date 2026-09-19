@@ -112,6 +112,45 @@ export const questions = sqliteTable("questions", {
     index("questions_lesson_id_idx").on(table.lessonId),
 ]);
 
+export const progress = sqliteTable("progress", {
+    id: text("id").primaryKey(),
+
+    questionId: text("question_id").notNull(),
+
+    lessonId: text("lesson_id").notNull(),
+
+    sessionDate: text("session_date").notNull(),
+
+    status: text("status", {
+        enum: ["unanswered", "correct", "incorrect"],
+    }).notNull().default("unanswered"),
+
+    answeredAt: integer("answered_at", { mode: "timestamp_ms" }),
+
+}, (table) => [
+    foreignKey({
+        columns: [table.questionId],
+        foreignColumns: [questions.id],
+        name: "progress_question_id_fk",
+    }).onDelete("cascade"),
+
+    foreignKey({
+        columns: [table.lessonId],
+        foreignColumns: [lessons.id],
+        name: "progress_lesson_id_fk",
+    }).onDelete("cascade"),
+
+    unique("progress_question_session_unique").on(
+        table.questionId,
+        table.sessionDate,
+    ),
+
+    index("progress_lesson_session_idx").on(
+        table.lessonId,
+        table.sessionDate,
+    ),
+]);
+
 export const answers = sqliteTable("answers", {
     id: text("id").primaryKey(),
 

@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { Animated } from "react-native";
+import { Animated, useAnimatedValue } from "react-native";
 
 type UseBottomSheetOptions = {
   height?: number;
@@ -15,13 +15,8 @@ export function useBottomSheet({
 
   const [visible, setVisible] = useState(false);
 
-  const translateY = useRef(
-    new Animated.Value(height)
-  ).current;
-
-  const backdropOpacity = useRef(
-    new Animated.Value(0)
-  ).current;
+  const translateY = useAnimatedValue(height);
+  const backdropOpacity = useAnimatedValue(0);
 
   const open = useCallback(() => {
     translateY.stopAnimation();
@@ -45,15 +40,10 @@ export function useBottomSheet({
           duration: openDuration,
           useNativeDriver: true,
         }),
+        
       ]).start();
     });
-
-  }, [
-    height,
-    openDuration,
-    translateY,
-    backdropOpacity,
-  ]);
+  }, [height, openDuration, translateY, backdropOpacity]);
 
   const close = useCallback((callback?: () => void) => {
     translateY.stopAnimation();
@@ -77,19 +67,13 @@ export function useBottomSheet({
       setVisible(false);
       callback?.();
     });
-
-  }, [
-    height,
-    closeDuration,
-    translateY,
-    backdropOpacity,
-  ]);
+  }, [height, closeDuration, translateY, backdropOpacity]);
 
   return {
+    open,
+    close,
     visible,
     translateY,
     backdropOpacity,
-    open,
-    close,
   };
 }

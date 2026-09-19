@@ -10,29 +10,6 @@ export async function getAnswers() {
   return query;
 }
 
-export async function getAnswersByLessonId(lessonId: string) {
-  const query = await db
-  .select()
-  .from(answers)
-  .where(
-    eq(answers.lessonId, lessonId), 
-  );
-
-  return query;
-}
-
-export async function getAnswerById(id: string) {
-  const query = await db
-  .select()
-  .from(answers)
-  .where(
-    eq(answers.id, id), 
-  )
-  .limit(1);
-
-  return query[0];
-}
-
 export async function createAnswer(
   input: {
     id: string;

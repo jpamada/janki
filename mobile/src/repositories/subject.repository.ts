@@ -1,8 +1,10 @@
-import { and, eq, isNull } from "drizzle-orm";
-import { lessons, subjects } from "@/db/schema";
+import { eq, isNull } from "drizzle-orm";
+import { subjects } from "@/db/schema";
+import { progress } from "@/db/schema";
 import { db } from "@/db/client";
 
 import * as Crypto from "expo-crypto";
+import { todayKey } from "@/constants/date";
 
 export async function getSubjects() {
   const query = await db
@@ -13,27 +15,52 @@ export async function getSubjects() {
 }
 
 export async function getSubjectsByCategory(
-  categoryId?: string | null
+  categoryId?: string | null,
 ) {
+  const date = todayKey();
+
   let query;
 
   if (categoryId?.trim()) {
     query = await db.query.subjects
     .findMany({
-      where: eq(subjects.categoryId, categoryId),
+      where: eq(
+        subjects.categoryId,
+        categoryId,
+      ),
       with: {
-        lessons: true
-      }
-    })
+        lessons: {
+          with: {
+            questions: true,
+            progress: {
+              where: eq(
+                progress.sessionDate,
+                date,
+              ),
+            },
+          },
+        },
+      },
+    });
 
   } else {
-   query = await db.query.subjects
+    query = await db.query.subjects
     .findMany({
       where: isNull(subjects.categoryId),
       with: {
-        lessons: true
-      }
-    })
+        lessons: {
+          with: {
+            questions: true,
+            progress: {
+              where: eq(
+                progress.sessionDate,
+                date,
+              ),
+            },
+          },
+        },
+      },
+    });
   }
 
   return query;
