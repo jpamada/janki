@@ -1,21 +1,20 @@
-import { ActivityIndicator, Animated, Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Animated, Image, Modal, Pressable, Text, TextInput, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { FileQuestionMark, Lightbulb, LogOut, Settings, Trophy } from 'lucide-react-native';
 import { getQuestionsByLessonIdWithAnswers } from '@/repositories/question.repository';
-import { recordAnswer, startOrResumeQuiz } from '@/repositories/progress.repository';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { recordAnswer } from '@/repositories/progress.repository';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { resetQuizSession } from '@/repositories/quiz.repository';
 import { router, useLocalSearchParams } from 'expo-router';
 import { logReview } from '@/repositories/logs.repository';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
+import { useQuizSession } from '@/hooks/useQuizSession';
 import { useQuizSfx } from '@/hooks/useQuizSfx';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import EmptyStateScreen from '@/components/shared/EmptyState';
 import CodeBlock from '@/components/shared/CodeBlock';
 import QuizResults from './results';
-import { useQuizSession } from '@/hooks/useQuizSession';
 
 export type UserAnswer = {
   questionId: string;
@@ -28,7 +27,7 @@ export type UserAnswer = {
 
 export default function QuizScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
-  const { playAnswerSfx } = useQuizSfx();
+  const { playAnswerSfx, playCompletedSfx } = useQuizSfx();
   const insets = useSafeAreaInsets();
 
   const queryClient = useQueryClient();
@@ -55,7 +54,7 @@ export default function QuizScreen() {
         queryKey: ['reviewHeatmap'] 
       });
       await queryClient.invalidateQueries({ 
-        queryKey: ['reviewStats'] 
+        queryKey: ['logsStats'] 
       });
     },
 
@@ -188,6 +187,7 @@ export default function QuizScreen() {
       setCurrentQuestionIndex((previous) => previous + 1);
 
     } else {
+      playCompletedSfx();
       setIsFinished(true);
     }
   };
@@ -266,28 +266,29 @@ export default function QuizScreen() {
             showsVerticalScrollIndicator={false}
             className="p-4"
           >
-            {currentQuestion.code ? (
-              <View className="gap-4">
-                <View className="rounded-lg">
-                  <Text className="text-xl font-semibold">
-                    {currentQuestion.question}
-                  </Text>
-                </View>
+            <View className="rounded-lg">
+              <Text className={`
+                text-xl font-semibold
+                ${(currentQuestion?.image || currentQuestion?.code) && "text-center"}
+              `}>
+                {currentQuestion.question}
+              </Text>
+            </View>
 
-                <View className="w-auto p-2">
-                  <CodeBlock
-                    code={currentQuestion.code}
-                    language={currentQuestion.language}
-                  />
-                </View>
-              </View>
-            ) : (
-              <View className="flex-1 justify-center">
-                <View className="rounded-lg bg-white p-6">
-                  <Text className="text-center text-xl font-semibold">
-                    {currentQuestion.question}
-                  </Text>
-                </View>
+            {currentQuestion.image && (
+              <Image
+                source={{ uri: currentQuestion.image }}
+                className="h-48 w-full rounded-xl mt-4"
+                resizeMode="contain"
+              />
+            )}
+
+            {currentQuestion.code && (
+              <View className="w-auto p-2">
+                <CodeBlock
+                  code={currentQuestion.code}
+                  language={currentQuestion.language}
+                />
               </View>
             )}
 

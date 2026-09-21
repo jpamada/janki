@@ -9,6 +9,10 @@ export function useQuizSfx() {
     require('@/assets/sounds/WrongSfx.mp3'),
   );
 
+  const completedPlayer = useAudioPlayer(
+    require('@/assets/sounds/CompletedSfx.mp3'),
+  );
+
   const playAnswerSfx = (correct: boolean) => {
     const player = correct
       ? correctPlayer
@@ -18,7 +22,13 @@ export function useQuizSfx() {
     player.play();
   };
 
+  const playCompletedSfx = () => {
+    completedPlayer.seekTo(0);
+    completedPlayer.play();
+  };
+
   return {
     playAnswerSfx,
+    playCompletedSfx,
   };
 }

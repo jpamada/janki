@@ -11,7 +11,10 @@ CREATE TABLE `answers` (
 CREATE INDEX `answers_lesson_id_idx` ON `answers` (`lesson_id`);--> statement-breakpoint
 CREATE TABLE `categories` (
 	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL
+	`name` text NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer,
+	`deleted_at` integer
 );
 --> statement-breakpoint
 CREATE TABLE `lessons` (
@@ -68,6 +71,7 @@ CREATE TABLE `questions` (
 	`type` text DEFAULT 'multiple_choice' NOT NULL,
 	`question` text NOT NULL,
 	`code` text,
+	`image` text,
 	`language` text,
 	`created_at` integer NOT NULL,
 	`updated_at` integer,

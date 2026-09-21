@@ -30,24 +30,35 @@ export async function startOrResumeQuiz(lessonId: string, allQuestionIds: string
     )
   );
 
-  if (existing.length === 0) {
+  const existingIds = new Set(existing.map((row) => row.questionId));
+  const missingIds = allQuestionIds.filter((id) => !existingIds.has(id));
+
+  if (missingIds.length > 0) {
     await db
     .insert(progress)
     .values(
-      allQuestionIds.map((qid) => ({
+      missingIds.map((qid) => ({
         id: Crypto.randomUUID(),
         questionId: qid,
-        lessonId: lessonId,
+        lessonId,
         sessionDate: date,
         status: "unanswered" as const,
       })),
     );
-    return allQuestionIds;
   }
 
-  return existing
-  .filter((row) => row.status !== "correct")
-  .map((row) => row.questionId);
+  const allRows = [
+    ...existing,
+    ...missingIds.map(
+      (id) => ({ 
+        questionId: id, 
+        status: "unanswered" as const })
+    ),
+  ];
+
+  return allRows
+    .filter((row) => row.status !== "correct")
+    .map((row) => row.questionId);
 }
 
 export async function recordAnswer(questionId: string, correct: boolean) {

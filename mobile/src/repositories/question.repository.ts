@@ -61,30 +61,14 @@ export async function getQuestionById(id: string) {
   return query;
 }
 
-export async function createQuestion(
-  input: {
-    id: string;
-    question: string;
-    lessonId: string;
-}) {
-  await db
-  .insert(questions)
-  .values({
-    id: input.id,
-    question: input.question,
-    lessonId: input.lessonId,
-    createdAt: new Date()
-  });
-};
-
 export async function createQuestionWithAnswers(
   input: {
-    type: "multiple_choice" | "identification";
     question: string;
-    code: string | null;
-    language: string | null;
     lessonId: string;
-
+    code: string | null;
+    image: string | null;
+    language: string | null;
+    type: "multiple_choice" | "identification";
     answers: {
       answer: string;
       isCorrect: boolean;
@@ -95,76 +79,52 @@ export async function createQuestionWithAnswers(
     const questionId = Crypto.randomUUID();
 
     await tx
-      .insert(questions)
-      .values({
-        id: questionId,
-        type: input.type,
-        question: input.question,
-        code: input.code,
-        language: input.language,
-        lessonId: input.lessonId,
-        createdAt: new Date(),
-      });
+    .insert(questions)
+    .values({
+      id: questionId,
+      type: input.type,
+      question: input.question,
+      code: input.code,
+      image: input.image,
+      language: input.language,
+      lessonId: input.lessonId,
+      createdAt: new Date(),
+    });
 
     for (const answer of input.answers) {
       const answerId = Crypto.randomUUID();
 
       await tx
-        .insert(answers)
-        .values({
-          id: answerId,
-          answer: answer.answer,
-          lessonId: input.lessonId,
-          createdAt: new Date(),
-        });
+      .insert(answers)
+      .values({
+        id: answerId,
+        answer: answer.answer,
+        lessonId: input.lessonId,
+        createdAt: new Date(),
+      });
 
       await tx
-        .insert(questionAnswers)
-        .values({
-          id: Crypto.randomUUID(),
-          questionId,
-          answerId,
-          isCorrect: answer.isCorrect,
-          createdAt: new Date(),
-        });
+      .insert(questionAnswers)
+      .values({
+        id: Crypto.randomUUID(),
+        questionId,
+        answerId,
+        isCorrect: answer.isCorrect,
+        createdAt: new Date(),
+      });
     }
   });
 }
 
-export async function updateQuestion(
-  id: string,
-  input: {
-    question: string;
-    lessonId: string;
-}) {
-  await db
-  .update(questions)
-  .set({
-    question: input.question,
-    lessonId: input.lessonId,
-    updatedAt: new Date(),
-  })
-  .where(
-    eq(questions.id, id)
-  );
-};
-
-export async function deleteQuestion(id: string) {
-  await db
-  .delete(questions)
-  .where(
-    eq(questions.id, id)
-  );
-};
-
 export async function updateQuestionWithAnswers(
   questionId: string,
   input: {
-    type: "multiple_choice" | "identification";
     question: string;
-    code: string | null;
-    language: string | null;
     lessonId: string;
+    code: string | null;
+    image: string | null;
+    language: string | null;
+    type: "multiple_choice" | "identification";
 
     answers: {
       answer: string;
@@ -177,8 +137,9 @@ export async function updateQuestionWithAnswers(
     .update(questions)
     .set({
       type: input.type,
-      question: input.question,
       code: input.code,
+      image: input.image,
+      question: input.question,
       language: input.language,
       lessonId: input.lessonId,
       updatedAt: new Date(),
@@ -214,23 +175,31 @@ export async function updateQuestionWithAnswers(
       const answerId = Crypto.randomUUID();
 
       await tx
-        .insert(answers)
-        .values({
-          id: answerId,
-          answer: answer.answer,
-          lessonId: input.lessonId,
-          createdAt: new Date(),
-        });
+      .insert(answers)
+      .values({
+        id: answerId,
+        answer: answer.answer,
+        lessonId: input.lessonId,
+        createdAt: new Date(),
+      });
 
       await tx
-        .insert(questionAnswers)
-        .values({
-          id: Crypto.randomUUID(),
-          questionId,
-          answerId,
-          isCorrect: answer.isCorrect,
-          createdAt: new Date(),
-        });
+      .insert(questionAnswers)
+      .values({
+        id: Crypto.randomUUID(),
+        questionId,
+        answerId,
+        isCorrect: answer.isCorrect,
+        createdAt: new Date(),
+      });
     }
   });
 }
+
+export async function deleteQuestion(id: string) {
+  await db
+  .delete(questions)
+  .where(
+    eq(questions.id, id)
+  );
+};

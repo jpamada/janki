@@ -192,34 +192,38 @@ export default function BrowseQuestionScreen() {
               className="w-[90%] rounded-2xl bg-white p-6"
               onPress={(event) => event.stopPropagation()}
             >
-              <Text className="text-xl font-bold">
-                Delete Lesson
+              <View className="self-center w-32 h-32 items-center justify-center rounded-full bg-gray-100 mb-4">
+                <Trash2 size={72} color="#ef4444" />
+              </View>
+
+              <Text className="text-center text-xl font-bold">
+                Delete Question
               </Text>
 
-              <Text className="mt-2 text-gray-500">
-                Are you sure you want to delete this lesson. This action cannot be undone.
+              <Text className="text-center text-gray-500">
+                Are you sure you want to delete this this question?
               </Text>
 
-              <View className="mt-6 flex-row justify-end gap-2">
+              <View className="mt-6 flex-col justify-end gap-2">
+                <Pressable
+                  onPress={handleDelete}
+                  disabled={deleteQuestionMutation.isPending}
+                  className="rounded-full bg-red-500 px-6 py-4 active:bg-red-400"
+                >
+                  <Text className="font-semibold text-center text-white">
+                    {deleteQuestionMutation.isPending ? 'Deleting...' : 'Delete'}
+                  </Text>
+                </Pressable>
+
                 <Pressable
                   onPress={() => {
                     setSelectedQuestionId(null);
                     setModalVisible(false);
                   }}
-                  className="rounded-full px-6 py-3 active:bg-gray-100"
+                  className="rounded-full px-6 py-4 active:bg-gray-100"
                 >
-                  <Text className="font-semibold text-gray-600">
+                  <Text className="font-semibold text-center text-gray-600">
                     Cancel
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={handleDelete}
-                  disabled={deleteQuestionMutation.isPending}
-                  className="rounded-full bg-red-500 px-6 py-3 active:bg-red-400"
-                >
-                  <Text className="font-semibold text-white">
-                    {deleteQuestionMutation.isPending ? 'Deleting...' : 'Delete'}
                   </Text>
                 </Pressable>
               </View>

@@ -40,11 +40,12 @@ export default function CreateQuestionScreen() {
   const handleQuestionSubmit = async (data: QuestionFormData) => {
     await createQuestionMutation.mutateAsync({
       type: data.type,
-      language: data.language,
       code: data.code,
+      image: data.image,
+      answers: data.answers,
+      language: data.language,
       question: data.question,
       lessonId: data.lessonId,
-      answers: data.answers,
     });
   };
 
@@ -74,11 +75,12 @@ export default function CreateQuestionScreen() {
         onSubmit={handleQuestionSubmit}
         onCreateSuccess={createSuccess}
         defaultValues={{
-          type: "multiple_choice",
-          question: "",
           code: "",
+          image: null,
+          question: "",
           language: null,
           lessonId: lessonId,
+          type: "multiple_choice",
           answers: [
             {
               answer: "",

@@ -115,7 +115,7 @@ export default function LessonForm({
       <Pressable
         disabled={isSubmitting}
         onPress={handleSubmit(handleLessonSubmit)}
-        className="bg-gray-600 rounded-full px-4 py-3 mt-2 active:bg-gray-700 disabled:bg-gray-400"
+        className="bg-gray-600 rounded-full px-4 py-4 mt-2 active:bg-gray-700 disabled:bg-gray-400"
       >
         <Text className="text-white text-center font-semibold">
           {isEditing ? 'Rename' : 'Create Lesson'}

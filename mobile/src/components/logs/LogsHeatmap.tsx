@@ -1,31 +1,72 @@
-import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, addMonths, subMonths, isSameMonth } from 'date-fns';
-import { View, Text, Pressable, LayoutChangeEvent } from 'react-native';
+import { addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, format } from 'date-fns';
+import { bucketColor, computeHeatmapWeeks, type HeatmapDay } from '@/helpers/logsHeatmap.helper';
+import { Text, View, Pressable, LayoutChangeEvent } from 'react-native';
 import { getReviewHeatmapData } from '@/repositories/logs.repository';
-import { useMemo, useState, Fragment, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Fragment } from 'react';
 
 const CELL_GAP = 4;
 const COLUMNS = 7;
 
-type HeatmapDay = {
-  date: string;
-  count: number;
-  inMonth: boolean;
-  dayNumber: number;
+type ReviewHeatmapProps = {
+  onLoadingChange?: (isPending: boolean) => void;
 };
 
-function bucketColor(count: number, inMonth: boolean) {
-  if (!inMonth) return 'transparent';
-  if (count === 0) return '#f3f4f6';
-  if (count >= 51) return '#196127';
-  if (count >= 26) return '#239a3b';
-  if (count >= 11) return '#7bc96f';
-  if (count >= 1) return '#c6e48b';
+type HeatmapGridProps = {
+  weeks: HeatmapDay[][];
+  cellSize: number;
+  width: number;
+  height: number;
+  onLayout: (event: LayoutChangeEvent) => void;
+};
+
+function HeatmapGrid({ 
+  weeks, 
+  width, 
+  height, 
+  cellSize, 
+  onLayout 
+}: HeatmapGridProps) {
+  return (
+    <View onLayout={onLayout}>
+      {cellSize > 0 && (
+        <Svg width={width} height={height}>
+          {weeks.map((week, weekIndex) =>
+            week.map((day, dayIndex) => (
+              <Fragment key={day.date || `${weekIndex}-${dayIndex}`}>
+                <Rect
+                  x={dayIndex * (cellSize + CELL_GAP)}
+                  y={weekIndex * (cellSize + CELL_GAP)}
+                  width={cellSize}
+                  height={cellSize}
+                  rx={6}
+                  fill={bucketColor(day.count, day.inMonth)}
+                />
+
+                {day.inMonth && (
+                  <SvgText
+                    x={dayIndex * (cellSize + CELL_GAP) + cellSize / 2}
+                    y={weekIndex * (cellSize + CELL_GAP) + cellSize / 2 + 4}
+                    fontSize={Math.max(cellSize * 0.32, 9)}
+                    fill={day.count > 0 ? '#fff' : '#9ca3af'}
+                    textAnchor="middle"
+                  >
+                    {day.dayNumber}
+                  </SvgText>
+                )}
+              </Fragment>
+            ))
+          )}
+        </Svg>
+      )}
+    </View>
+  );
 }
 
-export default function ReviewHeatmap() {
+export default function ReviewHeatmap({ onLoadingChange }: ReviewHeatmapProps) {
   const [viewDate, setViewDate] = useState(() => new Date());
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -38,36 +79,19 @@ export default function ReviewHeatmap() {
   const gridStart = useMemo(() => startOfWeek(monthStart), [monthStart]);
   const gridEnd = useMemo(() => endOfWeek(monthEnd), [monthEnd]);
 
-  const { data: rows = [] } = useQuery({
+  const { data: rows = [], isPending } = useQuery({
     queryKey: ['reviewHeatmap', format(monthStart, 'yyyy-MM')],
     queryFn: () => getReviewHeatmapData(gridStart, gridEnd),
   });
 
-  const { weeks } = useMemo(() => {
-    const countByDay = new Map(
-      rows.map((row) => [row.day, Number(row.count)])
-    );
+  useEffect(() => {
+    onLoadingChange?.(isPending);
+  }, [isPending, onLoadingChange]);
 
-    const dates = eachDayOfInterval({ start: gridStart, end: gridEnd });
-
-    const days: HeatmapDay[] = dates.map((date) => {
-      const key = format(date, 'yyyy-MM-dd');
-
-      return {
-        date: key,
-        count: countByDay.get(key) ?? 0,
-        inMonth: isSameMonth(date, monthStart),
-        dayNumber: date.getDate(),
-      };
-    });
-
-    const weeks: HeatmapDay[][] = [];
-    for (let i = 0; i < days.length; i += 7) {
-      weeks.push(days.slice(i, i + 7));
-    }
-
-    return { weeks };
-  }, [rows, gridStart, gridEnd, monthStart]);
+  const weeks = useMemo(
+    () => computeHeatmapWeeks(rows, gridStart, gridEnd, monthStart),
+    [rows, gridStart, gridEnd, monthStart],
+  );
 
   const cellSize = containerWidth > 0
     ? (containerWidth - CELL_GAP * (COLUMNS - 1)) / COLUMNS
@@ -79,9 +103,7 @@ export default function ReviewHeatmap() {
   return (
     <View className="gap-3 rounded-xl py-6">
       <View className='flex flex-row items-center justify-between'>
-        <Text className='text-gray-600 text-lg font-bold'>
-          Summary
-        </Text>
+        <Text className='text-gray-600 text-lg font-bold'>Summary</Text>
 
         <View className="flex-row items-center justify-end gap-2">
           <Pressable
@@ -104,38 +126,13 @@ export default function ReviewHeatmap() {
         </View>
       </View>
 
-      <View onLayout={handleLayout}>
-        {cellSize > 0 && (
-          <Svg width={width} height={height}>
-            {weeks.map((week, weekIndex) =>
-              week.map((day, dayIndex) => (
-                <Fragment key={day.date || `${weekIndex}-${dayIndex}`}>
-                  <Rect
-                    x={dayIndex * (cellSize + CELL_GAP)}
-                    y={weekIndex * (cellSize + CELL_GAP)}
-                    width={cellSize}
-                    height={cellSize}
-                    rx={6}
-                    fill={bucketColor(day.count, day.inMonth)}
-                  />
-
-                  {day.inMonth && (
-                    <SvgText
-                      x={dayIndex * (cellSize + CELL_GAP) + cellSize / 2}
-                      y={weekIndex * (cellSize + CELL_GAP) + cellSize / 2 + 4}
-                      fontSize={Math.max(cellSize * 0.32, 9)}
-                      fill={day.count > 0 ? '#fff' : '#9ca3af'}
-                      textAnchor="middle"
-                    >
-                      {day.dayNumber}
-                    </SvgText>
-                  )}
-                </Fragment>
-              ))
-            )}
-          </Svg>
-        )}
-      </View>
+      <HeatmapGrid
+        weeks={weeks}
+        cellSize={cellSize}
+        width={width}
+        height={height}
+        onLayout={handleLayout}
+      />
     </View>
   );
 }

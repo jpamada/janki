@@ -33,7 +33,8 @@ export async function createCategory(
   .insert(categories)
   .values({
     id: categoryId,
-    name: input.name
+    name: input.name,
+    createdAt: new Date()
   });
 }
 
@@ -45,7 +46,8 @@ export async function updateCategory(
   await db
   .update(categories)
   .set({
-    name: input.name
+    name: input.name,
+    updatedAt: new Date()
   })
   .where(
     eq(categories.id, id)

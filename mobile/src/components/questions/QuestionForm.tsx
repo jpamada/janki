@@ -1,29 +1,20 @@
+import { EllipsisVertical, Square, SquareCheck, Trash2, ImageOff, ImagePlus, CodeXml, Code } from 'lucide-react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
-import { QuestionFormData, questionSchema } from '@/schemas/question.schema';
+import { Animated, Image, Modal, Pressable, Text, TextInput, View } from 'react-native';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { QuestionFormData, questionSchema } from '@/schemas/question.schema';
+import { type WebViewAPI } from '@actualwave/react-native-codeditor';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { EllipsisVertical, Square, SquareCheck, Trash2, Code2 } from 'lucide-react-native';
-import { Animated, Modal, Pressable, Text, TextInput, View } from 'react-native';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useRef, useState } from 'react';
-import { lazy, Suspense } from "react";
-
-const CodeEditor = lazy(() => import('@actualwave/react-native-codeditor'));
-import type { WebViewAPI } from '@actualwave/react-native-codeditor';
-
-import Header from '../shared/Header';
-import { useBottomSheet } from '@/hooks/UseBottomSheet';
-import { LANGUAGES } from '@/constants/languages';
 import { setEditorLanguage } from '@/providers/setEditorLanguage';
+import { getEditorHeight } from '@/helpers/codeditor.helper';
+import { useBottomSheet } from '@/hooks/UseBottomSheet';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { LANGUAGES } from '@/constants/languages';
+import { useRef, useState } from 'react';
 
-const LINE_HEIGHT = 21;
-const MIN_HEIGHT = 280;
-const MAX_HEIGHT = 500;
-
-function getEditorHeight(content: string) {
-  const lines = content ? content.split("\n").length : 1;
-  return Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, lines * LINE_HEIGHT + 24));
-}
+import CodeEditor from '@actualwave/react-native-codeditor';
+import * as DocumentPicker from 'expo-document-picker';
+import Header from '../shared/Header';
 
 type QuestionFormProps = {
   onCreateSuccess?: boolean;
@@ -35,11 +26,12 @@ export default function QuestionForm({
   onCreateSuccess,
   onSubmit,
   defaultValues = {
-    type: "multiple_choice",
-    question: "",
     code: "",
-    language: null,
+    image: null,
+    question: "",
     lessonId: "",
+    language: null,
+    type: "multiple_choice",
     answers: [
       { answer: "", isCorrect: false },
       { answer: "", isCorrect: false },
@@ -59,6 +51,8 @@ export default function QuestionForm({
   } = useBottomSheet();
 
   const [codeVisible, setCodeVisible] = useState(!!defaultValues?.code?.trim());
+  const [imageVisible, setImageVisible] = useState(!!defaultValues?.image?.trim());
+
   const [modalVisible, setModalVisible] = useState(false);
 
   const { control, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<QuestionFormData>({
@@ -69,6 +63,11 @@ export default function QuestionForm({
   const { fields, append, remove, replace } = useFieldArray({
     control,
     name: 'answers',
+  });
+
+  const image = useWatch({
+    control,
+    name: 'image',
   });
 
   const questionType = useWatch({ control, name: 'type' });
@@ -99,14 +98,51 @@ export default function QuestionForm({
     });
   };
 
+  const handleRemoveImage = () => {
+    setValue('image', null, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+
+    setImageVisible(false);
+  };
+
+  const handleSelectImage = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'image/*',
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+
+      if (result.canceled) {
+        return;
+      }
+
+      const image = result.assets[0];
+
+      setValue('image', image.uri, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+
+      setImageVisible(true);
+    } catch (error) {
+      console.error('Failed to select image:', error);
+    }
+  };
+
   const handleFormSubmit = async (data: QuestionFormData) => {
     await onSubmit(data);
     setCodeVisible(false);
+    setImageVisible(false);
+    
     reset({
-      type: data.type,
-      question: "",
       code: "",
+      image: null,
+      question: "",
       language: null,
+      type: data.type,
       lessonId: data.lessonId,
       answers:
         data.type === "identification"
@@ -179,6 +215,20 @@ export default function QuestionForm({
             )}
           />
 
+          {imageVisible && image && (
+            <View className="gap-2">
+              <Text className="text-gray-600 text-sm font-semibold">
+                Image
+              </Text>
+
+              <Image
+                source={{ uri: image }}
+                className="h-56 w-full rounded-xl"
+                resizeMode="contain"
+              />
+            </View>
+          )}
+
           {codeVisible && (
             <View className="gap-2">
               <View className="flex-row items-center justify-between">
@@ -206,7 +256,11 @@ export default function QuestionForm({
                 name="code"
                 control={control}
                 render={({ field: { onChange, value } }) => (
-                  <View style={{ height: getEditorHeight(value ?? ''), borderRadius: 12, overflow: 'hidden' }}>
+                  <View style={{ 
+                    height: getEditorHeight(value ?? ''), 
+                    borderRadius: 12,
+                    overflow: 'hidden' 
+                  }}>
                     <CodeEditor
                       content={value ?? ''}
                       language={defaultValues.language === 'csharp' ? 'javascript' : (defaultValues.language ?? 'javascript')}
@@ -299,7 +353,7 @@ export default function QuestionForm({
 
               <Pressable
                 onPress={() => append({ answer: '', isCorrect: false })}
-                className='border-2 border-gray-200 border-dashed mx-1 py-2 active:bg-gray-50'
+                className='border-2 border-gray-200 border-dashed mx-1 py-2 active:bg-gray-50 mt-2'
               >
                 <Text className="text-gray-300 text-sm text-center font-semibold">Add answer</Text>
               </Pressable>
@@ -364,8 +418,42 @@ export default function QuestionForm({
                 }}
                 className="flex-row items-center gap-2 rounded-3xl p-4 active:bg-gray-100"
               >
-                <Code2 size={16} />
-                <Text className="text-xl">{codeVisible ? 'Remove code' : 'Add code'}</Text>
+                {codeVisible ? (
+                  <View className='flex-row items-center gap-2'>
+                    <CodeXml size={16} />
+                    <Text className="text-xl">Remove code</Text>
+                  </View>
+                ) : (
+                  <View className='flex-row items-center gap-2'>
+                    <Code size={16} />
+                    <Text className="text-xl">Add code</Text>
+                  </View>
+                )}
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
+                  if (imageVisible) {
+                    handleRemoveImage();
+                  } else {
+                    void handleSelectImage();
+                  } 
+                  closeBottomSheet();
+                }}
+                className="rounded-3xl p-4 active:bg-gray-100"
+              >
+                {imageVisible ? (
+                  <View className='flex-row items-center gap-2'>
+                    <ImageOff size={16} />
+                    <Text className="text-xl">Remove image</Text>
+                  </View>
+                ) : (
+                  <View className='flex-row items-center gap-2'>
+                    <ImagePlus size={16} />
+                    <Text className="text-xl">Add image</Text>
+                  </View>
+                )}
+                
               </Pressable>
             </View>
 

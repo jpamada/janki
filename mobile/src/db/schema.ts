@@ -4,6 +4,18 @@ export const categories = sqliteTable("categories", {
     id: text("id").primaryKey(),
 
     name: text("name").notNull(),
+
+    createdAt: integer("created_at", {
+        mode: "timestamp_ms"
+    }).notNull(),
+
+    updatedAt: integer("updated_at", {
+        mode: "timestamp_ms"
+    }),
+
+    deletedAt: integer("deleted_at", {
+        mode: "timestamp_ms"
+    }),
 });
 
 export const subjects = sqliteTable("subjects", {
@@ -88,6 +100,8 @@ export const questions = sqliteTable("questions", {
 
     code: text("code"),
 
+    image: text("image"),
+
     language: text("language"),
 
     createdAt: integer("created_at", {
@@ -125,7 +139,9 @@ export const progress = sqliteTable("progress", {
         enum: ["unanswered", "correct", "incorrect"],
     }).notNull().default("unanswered"),
 
-    answeredAt: integer("answered_at", { mode: "timestamp_ms" }),
+    answeredAt: integer("answered_at", { 
+        mode: "timestamp_ms" 
+    }),
 
 }, (table) => [
     foreignKey({

@@ -3,7 +3,7 @@ import { ActivityIndicator, FlatList, Modal, Pressable, Text, View } from 'react
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CategoryFormData } from '@/schemas/category.schema';
-import { Plus, SearchX } from 'lucide-react-native';
+import { Plus, SearchX, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 
 import CategoryForm from '@/components/categories/CategoryForm';
@@ -191,18 +191,32 @@ export default function CategoryScreen() {
             onPress={(event) => event.stopPropagation()}
           >
             {isDeleting && selectedCategoryId ? (
-              <View className="flex flex-col gap-4">
-                <View className="flex flex-col gap-4">
-                  <Text className="text-xl font-bold text-gray-900">
-                    Delete Category
-                  </Text>
-
-                  <Text className="mt-2 text-base text-gray-500">
-                    Are you sure you want to delete this category?
-                  </Text>
+              <View>
+                <View className="self-center w-32 h-32 items-center justify-center rounded-full bg-gray-100 mb-4">
+                  <Trash2 size={72} color="#ef4444" />
                 </View>
 
-                <View className="mt-6 flex-row justify-end gap-2">
+                <Text className="text-center text-xl font-bold">
+                  Delete Category
+                </Text>
+
+                <Text className="text-center text-gray-500">
+                  Are you sure you want to delete {selectedCategory?.name || "this category"}?
+                </Text>
+
+                <View className="mt-6 flex-col justify-end gap-2">
+                  <Pressable
+                    onPress={handleConfirmDelete}
+                    disabled={deleteCategoryMutation.isPending}
+                    className="rounded-full bg-red-500 px-6 py-4 active:bg-red-400"
+                  >
+                    <Text className="font-semibold text-center text-white">
+                      {deleteCategoryMutation.isPending
+                        ? 'Deleting...'
+                        : 'Delete'}
+                    </Text>
+                  </Pressable>
+
                   <Pressable
                     onPress={() => {
                       setIsEditing(false);
@@ -210,22 +224,10 @@ export default function CategoryScreen() {
                       setModalVisible(false);
                       setSelectedCategoryId(null);
                     }}
-                    className="rounded-full px-6 py-3 active:bg-gray-100"
+                    className="rounded-full px-6 py-4 active:bg-gray-100"
                   >
-                    <Text className="font-semibold text-gray-600">
+                    <Text className="font-semibold text-center text-gray-600">
                       Cancel
-                    </Text>
-                  </Pressable>
-
-                  <Pressable
-                    onPress={handleConfirmDelete}
-                    disabled={deleteCategoryMutation.isPending}
-                    className="rounded-full bg-red-500 px-6 py-3 active:bg-red-400"
-                  >
-                    <Text className="font-semibold text-white">
-                      {deleteCategoryMutation.isPending
-                        ? 'Deleting...'
-                        : 'Delete'}
                     </Text>
                   </Pressable>
                 </View>

@@ -59,7 +59,7 @@ export default function CategoryForm({
       <Pressable
         disabled={isSubmitting}
         onPress={handleSubmit(handleFormSubmit)}
-        className="bg-gray-600 rounded-full px-4 py-3 active:bg-gray-700 disabled:bg-gray-400"
+        className="bg-gray-600 rounded-full px-4 py-4 active:bg-gray-700 disabled:bg-gray-400"
       >
         <Text className="text-white text-center font-semibold">
           {isEditing ? 'Rename' : 'Create Category'}

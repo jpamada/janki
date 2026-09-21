@@ -7,11 +7,10 @@ import * as Haptics from "expo-haptics";
 
 type LessonItemProps = {
   id: string;
-  favorite: boolean;
   title: string;
   index: number;
+  favorite: boolean;
   onLongPress: (id: string) => void;
-
   onToggleFavorite: (id: string, favorite: boolean) => void;
 };
 

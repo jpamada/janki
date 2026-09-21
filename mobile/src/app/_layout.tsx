@@ -11,6 +11,7 @@ import { db } from '@/db/client';
 import migrations from '@/db/migrations/migrations';
 import "@/providers/registerCodeLanguages";
 import '../../global.css';
+import AppLoadingScreen from '@/components/shared/AppLoadingScreen';
 
 export default function RootLayout() {
   const { success, error } = useMigrations(db, migrations);
@@ -20,7 +21,7 @@ export default function RootLayout() {
   }
 
   if (!success) {
-    return null;
+    return <AppLoadingScreen />;
   }
 
   return (

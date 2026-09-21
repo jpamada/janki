@@ -120,3 +120,12 @@ export async function deleteSubject(id: string) {
     eq(subjects.id, id)
   );
 };
+
+export async function hasDefaultSubjects() {
+  const subject = await db.query.subjects
+  .findFirst({
+    where: isNull(subjects.categoryId),
+  });
+
+  return !!subject;
+}

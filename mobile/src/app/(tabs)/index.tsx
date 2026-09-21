@@ -1,15 +1,15 @@
-import { createSubject, deleteSubject, getSubjectsByCategory, updateSubject } from "@/repositories/subject.repository";
+import { createSubject, deleteSubject, getSubjectsByCategory, hasDefaultSubjects, updateSubject } from "@/repositories/subject.repository";
 import { FolderClosed, Lightbulb, PenLine, Plus, SearchX, StarMinus, StarPlus, Trash2, X } from "lucide-react-native";
 import { createLesson, deleteLesson, toggleLessonFavorite, updateLesson } from "@/repositories/lesson.repository";
 import { ActivityIndicator, Animated, FlatList, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCategories } from "@/repositories/category.repository";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { SubjectFormData } from "@/schemas/subject.schema";
 import { useSnackbar } from "@/providers/SnackbarContext";
 import { LessonFormData } from "@/schemas/lesson.schema";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
-import { useCallback, useMemo, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
 
 import SubjectItem from "@/components/subjects/SubjectItem";
@@ -29,6 +29,7 @@ export default function HomeScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [fabVisible, setFabVisible] = useState(false);
+  
   const [subjectModalVisible, setSubjectModalVisible] = useState(false);
   const [lessonModalVisible, setLessonModalVisible] = useState(false);
 
@@ -45,6 +46,13 @@ export default function HomeScreen() {
     queryKey: ['categories'],
     queryFn: getCategories,
   });
+
+  const { data: defaultHasSubjects = true } = useQuery({
+    queryKey: ['hasDefaultSubjects'],
+    queryFn: hasDefaultSubjects,
+  });
+
+  const showDefaultTab = defaultHasSubjects || categories.length === 0;
 
   const selectedSubject = useMemo(() => {
     return subjects.find(
@@ -69,6 +77,12 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
       });
+      await queryClient.invalidateQueries({ 
+        queryKey: ["hasDefaultSubjects"] 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ["favorites"] 
+      });
       resetForm();
     },
 
@@ -87,6 +101,12 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
       });
+      await queryClient.invalidateQueries({ 
+        queryKey: ["hasDefaultSubjects"] 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ["favorites"] 
+      });
       resetForm();
     },
 
@@ -101,6 +121,12 @@ export default function HomeScreen() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ["hasDefaultSubjects"] 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ["favorites"] 
       });
       resetForm();
     },
@@ -133,6 +159,9 @@ export default function HomeScreen() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ["favorites"] 
       });
       resetForm();
     },
@@ -252,6 +281,12 @@ export default function HomeScreen() {
     setSubjectModalVisible(false);
   }
 
+  useEffect(() => {
+    if (!showDefaultTab && selectedCategoryId === null && categories.length > 0) {
+      setSelectedCategoryId(categories[0].id);
+    }
+  }, [showDefaultTab, selectedCategoryId, categories]);
+
   useFocusEffect(
     useCallback(() => {
       queryClient.invalidateQueries({ queryKey: ["subjects"] });
@@ -268,20 +303,22 @@ export default function HomeScreen() {
         showsHorizontalScrollIndicator={false}
         contentContainerClassName="flex-row items-center gap-2 px-6"
       >
-        <Pressable
-          onPress={() => setSelectedCategoryId(null)}
-          className={`rounded-full px-4 py-2 ${
-            selectedCategoryId == null ? "bg-gray-600" : "bg-gray-50 active:bg-gray-100"
-          }`}
-        >
-          <Text
-            className={`text-gray-600 text-sm ${
-              selectedCategoryId == null ? 'text-white font-bold' : 'font-semibold'
+        {showDefaultTab && (
+          <Pressable
+            onPress={() => setSelectedCategoryId(null)}
+            className={`rounded-full px-4 py-2 ${
+              selectedCategoryId == null ? "bg-gray-600" : "bg-gray-50 active:bg-gray-100"
             }`}
           >
-            Default
-          </Text>
-        </Pressable>
+            <Text
+              className={`text-gray-600 text-sm ${
+                selectedCategoryId == null ? 'text-white font-bold' : 'font-semibold'
+              }`}
+            >
+              Default
+            </Text>
+          </Pressable>
+        )}
 
         {categories.map((category) => (
           <Pressable
@@ -352,7 +389,6 @@ export default function HomeScreen() {
         )}
       </View>
 
-
       {fabVisible && (
         <Pressable
           className="absolute inset-0"
@@ -372,7 +408,9 @@ export default function HomeScreen() {
               style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
             >
               <FolderClosed size={20} color="#4b5563" />
-              <Text className="font-semibold text-gray-700">New Subject</Text>
+              <Text className="font-semibold text-gray-700">
+                New Subject
+              </Text>
             </Pressable>
 
             <Pressable
@@ -388,7 +426,9 @@ export default function HomeScreen() {
               style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
             >
               <Lightbulb size={20} color="#4b5563" />
-              <Text className="font-semibold text-gray-700">New Lesson</Text>
+              <Text className="font-semibold text-gray-700">
+                New Lesson
+              </Text>
             </Pressable>
           </View>
         )}
@@ -590,25 +630,35 @@ export default function HomeScreen() {
           >
             {isDeleting ? (
               <View>
-                <Text className="text-xl font-bold">Delete Subject</Text>
-                <Text className="mt-2 text-gray-500">
-                  Are you sure you want to delete this Subject. This action cannot be undone.
-                </Text>
-                <View className="mt-6 flex-row justify-end gap-2">
-                  <Pressable
-                    onPress={resetForm}
-                    className="rounded-full px-6 py-3 active:bg-gray-100"
-                  >
-                    <Text className="font-semibold text-gray-600">Cancel</Text>
-                  </Pressable>
+                <View className="self-center w-32 h-32 items-center justify-center rounded-full bg-gray-100 mb-4">
+                  <Trash2 size={72} color="#ef4444" />
+                </View>
 
+                <Text className="text-center text-xl font-bold">
+                  Delete Subject
+                </Text>
+
+                <Text className="text-center text-gray-500">
+                  Are you sure you want to delete {selectedSubject?.name || "this subject"}?
+                </Text>
+
+                <View className="mt-6 flex-col justify-end gap-2">
                   <Pressable
                     onPress={handleDelete}
                     disabled={deleteSubjectMutation.isPending}
-                    className="rounded-full bg-red-500 px-6 py-3 active:bg-red-400"
+                    className="rounded-full bg-red-500 px-6 py-4 active:bg-red-400"
                   >
-                    <Text className="font-semibold text-white">
+                    <Text className="font-semibold text-center text-white">
                       {deleteSubjectMutation.isPending ? 'Deleting...' : 'Delete'}
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={resetForm}
+                    className="rounded-full px-6 py-4 active:bg-gray-100"
+                  >
+                    <Text className="font-semibold text-center text-gray-600">
+                      Cancel
                     </Text>
                   </Pressable>
                 </View>
@@ -643,26 +693,34 @@ export default function HomeScreen() {
           >
             {isDeleting ? (
               <View>
-                <Text className="text-xl font-bold">Delete Lesson</Text>
-                <Text className="mt-2 text-gray-500">
-                  Are you sure you want to delete this lesson. This action cannot be undone.
+                <View className="self-center w-32 h-32 items-center justify-center rounded-full bg-gray-100 mb-4">
+                  <Trash2 size={72} color="#ef4444" />
+                </View>
+                
+                <Text className="text-xl text-center font-bold">
+                  Delete Lesson
                 </Text>
-                <View className="mt-6 flex-row justify-end gap-2">
-                  <Pressable
-                    onPress={resetForm}
-                    className="rounded-full px-6 py-3 active:bg-gray-100"
-                  >
-                    <Text className="font-semibold text-gray-600">Cancel</Text>
-                  </Pressable>
 
+                <Text className="text-center text-gray-500">
+                  Are you sure you want to delete {selectedLesson?.name || "this lesson"}?
+                </Text>
+
+                <View className="mt-6 flex-col justify-end gap-2">
                   <Pressable
                     onPress={handleDelete}
                     disabled={deleteLessonMutation.isPending}
-                    className="rounded-full bg-red-500 px-6 py-3 active:bg-red-400"
+                    className="rounded-full bg-red-500 px-6 py-4 active:bg-red-400"
                   >
-                    <Text className="font-semibold text-white">
+                    <Text className="font-semibold text-center text-white">
                       {deleteLessonMutation.isPending ? 'Deleting...' : 'Delete'}
                     </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={resetForm}
+                    className="rounded-full px-6 py-4 active:bg-gray-100"
+                  >
+                    <Text className="font-semibold text-center text-gray-600">Cancel</Text>
                   </Pressable>
                 </View>
               </View>

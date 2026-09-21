@@ -68,11 +68,12 @@ export default function QuestionsScreen() {
         <QuestionForm
           onSubmit={handleSubmit}
           defaultValues={{
-            type: question?.type ?? "multiple_choice",
-            question: question?.question ?? "",
             code: question?.code ?? "",
-            language: question?.language ?? null,
+            image: question?.image ?? null,
+            question: question?.question ?? "",
             lessonId: question?.lessonId ?? "",
+            language: question?.language ?? null,
+            type: question?.type ?? "multiple_choice",
 
             answers:
               question?.questionAnswers.map((item) => ({
