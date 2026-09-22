@@ -42,6 +42,9 @@ export default function BrowseQuestionScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["questions", lessonId]
       });
+      await queryClient.invalidateQueries({
+        queryKey: ["questionsWithAnswers", lessonId]
+      });
       setModalVisible(false);
       setSelectedQuestionId(null);
       showSnackbar({ message: "Question deleted successfully" });
