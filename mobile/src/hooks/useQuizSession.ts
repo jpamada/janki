@@ -1,12 +1,13 @@
 import { startOrResumeQuiz } from "@/repositories/progress.repository";
 import { resetQuizSession } from "@/repositories/quiz.repository";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Question = {
   id: string;
   lessonId: string;
   question: string;
 };
+
 export function useQuizSession(
   lessonId: string | undefined,
   questions: Question[],
@@ -17,13 +18,34 @@ export function useQuizSession(
 
   const syncedIdsRef = useRef<Set<string>>(new Set());
 
+  const currentQuestionIds = useMemo(
+    () => new Set(questions.map((question) => question.id)),
+    [questions],
+  );
+
+  const activeQuizQuestionIds = useMemo(
+    () =>
+      quizQuestionIds.filter((id) =>
+        currentQuestionIds.has(id),
+      ),
+    [quizQuestionIds, currentQuestionIds],
+  );
+
   useEffect(() => {
     if (!lessonId || isLoading) return;
 
-    const currentIds = new Set(questions.map((q) => q.id));
-    const hasNewQuestions = questions.some((q) => !syncedIdsRef.current.has(q.id));
+    const currentIds = new Set(
+      questions.map((question) => question.id),
+    );
 
-    if (quizInitialized && !hasNewQuestions) return;
+    const hasNewQuestions = questions.some(
+      (question) => !syncedIdsRef.current.has(question.id),
+    );
+
+    if (quizInitialized && !hasNewQuestions) {
+      syncedIdsRef.current = currentIds;
+      return;
+    }
 
     if (questions.length === 0) {
       setQuizQuestionIds([]);
@@ -34,8 +56,15 @@ export function useQuizSession(
 
     const initializeQuiz = async () => {
       try {
-        const questionIds = questions.map((question) => question.id);
-        const activeQuestionIds = await startOrResumeQuiz(lessonId, questionIds);
+        const questionIds = questions.map(
+          (question) => question.id,
+        );
+
+        const activeQuestionIds = await startOrResumeQuiz(
+          lessonId,
+          questionIds,
+        );
+
         setQuizQuestionIds(activeQuestionIds);
         syncedIdsRef.current = currentIds;
       } catch (error) {
@@ -50,6 +79,7 @@ export function useQuizSession(
 
   const reset = async () => {
     if (!lessonId) return;
+
     await resetQuizSession(lessonId);
 
     const activeQuestionIds = await startOrResumeQuiz(
@@ -60,5 +90,11 @@ export function useQuizSession(
     setQuizQuestionIds(activeQuestionIds);
   };
 
-  return { quizQuestionIds, quizInitialized, reset };
+  return {
+    quizQuestionIds: activeQuizQuestionIds,
+    quizInitialized,
+    reset,
+  };
 }
+
+export default useQuizSession;

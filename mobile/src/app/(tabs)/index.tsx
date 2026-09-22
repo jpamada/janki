@@ -83,11 +83,13 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });
+      showSnackbar({ message: "Subject successfully created" });
       resetForm();
     },
 
     onError: (error) => {
       console.error(error.message);
+      showSnackbar({ message: "Something went wrong. Please try again." });
     }
   });
 
@@ -107,11 +109,13 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });
+      showSnackbar({ message: "Subject successfully updated" });
       resetForm();
     },
 
     onError: (error) => {
       console.error(error.message);
+      showSnackbar({ message: "Something went wrong. Please try again." });
     }
   });
 
@@ -128,10 +132,12 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });
+      showSnackbar({ message: "Subject successfully deleted" });
       resetForm();
     },
     onError: (error) => {
       console.error(error.message);
+      showSnackbar({ message: "Something went wrong. Please try again." });
     }
   });
 
@@ -142,11 +148,13 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
       });
+      showSnackbar({ message: "Lesson successfully created" });
       resetForm();
     },
 
     onError: (error) => {
       console.error(error.message);
+      showSnackbar({ message: "Something went wrong. Please try again." });
     }
   });
 
@@ -163,11 +171,13 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });
+      showSnackbar({ message: "Lesson successfully updated" });
       resetForm();
     },
     
     onError: (error) => {
       console.error(error.message);
+      showSnackbar({ message: "Something went wrong. Please try again." });
     }
   });
 
@@ -191,6 +201,7 @@ export default function HomeScreen() {
       } else {
         showSnackbar({ message: "Removed from favorites" });
       }
+
       resetForm();
     },
   });
@@ -205,11 +216,13 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["favorites"]
       });
+      showSnackbar({ message: "Lesson successfully deleted" });
       resetForm();
     },
 
     onError: (error) => {
       console.error(error.message);
+      showSnackbar({ message: "Something went wrong. Please try again." });
     }
   });
 
@@ -470,8 +483,9 @@ export default function HomeScreen() {
             <View className="rounded-3xl bg-white">
               <Pressable
                 onPress={() => {
-                  setLessonModalVisible(true);
-                  subjectSheet.close();
+                  subjectSheet.close(() => {
+                    setLessonModalVisible(true);
+                  });
                 }}
                 className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
               >
@@ -532,11 +546,12 @@ export default function HomeScreen() {
               <Pressable
                 onPress={() => {
                   const lessonId = selectedLessonId;
-                  lessonSheet.close();
-                  setSelectedLessonId(null);
-                  router.push({
-                    pathname: "/questions/create",
-                    params: { lessonId },
+                  lessonSheet.close(() => {
+                    setSelectedLessonId(null);
+                    router.push({
+                      pathname: "/questions/create",
+                      params: { lessonId },
+                    });
                   });
                 }}
                 className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
@@ -565,11 +580,12 @@ export default function HomeScreen() {
               <Pressable
                 onPress={() => {
                   if (!selectedLesson) return;
-                  toggleFavoriteMutation.mutate({
-                    id: selectedLesson.id,
-                    favorite: !selectedLesson.favorite,
+                  lessonSheet.close(() => {
+                    toggleFavoriteMutation.mutate({
+                      id: selectedLesson.id,
+                      favorite: !selectedLesson.favorite,
+                    });
                   });
-                  lessonSheet.close();
                 }}
                 className="flex-row items-center gap-2 p-4 active:bg-gray-100"
               >

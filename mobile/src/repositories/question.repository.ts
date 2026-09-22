@@ -46,7 +46,7 @@ export async function getQuestionsByLessonIdWithAnswers(
 }
 
 export async function getQuestionById(id: string) {
-  const query = db.query.questions
+  const query = await db.query.questions
   .findFirst({
     where: eq(questions.id, id),
     with: {
@@ -58,7 +58,7 @@ export async function getQuestionById(id: string) {
     },
   });
 
-  return query;
+  return query ?? null;
 }
 
 export async function createQuestionWithAnswers(

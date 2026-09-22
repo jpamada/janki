@@ -6,9 +6,11 @@ import { useLocalSearchParams } from 'expo-router';
 import { View } from 'react-native';
 
 import QuestionForm from '@/components/questions/QuestionForm';
+import { useSnackbar } from '@/providers/SnackbarContext';
 
 export default function CreateQuestionScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
+  const { showSnackbar } = useSnackbar();
 
   const queryClient = useQueryClient();
   
@@ -34,6 +36,7 @@ export default function CreateQuestionScreen() {
 
     onError: (error) => {
       console.error(error.message);
+      showSnackbar({ message: "Something went wrong. Please try again." });
     },
   });
 

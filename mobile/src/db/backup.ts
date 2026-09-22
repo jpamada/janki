@@ -108,7 +108,17 @@ export async function importData() {
 
   await db.transaction(async (tx) => {
     if (cats.length) {
-      await tx.insert(categories).values(cats).onConflictDoNothing();
+    await tx
+      .insert(categories)
+      .values(
+        cats.map((c) => ({
+          ...c,
+          createdAt: toDate(c.createdAt)!,
+          updatedAt: toDate(c.updatedAt),
+          deletedAt: toDate(c.deletedAt),
+        })),
+      )
+      .onConflictDoNothing();
     }
 
     if (subs.length) {

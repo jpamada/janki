@@ -7,11 +7,13 @@ import { recordAnswer } from '@/repositories/progress.repository';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { logReview } from '@/repositories/logs.repository';
+import { useSnackbar } from '@/providers/SnackbarContext';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { useQuizSession } from '@/hooks/useQuizSession';
+import { Suspense, useMemo, useState } from 'react';
 import { useQuizSfx } from '@/hooks/useQuizSfx';
-import { useMemo, useState } from 'react';
 
+import CodeBlockSkeleton from '@/components/skeletons/CodeBlockSkeleton';
 import EmptyStateScreen from '@/components/shared/EmptyState';
 import CodeBlock from '@/components/shared/CodeBlock';
 import QuizResults from './results';
@@ -26,21 +28,29 @@ export type UserAnswer = {
 };
 
 export default function QuizScreen() {
-  const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
-  const { playAnswerSfx, playCompletedSfx } = useQuizSfx();
-  const insets = useSafeAreaInsets();
+const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
 
+  const { playAnswerSfx, playCompletedSfx } = useQuizSfx();
+  const { showSnackbar } = useSnackbar();
+
+  const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+
   const resultSheet = useBottomSheet();
   const settingSheet = useBottomSheet();
 
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null);
+
   const [identificationInput, setIdentificationInput] = useState('');
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
   const [isFinished, setIsFinished] = useState(false);
 
-  const { data: questions = [], isLoading, error } = useQuery({
+  const {
+    data: questions = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['questionsWithAnswers', lessonId],
     queryFn: () => getQuestionsByLessonIdWithAnswers(lessonId),
     enabled: !!lessonId,
@@ -50,67 +60,98 @@ export default function QuizScreen() {
     mutationFn: logReview,
 
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ 
-        queryKey: ['reviewHeatmap'] 
+      await queryClient.invalidateQueries({
+        queryKey: ['reviewHeatmap'],
       });
-      await queryClient.invalidateQueries({ 
-        queryKey: ['logsStats'] 
+
+      await queryClient.invalidateQueries({
+        queryKey: ['logsStats'],
       });
     },
 
     onError: (error) => {
-      console.error(error.message)
+      console.error(error.message);
+      showSnackbar({ message: 'Something went wrong. Please try again.' });
     },
   });
 
   const recordQuizAnswerMutation = useMutation({
-    mutationFn: ({ questionId, correct }: { questionId: string; correct: boolean }) =>
-      recordAnswer(questionId, correct),
+    mutationFn: ({
+      questionId,
+      correct,
+    }: {
+      questionId: string;
+      correct: boolean;
+    }) => recordAnswer(questionId, correct),
 
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ 
-        queryKey: ["subjects"] 
+      await queryClient.invalidateQueries({
+        queryKey: ['subjects'],
       });
     },
 
     onError: (error) => {
-      console.error(error.message)
+      console.error(error.message);
+      showSnackbar({ message: 'Something went wrong. Please try again.' });
     },
   });
 
-  const { 
-    quizQuestionIds, 
-    quizInitialized, 
-    reset: resetQuizQueue 
+  const {
+    quizQuestionIds,
+    quizInitialized,
+    reset: resetQuizQueue,
   } = useQuizSession(
     lessonId,
     questions,
     isLoading,
   );
 
-  const quizQuestions = useMemo(() =>
-    quizQuestionIds.flatMap((id) => {
-      const question = questions.find((q) => q.id === id);
+  const currentQuestionIds = useMemo(
+    () => new Set(questions.map(
+      (question) => question.id)
+    ), [questions],
+  );
+
+  const activeQuizQuestionIds = useMemo(
+    () => quizQuestionIds.filter((id) =>
+      currentQuestionIds.has(id),
+    ), [quizQuestionIds, currentQuestionIds],
+  );
+
+  const quizQuestions = useMemo(
+    () => activeQuizQuestionIds.flatMap((id) => {
+      const question = questions.find(
+        (question) => question.id === id,
+      );
+
       return question ? [question] : [];
-  }), [quizQuestionIds, questions]);
+    }), [activeQuizQuestionIds, questions],
+  );
 
-  const currentQuestion = quizQuestions[currentQuestionIndex];
+  const currentQuestion = quizQuestions.find(
+    (question) => question.id === currentQuestionId,
+  ) ?? quizQuestions[0];
 
-  const progress = quizQuestions.length > 0
-    ? ((currentQuestionIndex + 1) / quizQuestions.length) * 100
-    : 0;
+  const currentQuestionIndex = currentQuestion ? quizQuestions.findIndex(
+    (question) => question.id === currentQuestion.id,
+  ) : -1;
+
+  const progress = quizQuestions.length > 0 && currentQuestionIndex >= 0
+  ? ((currentQuestionIndex + 1) / quizQuestions.length) * 100
+  : 0;
 
   const submitAnswerResult = async (input: {
     correct: boolean;
     answerId: string | null;
     answerText: string;
-    correctAnswer: { 
-      id: string; 
-      answer: string 
+    correctAnswer: {
+      id: string;
+      answer: string;
     };
   }) => {
-    if (!currentQuestion) return;
 
+    if (!currentQuestion) return;
+    const questionId = currentQuestion.id;
     playAnswerSfx(input.correct);
     setIsCorrect(input.correct);
 
@@ -118,7 +159,7 @@ export default function QuizScreen() {
       ...previous,
       {
         isCorrect: input.correct,
-        questionId: currentQuestion.id,
+        questionId,
         answerId: input.answerId,
         answerText: input.answerText,
         correctAnswerId: input.correctAnswer.id,
@@ -127,12 +168,12 @@ export default function QuizScreen() {
     ]);
 
     await recordQuizAnswerMutation.mutateAsync({
-      questionId: currentQuestion.id,
+      questionId,
       correct: input.correct,
     });
 
     await logReviewMutation.mutateAsync({
-      questionId: currentQuestion.id,
+      questionId,
       isCorrect: input.correct,
     });
 
@@ -145,6 +186,7 @@ export default function QuizScreen() {
     const selectedAnswer = currentQuestion.questionAnswers.find(
       (item) => item.answer.id === answerId,
     );
+
     const correctAnswer = currentQuestion.questionAnswers.find(
       (item) => item.isCorrect,
     );
@@ -152,7 +194,8 @@ export default function QuizScreen() {
     if (!selectedAnswer || !correctAnswer) return;
 
     await submitAnswerResult({
-      correct: selectedAnswer.answer.id === correctAnswer.answer.id,
+      correct:
+        selectedAnswer.answer.id === correctAnswer.answer.id,
       answerId: selectedAnswer.answer.id,
       answerText: selectedAnswer.answer.answer,
       correctAnswer: correctAnswer.answer,
@@ -160,15 +203,25 @@ export default function QuizScreen() {
   };
 
   const handleSubmitIdentification = async () => {
-    if (!currentQuestion || resultSheet.visible || !identificationInput.trim()) return;
+    if (
+      !currentQuestion ||
+      resultSheet.visible ||
+      !identificationInput.trim()
+    ) {
+      return;
+    }
 
     const correctAnswer = currentQuestion.questionAnswers.find(
       (item) => item.isCorrect,
     );
+
     if (!correctAnswer) return;
 
     const trimmedInput = identificationInput.trim();
-    const correct = trimmedInput.toLowerCase() === correctAnswer.answer.answer.trim().toLowerCase();
+
+    const correct =
+      trimmedInput.toLowerCase() ===
+      correctAnswer.answer.answer.trim().toLowerCase();
 
     await submitAnswerResult({
       correct,
@@ -179,30 +232,43 @@ export default function QuizScreen() {
   };
 
   const handleContinue = () => {
-    resultSheet.close();
+    if (!currentQuestion) return;
 
-    if (currentQuestionIndex < quizQuestions.length - 1) {
-      setIsCorrect(null);
-      setIdentificationInput('');
-      setCurrentQuestionIndex((previous) => previous + 1);
+    const currentIndex = quizQuestions.findIndex(
+      (question) => question.id === currentQuestion.id,
+    );
 
-    } else {
+    resultSheet.close(() => {
+      const nextQuestion = quizQuestions[currentIndex + 1];
+
+      if (nextQuestion) {
+        setIsCorrect(null);
+        setIdentificationInput('');
+        setCurrentQuestionId(nextQuestion.id);
+
+        return;
+      }
+
       playCompletedSfx();
       setIsFinished(true);
-    }
+    });
   };
 
   const handleResetQuizSession = async () => {
     try {
       await resetQuizQueue();
-      setCurrentQuestionIndex(0);
+
+      setCurrentQuestionId(null);
       setUserAnswers([]);
       setIsFinished(false);
       setIsCorrect(null);
       setIdentificationInput('');
-
     } catch (error) {
       console.error(error);
+
+      showSnackbar({
+        message: 'Something went wrong. Please try again.',
+      });
     }
   };
 
@@ -269,7 +335,7 @@ export default function QuizScreen() {
             <View className="rounded-lg">
               <Text className={`
                 text-xl font-semibold
-                ${(currentQuestion?.image || currentQuestion?.code) && "text-center"}
+                ${(currentQuestion?.image || currentQuestion?.code) ? "text-start" : "text-center"}
               `}>
                 {currentQuestion.question}
               </Text>
@@ -278,19 +344,23 @@ export default function QuizScreen() {
             {currentQuestion.image && (
               <Image
                 source={{ uri: currentQuestion.image }}
-                className="h-48 w-full rounded-xl mt-4"
+                className="h-72 w-full rounded-xl mt-4"
                 resizeMode="contain"
               />
             )}
 
             {currentQuestion.code && (
               <View className="w-auto p-2">
-                <CodeBlock
-                  code={currentQuestion.code}
-                  language={currentQuestion.language}
-                />
+                <Suspense fallback={
+                  <CodeBlockSkeleton />
+                }>
+                  <CodeBlock
+                    code={currentQuestion.code}
+                    language={currentQuestion.language}
+                  />
+                </Suspense>
               </View>
-            )}
+            )}  
 
             <Modal
               transparent
@@ -381,10 +451,11 @@ export default function QuizScreen() {
                 >
                   <Pressable
                     onPress={() => {
-                      settingSheet.close();
-                      router.push({
-                        pathname: "/questions/create",
-                        params: { lessonId: lessonId },
+                      settingSheet.close(() => {
+                        router.push({
+                          pathname: "/questions/create",
+                          params: { lessonId: lessonId },
+                        });
                       });
                     }}
                     className="flex-row items-center gap-2 rounded-t-xl bg-white p-4 active:bg-gray-100"
@@ -397,10 +468,11 @@ export default function QuizScreen() {
 
                   <Pressable
                     onPress={() => {
-                      settingSheet.close();
-                      router.push({
-                        pathname: "/questions/browse",
-                        params: { lessonId: lessonId },
+                      settingSheet.close(() => {
+                        router.push({
+                          pathname: "/questions/browse",
+                          params: { lessonId: lessonId },
+                        });
                       });
                     }}
                     className="flex-row items-center gap-2 bg-white p-4 active:bg-gray-100"
@@ -413,8 +485,9 @@ export default function QuizScreen() {
 
                   <Pressable
                     onPress={() => {
-                      settingSheet.close();
-                      router.back();
+                      settingSheet.close(() => {
+                        router.back();
+                      });
                     }}
                     className="flex-row items-center gap-2 rounded-b-xl bg-white p-4 active:bg-gray-100"
                   >
@@ -437,7 +510,7 @@ export default function QuizScreen() {
         <View className="flex-1 items-center justify-center gap-6 p-6">
           <Trophy color="#4b5563" size={72} />
           <Text className="text-center text-xl font-semibold text-gray-700">
-            You've answered every question correctly
+            You have answered every question correctly
           </Text>
 
           <Pressable

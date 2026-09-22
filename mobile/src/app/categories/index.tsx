@@ -9,8 +9,11 @@ import { useState } from 'react';
 import CategoryForm from '@/components/categories/CategoryForm';
 import CategoryItem from '@/components/categories/CategoryItem';
 import Header from '@/components/shared/Header';
+import { useSnackbar } from '@/providers/SnackbarContext';
 
 export default function CategoryScreen() {
+  const { showSnackbar } = useSnackbar();
+
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
 
@@ -36,11 +39,13 @@ export default function CategoryScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['categories'],
       });
+      showSnackbar({ message: "Category successfully created" });
       setModalVisible(false);
     },
 
     onError: (error) => {
       console.error(error.message);
+      showSnackbar({ message: "Something went wrong. Please try again." });
     },
   });
 
@@ -52,6 +57,7 @@ export default function CategoryScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['categories'],
       });
+      showSnackbar({ message: "Category successfully updated" })
       setIsEditing(false);
       setModalVisible(false);
       setSelectedCategoryId(null);
@@ -59,6 +65,7 @@ export default function CategoryScreen() {
 
     onError: (error) => {
       console.error(error.message);
+      showSnackbar({ message: "Something went wrong. Please try again." });
     },
   });
 
@@ -75,6 +82,7 @@ export default function CategoryScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['subjects', selectedCategoryId],
       });
+      showSnackbar({ message: "Category successfully deleted" });
       setIsDeleting(false);
       setModalVisible(false);
       setSelectedCategoryId(null);
@@ -82,6 +90,7 @@ export default function CategoryScreen() {
 
     onError: (error) => {
       console.error(error.message);
+      showSnackbar({ message: "Something went wrong. Please try again." });
     },
   });
 

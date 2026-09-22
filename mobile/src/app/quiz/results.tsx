@@ -92,8 +92,8 @@ export default function QuizResults({
               </Text>
 
               {question.code && (
-                <View className="mb-4 rounded-lg bg-gray-900 p-3">
-                  <Text style={{ fontFamily: 'monospace' }} className="text-sm text-gray-100">
+                <View className="mb-8 rounded-lg bg-white p-3">
+                  <Text style={{ fontFamily: 'monospace' }} className="text-sm">
                     {question.code}
                   </Text>
                 </View>

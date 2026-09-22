@@ -49,6 +49,7 @@ export default function BrowseQuestionScreen() {
 
     onError: (error) => {
       console.error(error);
+      showSnackbar({ message: "Something went wrong. Please try again." });
     }
   })
   
@@ -130,8 +131,9 @@ export default function BrowseQuestionScreen() {
               <Pressable
                 className="flex-1"
                 onPress={() => {
-                  setSelectedQuestionId(null);
-                  questionSheet.close();
+                  questionSheet.close(() => {
+                    setSelectedQuestionId(null);
+                  });
                 }}
               />
             </Animated.View>
@@ -144,14 +146,15 @@ export default function BrowseQuestionScreen() {
                 <Pressable
                   onPress={() => {
                     if (!selectedQuestionId) return;
-                    questionSheet.close();
-                    router.push({
-                      pathname: `/questions/[id]`,
-                      params: { 
-                        id: selectedQuestionId, 
-                        lessonId: selectedQuestion?.lessonId 
-                      }
-                    })
+                    questionSheet.close(() => {
+                      router.push({
+                        pathname: `/questions/[id]`,
+                        params: { 
+                          id: selectedQuestionId, 
+                          lessonId: selectedQuestion?.lessonId 
+                        }
+                      })
+                    });
                   }}
                   className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
                 >

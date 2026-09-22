@@ -72,6 +72,7 @@ export default function StatisticsScreen() {
 
     onError: (error) => {
       console.error(error);
+      showSnackbar({ message: "Something went wrong. Please try again." });
     }
   });
 
@@ -156,8 +157,9 @@ export default function StatisticsScreen() {
           <Pressable
             className="flex-1"
             onPress={() => {
-              setSelectedLessonId(null);
-              lessonSheet.close();
+              lessonSheet.close(() => {
+                setSelectedLessonId(null);
+              });
             }}
           />
         </Animated.View>
