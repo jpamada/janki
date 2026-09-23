@@ -1,4 +1,4 @@
-import { FolderClosed, FolderOpen, Lightbulb, Star } from "lucide-react-native";
+import { FolderClosed, FolderOpen, Star } from "lucide-react-native";
 import { Pressable, View, Text } from "react-native";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -47,9 +47,14 @@ export default function SubjectItem({
         onPress={() => {
           setSubjectIsOpen((prev) => !prev);
         }}
-        className="flex-row items-center gap-2 rounded-lg px-4 py-4 active:bg-gray-100"
+        className="flex-row items-center gap-2 rounded-lg px-2 py-2 bg-gray-100 active:bg-gray-100"
       >
-        {subjectIsOpen ? <FolderOpen size={18} /> : <FolderClosed size={18} />}
+        <View className="p-2">
+          {subjectIsOpen 
+            ? <FolderOpen size={18} /> 
+            : <FolderClosed size={18} />
+          }
+        </View>
 
         <Text className="flex-1 font-semibold text-gray-700 text-lg">
           {subject.name}
@@ -74,36 +79,34 @@ export default function SubjectItem({
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   onLessonLongPress(lesson.id);
                 }}
-                className="flex-row items-center justify-between gap-2 px-4 py-4 active:bg-gray-100"
+                className="flex-row items-center justify-between gap-2 px-2 py-2 active:bg-gray-100"
               >
                 <View className="flex flex-col gap-1">
                   <View className="flex flex-row items-center gap-2">
-                    <Lightbulb size={18} />
+                    <Pressable
+                      onPress={(event) => {
+                        event.stopPropagation();
+                        onToggleFavorite(lesson.id, !lesson.favorite);
+                      }}
+                      className="rounded-xl p-2 active:bg-gray-100"
+                    >
+                      {lesson.favorite ? (
+                        <Star size={20} color="#9ca3af" fill="#9ca3af" />
+                      ) : (
+                        <Star size={20} color="#9ca3af" />
+                      )}
+                    </Pressable>
                     <Text className="font-medium text-gray-600 text-lg">
                       {lesson.name}
                     </Text>
                   </View>
 
-                  <View className="flex flex-row items-center gap-2 ms-8">
+                  <View className="flex flex-row items-center gap-2 ms-12">
                     <Text className="text-sm text-gray-400">
                       {lesson.questions.length - correctCount} left
                     </Text>
                   </View>
                 </View>
-                
-                <Pressable
-                  onPress={(event) => {
-                    event.stopPropagation();
-                    onToggleFavorite(lesson.id, !lesson.favorite);
-                  }}
-                  className="rounded-xl px-4 py-2 active:bg-gray-100"
-                >
-                  {lesson.favorite ? (
-                    <Star size={20} color="#9ca3af" fill="#9ca3af" />
-                  ) : (
-                    <Star size={20} color="#9ca3af" />
-                  )}
-                </Pressable>
               </Pressable>
             );
           })}

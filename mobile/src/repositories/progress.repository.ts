@@ -1,19 +1,7 @@
 import { todayKey } from "@/constants/date";
-import { progress } from "@/db/schema";
+import { logs, progress } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db/client";
-
-export async function getTodayProgress(lessonId: string) {
-  return db
-  .select()
-  .from(progress)
-  .where(
-    and(
-      eq(progress.lessonId, lessonId),
-      eq(progress.sessionDate, todayKey()),
-    ),
-  );
-}
 
 export async function recordAnswer(questionId: string, correct: boolean) {
   await db
@@ -28,4 +16,9 @@ export async function recordAnswer(questionId: string, correct: boolean) {
       eq(progress.sessionDate, todayKey())
     )
   );
+}
+
+export async function deleteProgress() {
+  await db.delete(progress);
+  await db.delete(logs);
 }

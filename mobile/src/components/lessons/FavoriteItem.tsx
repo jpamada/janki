@@ -37,24 +37,14 @@ export default function FavoriteItem({
         pathname: `/quiz/play`,
         params: { lessonId: id }
       })}
-      className="flex flex-row items-center justify-between gap-2 bg-gray-50 rounded-lg px-4 py-2 active:bg-gray-100"
+      className="flex flex-row items-center gap-2 bg-gray-50 rounded-lg px-2 py-2 active:bg-gray-100"
     >
-      <View className="flex flex-col">
-        <Text className="text-gray-400 text-sm font-semibold">
-          {subject?.name}
-        </Text>
-
-        <Text className="text-gray-600 text-xl font-bold">
-          {title}
-        </Text>
-      </View>
-
       <Pressable 
         onPress={(event) => {
           event.stopPropagation();
           onRemoveFavorite(id);
         }}
-        className="p-4 rounded-xl active:bg-gray-100"
+        className="p-2 rounded-xl active:bg-gray-100"
       >
         {favorite === true ? (
           <Star size={20} color="#9ca3af" fill="#9ca3af"/>
@@ -62,6 +52,19 @@ export default function FavoriteItem({
           <Star size={20} color="#9ca3af" />
         )}
       </Pressable>
+
+      <View className="flex-1 min-w-0 pe-2">
+        <Text
+          className="text-gray-400 text-sm font-semibold"
+          numberOfLines={1}
+        >
+          {subject?.name}
+        </Text>
+
+        <Text className="text-gray-600 text-lg font-medium">
+          {title}
+        </Text>
+      </View>
     </Pressable>
   );
 }

@@ -11,16 +11,13 @@ import { useSnackbar } from "@/providers/SnackbarContext";
 import { LessonFormData } from "@/schemas/lesson.schema";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
 import { router, useFocusEffect } from "expo-router";
-import { useSfx } from "@/providers/SfxProvider";
 
 import SubjectItem from "@/components/subjects/SubjectItem";
 import SubjectForm from "@/components/subjects/SubjectForm";
 import LessonForm from "@/components/lessons/LessonForm";
-import CodeBlock from '@/components/shared/CodeBlock';
 import Header from "@/components/shared/Header";
 
 export default function HomeScreen() {
-  const { playAnswerSfx, playCompletedSfx } = useSfx();
   const { showSnackbar } = useSnackbar();
 
   const subjectSheet = useBottomSheet();
@@ -359,17 +356,15 @@ export default function HomeScreen() {
           className="flex flex-row items-center gap-1 bg-gray-50 rounded-full px-4 py-2 active:bg-gray-100"
         >
           <Plus color="#4b5563" strokeWidth={2} size={16} />
-          <Text className='text-gray-600 text-sm font-semibold'>
-            New Category
-          </Text>
+          {showDefaultTab && (
+            <Text className='text-gray-600 text-sm font-semibold'>
+              New Category
+            </Text>
+          )}
         </Pressable>
       </ScrollView>
 
-      <View className="flex-1 px-6 py-4">
-        <Text className="text-gray-400 text-sm font-semibold mb-2">
-          Subjects
-        </Text>
-
+      <View className="flex-1">
         {isLoading ? (
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="small" color="#4b5563" />
@@ -383,8 +378,18 @@ export default function HomeScreen() {
         ) : subjects?.length > 0 ? (
           <FlatList
             data={subjects}
+            className="px-6 py-4"
             keyExtractor={(item) => item.id}
             contentContainerClassName="gap-2"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingBottom: 100,
+            }}
+            ListHeaderComponent={
+              <Text className="text-gray-400 text-sm font-semibold mb-2">
+                Subjects
+              </Text>
+            }
             renderItem={({ item }) => (
               <SubjectItem
                 subject={item}

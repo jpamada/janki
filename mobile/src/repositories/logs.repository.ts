@@ -1,4 +1,4 @@
-import { sql, gte, and, lte } from 'drizzle-orm';
+import { sql, gte, and, lte, eq } from 'drizzle-orm';
 import { logs } from "@/db/schema";
 import { db } from "@/db/client";
 
@@ -37,6 +37,7 @@ export async function getReviewHeatmapData(
     .from(logs)
     .where(
       and(
+        eq(logs.isCorrect, true),
         gte(logs.reviewedAt, start),
         lte(logs.reviewedAt, end),
       )
@@ -65,6 +66,9 @@ export async function getReviewActivityDays() {
     `,
   })
   .from(logs)
+  .where(
+    eq(logs.isCorrect, true)
+  )
   .groupBy(
     sql`
       date(${logs.reviewedAt} / 1000, 'unixepoch', 'localtime')

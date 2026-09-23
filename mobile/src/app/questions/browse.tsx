@@ -87,10 +87,13 @@ export default function BrowseQuestionScreen() {
         ): questions.length > 0 ? (
           <FlatList
             data={questions}
+            className="px-6 py-2"
             keyExtractor={(item) => item.id}
             contentContainerClassName="gap-2 pb-6"
-            className="px-6 py-2"
             showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingBottom: 100,
+            }}
             renderItem={({ item }) => (
               <QuestionItem
                 key={item.id}

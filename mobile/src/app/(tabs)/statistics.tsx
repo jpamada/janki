@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { computeReviewStats } from '@/helpers/logsStats.helper';
 import { useSnackbar } from '@/providers/SnackbarContext';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
-import { FlatList } from 'react-native-gesture-handler';
+import { FlatList, ScrollView } from 'react-native-gesture-handler';
 import { router } from 'expo-router';
 import { useState } from 'react';
 
@@ -25,7 +25,6 @@ export default function StatisticsScreen() {
   const queryClient = useQueryClient();
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [heatmapPending, setHeatmapPending] = useState(true);
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
 
   const { data: favorites = [], isPending: favoritesPending } = useQuery({
@@ -39,7 +38,6 @@ export default function StatisticsScreen() {
   });
 
   const reviewStats = computeReviewStats(reviewActivityRows);
-  const isPending = favoritesPending && statsPending && heatmapPending;
 
   const selectedLesson = favorites.find(
     (lesson) => lesson.id === selectedLessonId,
@@ -99,47 +97,51 @@ export default function StatisticsScreen() {
     >
       <Header title="Stats" />
 
-      {isPending ? (
+      {favoritesPending || statsPending ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="small" color="#4b5563" />
         </View>
 
       ) : (
-        <View className="flex-1 px-6 py-4">
-          <LogsStats {...reviewStats} />
-          <ReviewHeatmap />
+        <View className="flex-1">
+          <FlatList
+            data={favorites}
+            className='px-6 py-4'
+            keyExtractor={(item) => item.id}
+            contentContainerClassName="gap-2"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingBottom: 32,
+            }}
+            ListHeaderComponent={
+              <>
+                <LogsStats {...reviewStats} />
+                <ReviewHeatmap />
 
-          <View className='bg-white rounded-xl py-4 min-h-60 mb-16'>
-            <Text className='text-gray-600 text-lg font-bold mb-2'>
-              Favorites
-            </Text>
-
-            {favorites.length > 0 ? (
-              <FlatList
-                data={favorites}
-                keyExtractor={(item) => item.id}
-                contentContainerClassName="gap-2"
-                renderItem={({ item }) => (
-                  <FavoriteItem
-                    id={item.id}
-                    title={item.name}
-                    subject={item.subject}
-                    favorite={item.favorite}
-                    onLongPress={handleLessonLongPress}
-                    onRemoveFavorite={handleRemoveFavorite}
-                  />
-                )}
+                <Text className='text-gray-600 text-lg font-bold mb-2'>
+                  Favorites
+                </Text>
+              </>
+            }
+            renderItem={({ item }) => (
+              <FavoriteItem
+                id={item.id}
+                title={item.name}
+                subject={item.subject}
+                favorite={item.favorite}
+                onLongPress={handleLessonLongPress}
+                onRemoveFavorite={handleRemoveFavorite}
               />
-
-            ) : (
+            )}
+            ListEmptyComponent={
               <View className='flex-1 justify-center items-center'>
                 <Star size={64} color="#d1d5db" />
                 <Text className='text-gray-300 font-semibold'>
                   No Favorites found
                 </Text>
               </View>
-            )}
-          </View>
+            }
+          />
         </View>
       )}
 

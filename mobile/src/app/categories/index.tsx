@@ -82,6 +82,9 @@ export default function CategoryScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['subjects', selectedCategoryId],
       });
+      await queryClient.invalidateQueries({
+        queryKey: ["hasDefaultSubjects"]
+      });
       showSnackbar({ message: "Category successfully deleted" });
       setIsDeleting(false);
       setModalVisible(false);
@@ -148,6 +151,9 @@ export default function CategoryScreen() {
         <FlatList
           data={categories}
           keyExtractor={(item) => item.id}
+          contentContainerStyle={{
+            paddingBottom: 100,
+          }}
           renderItem={({ item }) => (
             <CategoryItem
               id={item.id}

@@ -15,6 +15,7 @@ import migrations from '@/db/migrations/migrations';
 
 import "@/providers/registerCodeLanguages";
 import "react-native-code-highlighter";
+import "react-syntax-highlighter";
 import '../../global.css';
 
 export default function RootLayout() {

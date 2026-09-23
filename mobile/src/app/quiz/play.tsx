@@ -1,10 +1,11 @@
 import { ActivityIndicator, Animated, Image, Modal, Pressable, Text, TextInput, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { FileQuestionMark, Lightbulb, LogOut, Settings, Trophy } from 'lucide-react-native';
-import { getQuizData } from '@/repositories/quiz.repository';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { recordAnswer } from '@/repositories/progress.repository';
+import { atomOneLight } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { recordAnswer } from '@/repositories/progress.repository';
+import { getQuizData } from '@/repositories/quiz.repository';
 import { router, useLocalSearchParams } from 'expo-router';
 import { logReview } from '@/repositories/logs.repository';
 import { useSnackbar } from '@/providers/SnackbarContext';
@@ -12,7 +13,6 @@ import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSfx } from '@/providers/SfxProvider';
 import { lazy, useMemo, useState } from 'react';
-import { atomOneLight } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 import EmptyStateScreen from '@/components/shared/EmptyState';
 import QuizResults from './results';

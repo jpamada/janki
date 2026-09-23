@@ -5,10 +5,9 @@ import { Text, View, Pressable, LayoutChangeEvent } from 'react-native';
 import { getReviewHeatmapData } from '@/repositories/logs.repository';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
+import { CELL_GAP, COLUMNS } from '@/constants/heatmapConsts';
 import { useQuery } from '@tanstack/react-query';
 
-const CELL_GAP = 4;
-const COLUMNS = 7;
 
 type ReviewHeatmapProps = {
   onLoadingChange?: (isPending: boolean) => void;
