@@ -1,7 +1,6 @@
+import { Pressable, View, Text } from "react-native";
 import { Star } from "lucide-react-native";
-import { Pressable, View } from "react-native";
 import { router } from "expo-router";
-import { Text } from "react-native";
 
 import * as Haptics from "expo-haptics";
 

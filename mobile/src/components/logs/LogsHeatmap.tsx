@@ -1,12 +1,11 @@
 import { addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, format } from 'date-fns';
 import { bucketColor, computeHeatmapWeeks, type HeatmapDay } from '@/helpers/logsHeatmap.helper';
+import { useCallback, useEffect, useMemo, useState, Fragment } from 'react';
 import { Text, View, Pressable, LayoutChangeEvent } from 'react-native';
 import { getReviewHeatmapData } from '@/repositories/logs.repository';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Fragment } from 'react';
 
 const CELL_GAP = 4;
 const COLUMNS = 7;

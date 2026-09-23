@@ -1,10 +1,9 @@
-import { Pressable } from "react-native";
-import { Text } from "react-native";
+import { Pressable, Text } from "react-native";
 import { router } from "expo-router";
 
 import * as Haptics from "expo-haptics";
 
-type QuestionItem = {
+type QuestionItemProps = {
   id: string;
   lessonId: string;
   question: string;
@@ -16,7 +15,7 @@ export default function QuestionItem({
   lessonId,
   question,
   onLongPress
-}: QuestionItem) {
+}: QuestionItemProps) {
   
   return (
     <Pressable

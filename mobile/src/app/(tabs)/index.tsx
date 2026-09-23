@@ -11,13 +11,16 @@ import { useSnackbar } from "@/providers/SnackbarContext";
 import { LessonFormData } from "@/schemas/lesson.schema";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
 import { router, useFocusEffect } from "expo-router";
+import { useSfx } from "@/providers/SfxProvider";
 
 import SubjectItem from "@/components/subjects/SubjectItem";
 import SubjectForm from "@/components/subjects/SubjectForm";
 import LessonForm from "@/components/lessons/LessonForm";
+import CodeBlock from '@/components/shared/CodeBlock';
 import Header from "@/components/shared/Header";
 
 export default function HomeScreen() {
+  const { playAnswerSfx, playCompletedSfx } = useSfx();
   const { showSnackbar } = useSnackbar();
 
   const subjectSheet = useBottomSheet();

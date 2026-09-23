@@ -1,7 +1,7 @@
 import { ActivityIndicator, Animated, Image, Modal, Pressable, Text, TextInput, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { FileQuestionMark, Lightbulb, LogOut, Settings, Trophy } from 'lucide-react-native';
-import { getQuestionsByLessonIdWithAnswers } from '@/repositories/question.repository';
+import { getQuizData } from '@/repositories/quiz.repository';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { recordAnswer } from '@/repositories/progress.repository';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,13 +10,16 @@ import { logReview } from '@/repositories/logs.repository';
 import { useSnackbar } from '@/providers/SnackbarContext';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { useQuizSession } from '@/hooks/useQuizSession';
-import { Suspense, useMemo, useState } from 'react';
-import { useQuizSfx } from '@/hooks/useQuizSfx';
+import { useSfx } from '@/providers/SfxProvider';
+import { lazy, useMemo, useState } from 'react';
+import { atomOneLight } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
-import CodeBlockSkeleton from '@/components/skeletons/CodeBlockSkeleton';
 import EmptyStateScreen from '@/components/shared/EmptyState';
-import CodeBlock from '@/components/shared/CodeBlock';
 import QuizResults from './results';
+
+const CodeHighlighter = lazy(
+  () => import("react-native-code-highlighter"),
+);
 
 export type UserAnswer = {
   questionId: string;
@@ -28,9 +31,9 @@ export type UserAnswer = {
 };
 
 export default function QuizScreen() {
-const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
+  const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
 
-  const { playAnswerSfx, playCompletedSfx } = useQuizSfx();
+  const { playAnswerSfx, playCompletedSfx } = useSfx();
   const { showSnackbar } = useSnackbar();
 
   const insets = useSafeAreaInsets();
@@ -46,15 +49,45 @@ const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
   const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
   const [isFinished, setIsFinished] = useState(false);
 
-  const {
-    data: questions = [],
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['questionsWithAnswers', lessonId],
-    queryFn: () => getQuestionsByLessonIdWithAnswers(lessonId),
+  const { data: quizData = [], isLoading, error } = useQuery({
+    queryKey: ['quizData', lessonId],
+    queryFn: () => getQuizData(lessonId),
     enabled: !!lessonId,
   });
+
+  const {
+    quizQuestionIds,
+    quizInitialized,
+    reset: resetQuizQueue,
+  } = useQuizSession(
+    lessonId,
+    quizData,
+    isLoading,
+  );
+
+  const quizQuestions = useMemo(
+    () =>
+      quizQuestionIds.flatMap((id) => {
+        const question = quizData.find(
+          (question) => question.id === id,
+        );
+
+        return question ? [question] : [];
+      }),
+    [quizQuestionIds, quizData],
+  );
+
+  const currentQuestion = quizQuestions.find(
+    (question) => question.id === currentQuestionId,
+  ) ?? quizQuestions[0];
+
+  const currentQuestionIndex = currentQuestion ? quizQuestions.findIndex(
+    (question) => question.id === currentQuestion.id,
+  ) : -1;
+
+  const progress = quizQuestions.length > 0 && currentQuestionIndex >= 0
+    ? ((currentQuestionIndex + 1) / quizQuestions.length) * 100
+    : 0;
 
   const logReviewMutation = useMutation({
     mutationFn: logReview,
@@ -96,50 +129,6 @@ const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
     },
   });
 
-  const {
-    quizQuestionIds,
-    quizInitialized,
-    reset: resetQuizQueue,
-  } = useQuizSession(
-    lessonId,
-    questions,
-    isLoading,
-  );
-
-  const currentQuestionIds = useMemo(
-    () => new Set(questions.map(
-      (question) => question.id)
-    ), [questions],
-  );
-
-  const activeQuizQuestionIds = useMemo(
-    () => quizQuestionIds.filter((id) =>
-      currentQuestionIds.has(id),
-    ), [quizQuestionIds, currentQuestionIds],
-  );
-
-  const quizQuestions = useMemo(
-    () => activeQuizQuestionIds.flatMap((id) => {
-      const question = questions.find(
-        (question) => question.id === id,
-      );
-
-      return question ? [question] : [];
-    }), [activeQuizQuestionIds, questions],
-  );
-
-  const currentQuestion = quizQuestions.find(
-    (question) => question.id === currentQuestionId,
-  ) ?? quizQuestions[0];
-
-  const currentQuestionIndex = currentQuestion ? quizQuestions.findIndex(
-    (question) => question.id === currentQuestion.id,
-  ) : -1;
-
-  const progress = quizQuestions.length > 0 && currentQuestionIndex >= 0
-  ? ((currentQuestionIndex + 1) / quizQuestions.length) * 100
-  : 0;
-
   const submitAnswerResult = async (input: {
     correct: boolean;
     answerId: string | null;
@@ -149,9 +138,9 @@ const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
       answer: string;
     };
   }) => {
-
     if (!currentQuestion) return;
     const questionId = currentQuestion.id;
+
     playAnswerSfx(input.correct);
     setIsCorrect(input.correct);
 
@@ -234,12 +223,8 @@ const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
   const handleContinue = () => {
     if (!currentQuestion) return;
 
-    const currentIndex = quizQuestions.findIndex(
-      (question) => question.id === currentQuestion.id,
-    );
-
     resultSheet.close(() => {
-      const nextQuestion = quizQuestions[currentIndex + 1];
+      const nextQuestion = quizQuestions[currentQuestionIndex + 1];
 
       if (nextQuestion) {
         setIsCorrect(null);
@@ -254,7 +239,7 @@ const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
     });
   };
 
-  const handleResetQuizSession = async () => {
+  const handleresetQuiz = async () => {
     try {
       await resetQuizQueue();
 
@@ -283,12 +268,7 @@ const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
 
   return (
     <View className="flex-1 bg-white">
-      {isLoading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="small" color="#4b5563" />
-        </View>
-
-      ) : !quizInitialized ? (
+      {!quizInitialized ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="small" color="#4b5563"
           />
@@ -350,16 +330,16 @@ const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
             )}
 
             {currentQuestion.code && (
-              <View className="w-auto p-2">
-                <Suspense fallback={
-                  <CodeBlockSkeleton />
-                }>
-                  <CodeBlock
-                    code={currentQuestion.code}
-                    language={currentQuestion.language}
-                  />
-                </Suspense>
-              </View>
+              <CodeHighlighter
+                hljsStyle={atomOneLight}
+                language={currentQuestion.language ?? "text"}
+                textStyle={{
+                  fontSize: 14,
+                  fontFamily: "JetBrainsMono_400Regular",
+                }}
+              >
+                {currentQuestion.code}
+              </CodeHighlighter>
             )}  
 
             <Modal
@@ -506,7 +486,7 @@ const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
           </KeyboardAwareScrollView>
         </>
 
-      ) : (quizInitialized && questions.length > 0 && quizQuestionIds.length === 0) ? (
+      ) : (quizInitialized && quizData.length > 0 && quizQuestionIds.length === 0) ? (
         <View className="flex-1 items-center justify-center gap-6 p-6">
           <Trophy color="#4b5563" size={72} />
           <Text className="text-center text-xl font-semibold text-gray-700">
@@ -514,7 +494,7 @@ const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
           </Text>
 
           <Pressable
-            onPress={handleResetQuizSession}
+            onPress={handleresetQuiz}
             className="rounded-xl bg-gray-600 px-8 py-4 active:bg-gray-700"
           >
             <Text className="text-center text-lg font-semibold text-white">

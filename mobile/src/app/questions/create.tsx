@@ -1,4 +1,4 @@
-import { createQuestionWithAnswers } from '@/repositories/question.repository';
+import { createQuizData } from '@/repositories/quiz.repository';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { QuestionFormData } from '@/schemas/question.schema';
 import { useEffect, useRef, useState } from 'react';
@@ -19,14 +19,14 @@ export default function CreateQuestionScreen() {
   const [createSuccess, setCreateSuccess] = useState(false);
 
   const createQuestionMutation = useMutation({
-    mutationFn: createQuestionWithAnswers,
+    mutationFn: createQuizData,
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["questions", lessonId],
       });
       await queryClient.invalidateQueries({
-        queryKey: ["questionsWithAnswers", lessonId],
+        queryKey: ["quizData", lessonId],
       });
       await queryClient.invalidateQueries({
         queryKey: ["subjects"],

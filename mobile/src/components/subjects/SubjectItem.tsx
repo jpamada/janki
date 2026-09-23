@@ -1,7 +1,6 @@
-import { FileText, FolderClosed, FolderOpen, Lightbulb, Star } from "lucide-react-native";
-import { Pressable, View } from "react-native";
+import { FolderClosed, FolderOpen, Lightbulb, Star } from "lucide-react-native";
+import { Pressable, View, Text } from "react-native";
 import { router } from "expo-router";
-import { Text } from "react-native";
 import { useState } from "react";
 
 import * as Haptics from 'expo-haptics';

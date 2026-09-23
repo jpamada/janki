@@ -49,6 +49,7 @@ const config: ExpoConfig = {
     "expo-sqlite",
     "expo-image",
     "expo-audio",
+    "expo-asset",
     "expo-sharing",
     "expo-web-browser",
     "@actualwave/react-native-codeditor",

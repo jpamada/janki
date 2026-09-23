@@ -1,8 +1,8 @@
-import { getReviewActivityDays, getReviewHeatmapData } from '@/repositories/logs.repository';
 import { getFavoriteLessons, toggleLessonFavorite } from '@/repositories/lesson.repository';
 import { ActivityIndicator, Animated, Modal, Pressable, Text, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Lightbulb, Star, StarMinus, StarPlus } from 'lucide-react-native';
+import { getReviewActivityDays } from '@/repositories/logs.repository';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { computeReviewStats } from '@/helpers/logsStats.helper';
 import { useSnackbar } from '@/providers/SnackbarContext';

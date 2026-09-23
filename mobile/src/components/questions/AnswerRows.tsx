@@ -1,4 +1,3 @@
-// components/questions/AnswerRow.tsx
 import { memo } from 'react';
 import { Controller, type Control } from 'react-hook-form';
 import { Pressable, Text, TextInput, View } from 'react-native';

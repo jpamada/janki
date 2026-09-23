@@ -43,7 +43,7 @@ export default function BrowseQuestionScreen() {
         queryKey: ["questions", lessonId]
       });
       await queryClient.invalidateQueries({
-        queryKey: ["questionsWithAnswers", lessonId]
+        queryKey: ["quizData", lessonId]
       });
       setModalVisible(false);
       setSelectedQuestionId(null);

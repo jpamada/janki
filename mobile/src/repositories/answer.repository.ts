@@ -1,5 +1,5 @@
-import { and, eq, isNull } from "drizzle-orm";
 import { answers } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 
 export async function getAnswers() {

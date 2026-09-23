@@ -1,8 +1,7 @@
 import { CategoryFormData, categorySchema } from "@/schemas/category.schema"
-import { Pressable, Text, TextInput } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { View } from "react-native";
 
 type CategoryProps = {
   onSubmit: (data: CategoryFormData) => Promise<void>;

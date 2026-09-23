@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from "react";
 import { Animated, useAnimatedValue } from "react-native";
+import { useCallback, useState } from "react";
 
 type UseBottomSheetOptions = {
   height?: number;

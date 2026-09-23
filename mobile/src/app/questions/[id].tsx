@@ -1,4 +1,4 @@
-import { deleteQuestion, getQuestionById, updateQuestionWithAnswers } from "@/repositories/question.repository";
+import { deleteQuestion, getQuestionById } from "@/repositories/question.repository";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { QuestionFormData } from "@/schemas/question.schema";
@@ -6,6 +6,7 @@ import { ActivityIndicator, Modal, Pressable, Text, View } from "react-native";
 import { SearchX, Trash2 } from "lucide-react-native";
 
 import QuestionForm from "@/components/questions/QuestionForm";
+import { updateQuizData } from "@/repositories/quiz.repository";
 import { useSnackbar } from "@/providers/SnackbarContext";
 import { useState } from "react";
 
@@ -30,7 +31,7 @@ export default function QuestionsScreen() {
 
   const updateQuestionMutation = useMutation({
     mutationFn: (data: QuestionFormData) =>
-      updateQuestionWithAnswers(id, data),
+      updateQuizData(id, data),
 
       onSuccess: async () => {
         await queryClient.invalidateQueries({
@@ -40,7 +41,7 @@ export default function QuestionsScreen() {
           queryKey: ["questions", lessonId]
         });
         await queryClient.invalidateQueries({
-          queryKey: ["questionsWithAnswers", lessonId],
+          queryKey: ["quizData", lessonId],
         });
         showSnackbar({ message: "Question updated successfully" })
         router.back();
@@ -63,7 +64,7 @@ export default function QuestionsScreen() {
         queryKey: ["questions", lessonId]
       });
       await queryClient.invalidateQueries({
-        queryKey: ["questionsWithAnswers", lessonId],
+        queryKey: ["quizData", lessonId],
       });
       showSnackbar({ message: "Question successfully deleted" })
       router.back();

@@ -1,6 +1,5 @@
 import { eq, isNull } from "drizzle-orm";
-import { subjects } from "@/db/schema";
-import { progress } from "@/db/schema";
+import { subjects, progress } from "@/db/schema";
 import { db } from "@/db/client";
 
 import * as Crypto from "expo-crypto";

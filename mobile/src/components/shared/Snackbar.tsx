@@ -38,7 +38,6 @@ export default function Snackbar({
   const opacity = useSharedValue(0);
   const scale = useSharedValue(0.85);
 
-  // Pop-in entrance — quick ease-out, no overshoot
   useEffect(() => {
     opacity.value = withTiming(1, { duration: 150, easing: Easing.out(Easing.ease) });
     scale.value = withTiming(1, { duration: 150, easing: Easing.out(Easing.quad) });

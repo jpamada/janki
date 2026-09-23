@@ -1,4 +1,3 @@
-// components/questions/LanguagePicker.tsx
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useWatch, type Control } from 'react-hook-form';

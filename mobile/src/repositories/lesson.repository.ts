@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { eq, isNull } from "drizzle-orm";
 import { lessons } from "@/db/schema";
 import { db } from "@/db/client";
 
