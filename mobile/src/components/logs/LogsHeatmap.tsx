@@ -3,11 +3,13 @@ import { bucketColor, computeHeatmapWeeks, type HeatmapDay } from '@/helpers/log
 import { useCallback, useEffect, useMemo, useState, Fragment } from 'react';
 import { Text, View, Pressable, LayoutChangeEvent } from 'react-native';
 import { getReviewHeatmapData } from '@/repositories/logs.repository';
+import { useMinimumLoadingDuration } from '@/hooks/useMinimumLoadingDuration';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
-import { CELL_GAP, COLUMNS } from '@/constants/heatmapConsts';
 import { useQuery } from '@tanstack/react-query';
+import { CELL_GAP, COLUMNS } from '@/constants/heatmapConsts';
 
+const SKELETON_ROWS = 5;
 
 type ReviewHeatmapProps = {
   onLoadingChange?: (isPending: boolean) => void;
@@ -21,12 +23,12 @@ type HeatmapGridProps = {
   onLayout: (event: LayoutChangeEvent) => void;
 };
 
-function HeatmapGrid({ 
-  weeks, 
-  width, 
-  height, 
-  cellSize, 
-  onLayout 
+function HeatmapGrid({
+  weeks,
+  width,
+  height,
+  cellSize,
+  onLayout,
 }: HeatmapGridProps) {
   return (
     <View onLayout={onLayout}>
@@ -64,6 +66,40 @@ function HeatmapGrid({
   );
 }
 
+type HeatmapSkeletonProps = {
+  width: number;
+  cellSize: number;
+  onLayout: (event: LayoutChangeEvent) => void;
+};
+
+function HeatmapSkeleton({ width, cellSize, onLayout }: HeatmapSkeletonProps) {
+  return (
+    <View onLayout={onLayout}>
+      {cellSize > 0 ? (
+        <Svg width={width} height={SKELETON_ROWS * (cellSize + CELL_GAP) - CELL_GAP}>
+          {Array.from({ length: SKELETON_ROWS }).map((_, weekIndex) =>
+            Array.from({ length: COLUMNS }).map((_, dayIndex) => (
+              <Rect
+                key={`${weekIndex}-${dayIndex}`}
+                x={dayIndex * (cellSize + CELL_GAP)}
+                y={weekIndex * (cellSize + CELL_GAP)}
+                width={cellSize}
+                height={cellSize}
+                rx={6}
+                fill="#f3f4f6"
+              />
+            ))
+          )}
+        </Svg>
+      ) : (
+        // Reserve visible space even before the first layout measurement
+        // lands, so nothing renders as a blank gap.
+        <View style={{ height: 160 }} className="bg-gray-50 rounded-xl" />
+      )}
+    </View>
+  );
+}
+
 export default function ReviewHeatmap({ onLoadingChange }: ReviewHeatmapProps) {
   const [viewDate, setViewDate] = useState(() => new Date());
   const [containerWidth, setContainerWidth] = useState(0);
@@ -81,6 +117,11 @@ export default function ReviewHeatmap({ onLoadingChange }: ReviewHeatmapProps) {
     queryKey: ['reviewHeatmap', format(monthStart, 'yyyy-MM')],
     queryFn: () => getReviewHeatmapData(gridStart, gridEnd),
   });
+
+  // Guarantees the skeleton is visible for at least 400ms, even if the
+  // local DB query resolves faster than a single frame — otherwise the
+  // loading state can flip too quickly to ever be perceived.
+  const showSkeleton = useMinimumLoadingDuration(isPending, 400);
 
   useEffect(() => {
     onLoadingChange?.(isPending);
@@ -124,13 +165,21 @@ export default function ReviewHeatmap({ onLoadingChange }: ReviewHeatmapProps) {
         </View>
       </View>
 
-      <HeatmapGrid
-        weeks={weeks}
-        cellSize={cellSize}
-        width={width}
-        height={height}
-        onLayout={handleLayout}
-      />
+      {showSkeleton ? (
+        <HeatmapSkeleton
+          width={width}
+          cellSize={cellSize}
+          onLayout={handleLayout}
+        />
+      ) : (
+        <HeatmapGrid
+          weeks={weeks}
+          cellSize={cellSize}
+          width={width}
+          height={height}
+          onLayout={handleLayout}
+        />
+      )}
     </View>
   );
 }

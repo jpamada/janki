@@ -20,7 +20,7 @@ const config: ExpoConfig = {
     package: "com.jpamada.mobile",
 
     adaptiveIcon: {
-      backgroundColor: "#E6F4FE",
+      backgroundColor: "#FFFFFF",
       foregroundImage: "./assets/images/android-icon-foreground.png",
       backgroundImage: "./assets/images/android-icon-background.png",
       monochromeImage: "./assets/images/android-icon-monochrome.png",
@@ -39,9 +39,9 @@ const config: ExpoConfig = {
     [
       "expo-splash-screen",
       {
-        backgroundColor: "#208AEF",
+        backgroundColor: "#FFFFFF",
         image: "./assets/images/splash-icon.png",
-        imageWidth: 76,
+        imageWidth: 200,
       },
     ],
 
@@ -63,7 +63,7 @@ const config: ExpoConfig = {
   extra: {
     router: {},
     eas: {
-      projectId: "b5985079-f0b0-4e05-9ca3-c55b6b6e1af5",
+      projectId: "75aec871-0f6f-4482-b9f1-5f318cf4fa7a",
     },
   },
 };

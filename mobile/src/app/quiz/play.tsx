@@ -330,16 +330,22 @@ export default function QuizScreen() {
             )}
 
             {currentQuestion.code && (
-              <CodeHighlighter
-                hljsStyle={atomOneLight}
-                language={currentQuestion.language ?? "text"}
-                textStyle={{
-                  fontSize: 14,
-                  fontFamily: "JetBrainsMono_400Regular",
-                }}
-              >
-                {currentQuestion.code}
-              </CodeHighlighter>
+              <View className="w-auto p-2">
+                <CodeHighlighter
+                  hljsStyle={atomOneLight}
+                  language={currentQuestion.language ?? "text"}
+                  scrollViewProps={{
+                    style: { backgroundColor: "transparent" },
+                    contentContainerStyle: { backgroundColor: "transparent" },
+                  }}
+                  textStyle={{
+                    fontSize: 14,
+                    fontFamily: "JetBrainsMono_400Regular",
+                  }}
+                >
+                  {currentQuestion.code}
+                </CodeHighlighter>
+              </View>
             )}  
 
             <Modal
