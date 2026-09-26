@@ -1,16 +1,8 @@
-import { useEffect } from "react";
-import { Pressable, Text, View, useWindowDimensions } from "react-native";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS, interpolate, Extrapolation, Easing } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  runOnJS,
-  interpolate,
-  Extrapolation,
-  Easing,
-} from "react-native-reanimated";
+import { Pressable, Text, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useEffect } from "react";
 
 type SnackbarProps = {
   message: string;

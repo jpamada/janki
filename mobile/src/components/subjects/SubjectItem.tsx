@@ -1,9 +1,10 @@
-import { FolderClosed, FolderOpen, Star } from "lucide-react-native";
+import { Check, FolderClosed, FolderOpen, Star } from "lucide-react-native";
 import { Pressable, View, Text } from "react-native";
 import { router } from "expo-router";
 import { useState } from "react";
 
 import * as Haptics from 'expo-haptics';
+import DebouncedPressable from "../shared/DebouncedPressable";
 
 type SubjectItemProps = {
   subject: {
@@ -68,8 +69,10 @@ export default function SubjectItem({
               (item) => item.status === 'correct',
             ).length;
 
+            const remainingCount = lesson.questions.length - correctCount;
+
             return (
-              <Pressable
+              <DebouncedPressable
                 key={lesson.id}
                 onPress={() => router.push({
                   pathname: "/quiz/play",
@@ -101,13 +104,28 @@ export default function SubjectItem({
                     </Text>
                   </View>
 
-                  <View className="flex flex-row items-center gap-2 ms-12">
-                    <Text className="text-sm text-gray-400">
-                      {lesson.questions.length - correctCount} left
-                    </Text>
+                  <View className="flex flex-row items-center gap-2 ms-12">                   
+                    {lesson?.questions?.length === 0 ? (
+                      <View className="flex flex-row items-center gap-1">
+                        <Text className="text-sm text-gray-400">
+                          Empty
+                        </Text>
+                      </View>
+                    ) : (remainingCount === 0 && correctCount > 0) ? (
+                      <View className="flex flex-row items-center gap-1">
+                        <Text className="text-sm text-gray-400">
+                          Completed
+                        </Text>
+                      </View>
+                      
+                    ) : (
+                      <Text className="text-sm text-gray-400">
+                        {remainingCount} left
+                      </Text>
+                    )}
                   </View>
                 </View>
-              </Pressable>
+              </DebouncedPressable>
             );
           })}
         </View>

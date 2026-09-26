@@ -1,6 +1,7 @@
-import { Pressable, Text } from "react-native";
 import { router } from "expo-router";
+import { Text } from "react-native";
 
+import DebouncedPressable from "../shared/DebouncedPressable";
 import * as Haptics from "expo-haptics";
 
 type QuestionItemProps = {
@@ -18,7 +19,7 @@ export default function QuestionItem({
 }: QuestionItemProps) {
   
   return (
-    <Pressable
+    <DebouncedPressable
       onLongPress={() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onLongPress(id);
@@ -34,6 +35,6 @@ export default function QuestionItem({
       <Text className="text-gray-600 text-xl font-semibold">
         {question}
       </Text>
-    </Pressable>
+    </DebouncedPressable>
   );
 }

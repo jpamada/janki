@@ -1,9 +1,11 @@
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CircleCheck, CircleX } from 'lucide-react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { UserAnswer } from './play';
+
+import DebouncedPressable from '@/components/shared/DebouncedPressable';
 
 type QuizResultsProps = {
   questions: {
@@ -49,14 +51,14 @@ export default function QuizResults({
           Results
         </Text>
 
-        <Pressable
+        <DebouncedPressable
           onPress={() => router.back()}
           className="rounded-lg bg-gray-600 px-3 py-2 active:bg-gray-700"
         >
           <Text className="text-center font-semibold text-white">
             Finish Quiz
           </Text>
-        </Pressable>
+        </DebouncedPressable>
       </View>
 
       <Text className="mb-8 text-xl font-semibold">
@@ -93,7 +95,7 @@ export default function QuizResults({
 
               {question.code && (
                 <View className="mb-8 rounded-lg bg-white p-3">
-                  <Text style={{ fontFamily: 'monospace' }} className="text-sm">
+                  <Text style={{ fontFamily: 'monospace' }} className="text-xs text-gray-700">
                     {question.code}
                   </Text>
                 </View>

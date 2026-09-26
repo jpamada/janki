@@ -1,8 +1,8 @@
-import { memo } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { type QuestionFormData } from '@/schemas/question.schema';
 import { useWatch, type Control } from 'react-hook-form';
-import type { QuestionFormData } from '@/schemas/question.schema';
+import { Pressable, Text, View } from 'react-native';
 import { LANGUAGES } from '@/constants/languages';
+import { memo } from 'react';
 
 type LanguagePickerProps = {
   control: Control<QuestionFormData>;

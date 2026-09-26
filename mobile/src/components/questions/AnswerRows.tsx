@@ -1,8 +1,8 @@
-import { memo } from 'react';
-import { Controller, type Control } from 'react-hook-form';
-import { Pressable, Text, TextInput, View } from 'react-native';
 import { Square, SquareCheck, Trash2 } from 'lucide-react-native';
-import type { QuestionFormData } from '@/schemas/question.schema';
+import { type QuestionFormData } from '@/schemas/question.schema';
+import { Pressable, Text, TextInput, View } from 'react-native';
+import { Controller, type Control } from 'react-hook-form';
+import { memo } from 'react';
 
 type AnswerRowProps = {
   control: Control<QuestionFormData>;

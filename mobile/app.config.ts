@@ -13,29 +13,28 @@ const config: ExpoConfig = {
   userInterfaceStyle: "automatic",
 
   ios: {
-    icon: "./assets/expo.icon",
+    icon: "./assets/images/icon.png",
   },
 
   android: {
     package: "com.jpamada.mobile",
-
-    adaptiveIcon: {
-      backgroundColor: "#FFFFFF",
-      foregroundImage: "./assets/images/android-icon-foreground.png",
-      backgroundImage: "./assets/images/android-icon-background.png",
-      monochromeImage: "./assets/images/android-icon-monochrome.png",
-    },
-
     predictiveBackGestureEnabled: false,
   },
 
   web: {
     output: "static",
-    favicon: "./assets/images/favicon.png",
+    favicon: "./assets/images/icon.png",
     bundler: "metro",
   },
 
   plugins: [
+    [
+      "expo-notifications",
+      {
+        icon: "./assets/images/notification-icon.png",
+        color: "#FFFFFF",
+      },
+    ],
     [
       "expo-splash-screen",
       {

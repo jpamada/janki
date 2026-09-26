@@ -1,5 +1,7 @@
 import { Href, router } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import {  Text, View } from "react-native";
+
+import DebouncedPressable from "./DebouncedPressable";
 
 type EmptyStateProps = {
   title: string;
@@ -27,7 +29,7 @@ export default function EmptyStateScreen({
       )}
 
       {navigate && (
-        <Pressable
+        <DebouncedPressable
           onPress={() =>
           router.push(navigate)}
           className="rounded-xl bg-gray-600 px-8 py-4 active:bg-gray-700"
@@ -35,7 +37,7 @@ export default function EmptyStateScreen({
           <Text className="text-center text-lg font-semibold text-white">
             Add Questions
           </Text>
-        </Pressable>
+        </DebouncedPressable>
       )}
     </View>
   )

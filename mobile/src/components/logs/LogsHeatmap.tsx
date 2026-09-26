@@ -1,13 +1,13 @@
 import { addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, format } from 'date-fns';
 import { bucketColor, computeHeatmapWeeks, type HeatmapDay } from '@/helpers/logsHeatmap.helper';
+import { useMinimumLoadingDuration } from '@/hooks/useMinimumLoadingDuration';
 import { useCallback, useEffect, useMemo, useState, Fragment } from 'react';
 import { Text, View, Pressable, LayoutChangeEvent } from 'react-native';
 import { getReviewHeatmapData } from '@/repositories/logs.repository';
-import { useMinimumLoadingDuration } from '@/hooks/useMinimumLoadingDuration';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
-import { useQuery } from '@tanstack/react-query';
 import { CELL_GAP, COLUMNS } from '@/constants/heatmapConsts';
+import { useQuery } from '@tanstack/react-query';
 
 const SKELETON_ROWS = 5;
 

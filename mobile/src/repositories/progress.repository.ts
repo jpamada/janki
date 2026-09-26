@@ -1,5 +1,5 @@
-import { todayKey } from "@/constants/date";
 import { logs, progress } from "@/db/schema";
+import { todayKey } from "@/constants/date";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 

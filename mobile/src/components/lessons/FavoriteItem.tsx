@@ -2,6 +2,7 @@ import { Pressable, View, Text } from "react-native";
 import { Star } from "lucide-react-native";
 import { router } from "expo-router";
 
+import DebouncedPressable from "../shared/DebouncedPressable";
 import * as Haptics from "expo-haptics";
 
 type Subject = {
@@ -28,7 +29,7 @@ export default function FavoriteItem({
 }: LessonItem) {
 
   return (
-    <Pressable
+    <DebouncedPressable
       onLongPress={() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onLongPress(id);
@@ -65,6 +66,6 @@ export default function FavoriteItem({
           {title}
         </Text>
       </View>
-    </Pressable>
+    </DebouncedPressable>
   );
 }

@@ -1,7 +1,9 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Pressable, Text, View } from "react-native";
-import { router } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
+import { Text, View } from "react-native";
+import { router } from "expo-router";
+
+import DebouncedPressable from "./DebouncedPressable";
 
 type HeaderProps = {
   title?: string;
@@ -31,12 +33,12 @@ export default function Header({
         flex flex-row items-center
       `}>
         {back && (
-          <Pressable
+          <DebouncedPressable
             onPress={() => router.back()}
             className="p-3 rounded-xl active:bg-gray-100"
           >
             <ArrowLeft />
-          </Pressable>
+          </DebouncedPressable>
         )}
 
         {title && (

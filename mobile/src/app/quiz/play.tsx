@@ -14,6 +14,7 @@ import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSfx } from '@/providers/SfxProvider';
 import { lazy, useMemo, useState } from 'react';
 
+import DebouncedPressable from '@/components/shared/DebouncedPressable';
 import EmptyStateScreen from '@/components/shared/EmptyState';
 import QuizResults from './results';
 
@@ -267,7 +268,7 @@ export default function QuizScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-gray-50">
       {!quizInitialized ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="small" color="#4b5563"
@@ -283,7 +284,7 @@ export default function QuizScreen() {
 
       ) : quizQuestions.length > 0 && currentQuestion ? (
         <>
-          <View className="mt-8 flex-row items-center gap-1 p-1">
+          <View className="mt-8 flex-row items-center gap-1 p-1 bg-gray-50">
             <Pressable
               onPress={() =>
                 settingSheet.open()
@@ -310,12 +311,14 @@ export default function QuizScreen() {
             bottomOffset={20}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
-            className="p-4"
+            contentContainerClassName='flex-1'
           >
-            <View className="rounded-lg">
+            <View className="rounded-lg bg-gray-50 px-4 py-2">
               <Text className={`
                 text-xl font-semibold
-                ${(currentQuestion?.image || currentQuestion?.code) ? "text-start" : "text-center"}
+                ${(currentQuestion?.image || currentQuestion?.code || currentQuestion?.question.length > 30) 
+                  ? "text-start" 
+                  : "text-center"}
               `}>
                 {currentQuestion.question}
               </Text>
@@ -324,13 +327,13 @@ export default function QuizScreen() {
             {currentQuestion.image && (
               <Image
                 source={{ uri: currentQuestion.image }}
-                className="h-72 w-full rounded-xl mt-4"
+                className="h-72 w-full rounded-xl mt-4 px-4"
                 resizeMode="contain"
               />
             )}
 
             {currentQuestion.code && (
-              <View className="w-auto p-2">
+              <View className="flex-1 bg-white w-auto p-4">
                 <CodeHighlighter
                   hljsStyle={atomOneLight}
                   language={currentQuestion.language ?? "text"}
@@ -340,7 +343,7 @@ export default function QuizScreen() {
                   }}
                   textStyle={{
                     fontSize: 14,
-                    fontFamily: "JetBrainsMono_400Regular",
+                    fontFamily: "monospace",
                   }}
                 >
                   {currentQuestion.code}
@@ -396,7 +399,7 @@ export default function QuizScreen() {
                       </View>
                     )}
 
-                    <Pressable
+                    <DebouncedPressable
                       onPress={handleContinue}
                       className="mt-8 rounded-lg bg-gray-600 p-4 active:bg-gray-700"
                     >
@@ -406,7 +409,7 @@ export default function QuizScreen() {
                           ? 'Continue'
                           : 'Finish'}
                       </Text>
-                    </Pressable>
+                    </DebouncedPressable>
                   </View>
 
                   <View style={{ height: insets.bottom }} />
@@ -435,7 +438,7 @@ export default function QuizScreen() {
                   style={{ transform: [{ translateY: settingSheet.translateY }]}}
                   className="rounded-3xl bg-gray-50 px-4 py-6"
                 >
-                  <Pressable
+                  <DebouncedPressable
                     onPress={() => {
                       settingSheet.close(() => {
                         router.push({
@@ -450,9 +453,9 @@ export default function QuizScreen() {
                     <Text className="text-xl">
                       Add Question
                     </Text>
-                  </Pressable>
+                  </DebouncedPressable>
 
-                  <Pressable
+                  <DebouncedPressable
                     onPress={() => {
                       settingSheet.close(() => {
                         router.push({
@@ -467,9 +470,9 @@ export default function QuizScreen() {
                     <Text className="text-xl">
                       Browse Questions
                     </Text>
-                  </Pressable>
+                  </DebouncedPressable>
 
-                  <Pressable
+                  <DebouncedPressable
                     onPress={() => {
                       settingSheet.close(() => {
                         router.back();
@@ -482,7 +485,7 @@ export default function QuizScreen() {
                     <Text className="text-xl">
                       Give Up
                     </Text>
-                  </Pressable>
+                  </DebouncedPressable>
 
                   <View style={{ height: insets.bottom }}
                   />
@@ -499,14 +502,14 @@ export default function QuizScreen() {
             You have answered every question correctly
           </Text>
 
-          <Pressable
+          <DebouncedPressable
             onPress={handleresetQuiz}
             className="rounded-xl bg-gray-600 px-8 py-4 active:bg-gray-700"
           >
             <Text className="text-center text-lg font-semibold text-white">
               Answer Again
             </Text>
-          </Pressable>
+          </DebouncedPressable>
         </View>
 
       ) : (
@@ -561,11 +564,8 @@ export default function QuizScreen() {
                   className="rounded-xl bg-gray-100 px-4 py-4 text-lg font-semibold"
                 />
 
-                <Pressable
-                  disabled={
-                    resultSheet.visible ||
-                    !identificationInput.trim()
-                  }
+                <DebouncedPressable
+                  disabled={resultSheet.visible || !identificationInput.trim()}
                   onPress={
                     handleSubmitIdentification
                   }
@@ -574,7 +574,7 @@ export default function QuizScreen() {
                   <Text className="text-center text-lg font-semibold text-white">
                     Submit
                   </Text>
-                </Pressable>
+                </DebouncedPressable>
               </>
             )}
           </View>

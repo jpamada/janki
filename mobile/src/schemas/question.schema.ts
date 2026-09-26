@@ -11,7 +11,7 @@ export const questionSchema = z.object({
     .string()
     .trim()
     .min(1, 'Question is required')
-    .max(200, 'Question is too long'),
+    .max(500, 'Question is too long'),
 
   code: z
     .string()

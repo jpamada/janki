@@ -1,14 +1,14 @@
 import { deleteQuestion, getQuestionById } from "@/repositories/question.repository";
+import { ActivityIndicator, Modal, Pressable, Text, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { updateQuizData } from "@/repositories/quiz.repository";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { QuestionFormData } from "@/schemas/question.schema";
-import { ActivityIndicator, Modal, Pressable, Text, View } from "react-native";
+import { useSnackbar } from "@/providers/SnackbarContext";
 import { SearchX, Trash2 } from "lucide-react-native";
+import { useState } from "react";
 
 import QuestionForm from "@/components/questions/QuestionForm";
-import { updateQuizData } from "@/repositories/quiz.repository";
-import { useSnackbar } from "@/providers/SnackbarContext";
-import { useState } from "react";
 
 export default function QuestionsScreen() {
   const { id, lessonId } = useLocalSearchParams<{ 

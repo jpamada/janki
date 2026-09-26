@@ -5,13 +5,14 @@ import { ActivityIndicator, Animated, FlatList, Modal, Pressable, ScrollView, Te
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCategories } from "@/repositories/category.repository";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SubjectFormData } from "@/schemas/subject.schema";
 import { useSnackbar } from "@/providers/SnackbarContext";
 import { LessonFormData } from "@/schemas/lesson.schema";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
 import { router, useFocusEffect } from "expo-router";
 
+import DebouncedPressable from "@/components/shared/DebouncedPressable";
 import SubjectItem from "@/components/subjects/SubjectItem";
 import SubjectForm from "@/components/subjects/SubjectForm";
 import LessonForm from "@/components/lessons/LessonForm";
@@ -19,6 +20,8 @@ import Header from "@/components/shared/Header";
 
 export default function HomeScreen() {
   const { showSnackbar } = useSnackbar();
+
+  const categoryScrollRef = useRef<ScrollView>(null);
 
   const subjectSheet = useBottomSheet();
   const lessonSheet = useBottomSheet();
@@ -295,6 +298,13 @@ export default function HomeScreen() {
   }
 
   useEffect(() => {
+    categoryScrollRef.current?.scrollTo({
+      x: 0,
+      animated: false,
+    });
+  }, [categories]);
+
+  useEffect(() => {
     if (!showDefaultTab && selectedCategoryId === null && categories.length > 0) {
       setSelectedCategoryId(categories[0].id);
     }
@@ -313,6 +323,7 @@ export default function HomeScreen() {
       <ScrollView
         horizontal
         className="max-h-12"
+        ref={categoryScrollRef}
         showsHorizontalScrollIndicator={false}
         contentContainerClassName="flex-row items-center gap-2 px-6"
       >
@@ -351,7 +362,7 @@ export default function HomeScreen() {
           </Pressable>
         ))}
 
-        <Pressable
+        <DebouncedPressable
           onPress={() => router.push('/categories')}
           className="flex flex-row items-center gap-1 bg-gray-50 rounded-full px-4 py-2 active:bg-gray-100"
         >
@@ -361,7 +372,7 @@ export default function HomeScreen() {
               New Category
             </Text>
           )}
-        </Pressable>
+        </DebouncedPressable>
       </ScrollView>
 
       <View className="flex-1">
@@ -383,6 +394,7 @@ export default function HomeScreen() {
             contentContainerClassName="gap-2"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
+              flexGrow: 1,
               paddingBottom: 100,
             }}
             ListHeaderComponent={
@@ -399,7 +411,7 @@ export default function HomeScreen() {
               />
             )}
             ListEmptyComponent={
-              <View className='flex-1 justify-center items-center'>
+              <View className='flex-1 justify-center items-center '>
                 <SearchX size={64} color="#9ca3af" />
                 <Text className='text-gray-400 font-semibold'>
                   No subjects found

@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { computeReviewStats } from '@/helpers/logsStats.helper';
 import { useSnackbar } from '@/providers/SnackbarContext';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
-import { FlatList, ScrollView } from 'react-native-gesture-handler';
+import { FlatList } from 'react-native-gesture-handler';
 import { router } from 'expo-router';
 import { useState } from 'react';
 
@@ -111,6 +111,7 @@ export default function StatisticsScreen() {
             contentContainerClassName="gap-2"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
+              flexGrow: 1,
               paddingBottom: 32,
             }}
             ListHeaderComponent={

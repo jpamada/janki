@@ -1,16 +1,18 @@
-import { LayoutGrid, CloudUpload, CloudDownload, Trash2 } from 'lucide-react-native';
+import { LayoutGrid, CloudUpload, CloudDownload, Trash2, Info, Palette } from 'lucide-react-native';
 import { View, ScrollView, Pressable, Text, Modal } from 'react-native';
+import { deleteProgress } from '@/repositories/progress.repository';
 import { useSnackbar } from '@/providers/SnackbarContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { exportData, importData } from '@/db/backup';
 import { router } from 'expo-router';
-
-import Header from '../../components/shared/Header';
 import { useState } from 'react';
-import { deleteProgress } from '@/repositories/progress.repository';
+
+import DebouncedPressable from '@/components/shared/DebouncedPressable';
+import Header from '../../components/shared/Header';
 
 export default function SettingsScreen() {
   const { showSnackbar } = useSnackbar();
+
   const queryClient = useQueryClient();
 
   const [resetModalVisible, setResetModalVisible] = useState(false);
@@ -21,17 +23,13 @@ export default function SettingsScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["reviewHeatmap"],
       });
-
       await queryClient.invalidateQueries({
         queryKey: ["logsStats"],
       });
-
       await queryClient.invalidateQueries({
         queryKey: ["subjects"],
       });
-
       setResetModalVisible(false);
-
       showSnackbar({
         message: "Review data successfully reset",
       });
@@ -47,7 +45,6 @@ export default function SettingsScreen() {
   const handleBackup = async () => {
     try {
       await exportData();
-      showSnackbar({ message: "Backup successful" });
 
     } catch (error) {
       console.error(error);
@@ -78,14 +75,31 @@ export default function SettingsScreen() {
       <Header title="Settings" />
 
       <ScrollView
-        overScrollMode="always"
         className="flex-1 px-6 py-4"
         showsVerticalScrollIndicator={false}
+        contentContainerClassName="pb-8"
       >
-        <View className="flex flex-col gap-4">
+        <View className="flex flex-col">
+          <Text className="text-gray-400 text-sm font-semibold mb-2">
+            Interface
+          </Text>
+
           <Pressable
+            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'
+          >
+            <View className='bg-white rounded-xl p-4'>
+              <Palette color="#9ca3af" />
+            </View>
+            <Text className='text-gray-600 text-lg font-bold'>Appearance</Text>
+          </Pressable>
+
+          <Text className="text-gray-400 text-sm font-semibold mb-2">
+            Filter
+          </Text>
+
+          <DebouncedPressable
             onPress={() => router.push(`/categories`)}
-            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg active:bg-gray-100'
+            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'
           >
             <View className='bg-white rounded-xl p-4'>
               <LayoutGrid color="#9ca3af" />
@@ -94,11 +108,15 @@ export default function SettingsScreen() {
             <Text className='text-gray-600 text-lg font-bold'>
               Categories
             </Text>
-          </Pressable>
+          </DebouncedPressable>
+
+          <Text className="text-gray-400 text-sm font-semibold mb-2">
+            Data
+          </Text>
 
           <Pressable
             onPress={handleBackup}
-            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg active:bg-gray-100'
+            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg mb-2 active:bg-gray-100'
           >
             <View className='bg-white rounded-xl p-4'>
               <CloudUpload color="#9ca3af" />
@@ -108,7 +126,7 @@ export default function SettingsScreen() {
 
           <Pressable
             onPress={handleRestore}
-            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg active:bg-gray-100'
+            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg mb-2 active:bg-gray-100'
           >
             <View className='bg-white rounded-xl p-4'>
               <CloudDownload color="#9ca3af" />
@@ -118,12 +136,25 @@ export default function SettingsScreen() {
 
           <Pressable
             onPress={() => setResetModalVisible(true)}
-            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg active:bg-gray-100'
+            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg mb-2 active:bg-gray-100'
           >
             <View className='bg-white rounded-xl p-4'>
               <Trash2 color="#9ca3af" />
             </View>
             <Text className='text-gray-600 text-lg font-bold'>Delete Progress</Text>
+          </Pressable>
+
+          <Text className="text-gray-400 text-sm font-semibold mb-2">
+            System & About
+          </Text>
+
+          <Pressable
+            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg active:bg-gray-100'
+          >
+            <View className='bg-white rounded-xl p-4'>
+              <Info color="#9ca3af" />
+            </View>
+            <Text className='text-gray-600 text-lg font-bold'>About</Text>
           </Pressable>
         </View>
       </ScrollView>

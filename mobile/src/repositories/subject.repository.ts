@@ -1,9 +1,9 @@
-import { eq, isNull } from "drizzle-orm";
 import { subjects, progress } from "@/db/schema";
+import { todayKey } from "@/constants/date";
+import { eq, isNull } from "drizzle-orm";
 import { db } from "@/db/client";
 
 import * as Crypto from "expo-crypto";
-import { todayKey } from "@/constants/date";
 
 export async function getSubjects() {
   const query = await db
