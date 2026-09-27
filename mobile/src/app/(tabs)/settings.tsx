@@ -1,5 +1,5 @@
-import { LayoutGrid, CloudUpload, CloudDownload, Trash2, Info, Palette } from 'lucide-react-native';
-import { View, ScrollView, Pressable, Text, Modal } from 'react-native';
+import { LayoutGrid, CloudUpload, CloudDownload, Trash2, Palette } from 'lucide-react-native';
+import { View, ScrollView, Pressable, Text, Modal, Image } from 'react-native';
 import { deleteProgress } from '@/repositories/progress.repository';
 import { useSnackbar } from '@/providers/SnackbarContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 
 import DebouncedPressable from '@/components/shared/DebouncedPressable';
+import Icon from "../../../assets/images/icon-transparent.png"
 import Header from '../../components/shared/Header';
 
 export default function SettingsScreen() {
@@ -144,18 +145,20 @@ export default function SettingsScreen() {
             <Text className='text-gray-600 text-lg font-bold'>Delete Progress</Text>
           </Pressable>
 
-          <Text className="text-gray-400 text-sm font-semibold mb-2">
-            System & About
-          </Text>
-
-          <Pressable
-            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg active:bg-gray-100'
-          >
-            <View className='bg-white rounded-xl p-4'>
-              <Info color="#9ca3af" />
+          <View className="flex flex-col items-center rounded-3xl p-4">
+            <View className="flex flex-row items-center">
+              <Image
+                source={Icon}
+                className="h-8 w-8"
+                resizeMode="contain"
+              />
+              <Text className="text-lg font-bold">Janki</Text>
             </View>
-            <Text className='text-gray-600 text-lg font-bold'>About</Text>
-          </Pressable>
+
+            <Text className="text-gray-400 font-semibold">
+              version 1.0.0
+            </Text>
+          </View>
         </View>
       </ScrollView>
 
