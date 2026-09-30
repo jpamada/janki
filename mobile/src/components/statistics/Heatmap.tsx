@@ -3,7 +3,7 @@ import { bucketColor, computeHeatmapWeeks, type HeatmapDay } from '@/helpers/log
 import { useMinimumLoadingDuration } from '@/hooks/useMinimumLoadingDuration';
 import { useCallback, useEffect, useMemo, useState, Fragment } from 'react';
 import { Text, View, Pressable, LayoutChangeEvent } from 'react-native';
-import { getReviewHeatmapData } from '@/repositories/logs.repository';
+import { getHeatmapData } from '@/repositories/statistics.repository';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { CELL_GAP, COLUMNS } from '@/constants/heatmapConsts';
@@ -92,15 +92,14 @@ function HeatmapSkeleton({ width, cellSize, onLayout }: HeatmapSkeletonProps) {
           )}
         </Svg>
       ) : (
-        // Reserve visible space even before the first layout measurement
-        // lands, so nothing renders as a blank gap.
+
         <View style={{ height: 160 }} className="bg-gray-50 rounded-xl" />
       )}
     </View>
   );
 }
 
-export default function ReviewHeatmap({ onLoadingChange }: ReviewHeatmapProps) {
+export default function Heatmap({ onLoadingChange }: ReviewHeatmapProps) {
   const [viewDate, setViewDate] = useState(() => new Date());
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -115,12 +114,9 @@ export default function ReviewHeatmap({ onLoadingChange }: ReviewHeatmapProps) {
 
   const { data: rows = [], isPending } = useQuery({
     queryKey: ['reviewHeatmap', format(monthStart, 'yyyy-MM')],
-    queryFn: () => getReviewHeatmapData(gridStart, gridEnd),
+    queryFn: () => getHeatmapData(gridStart, gridEnd),
   });
 
-  // Guarantees the skeleton is visible for at least 400ms, even if the
-  // local DB query resolves faster than a single frame — otherwise the
-  // loading state can flip too quickly to ever be perceived.
   const showSkeleton = useMinimumLoadingDuration(isPending, 400);
 
   useEffect(() => {
@@ -140,7 +136,7 @@ export default function ReviewHeatmap({ onLoadingChange }: ReviewHeatmapProps) {
   const height = weeks.length * (cellSize + CELL_GAP) - CELL_GAP;
 
   return (
-    <View className="gap-3 rounded-xl py-6">
+    <View className="gap-3 rounded-xl">
       <View className='flex flex-row items-center justify-between'>
         <Text className='text-gray-600 text-lg font-bold'>Summary</Text>
 

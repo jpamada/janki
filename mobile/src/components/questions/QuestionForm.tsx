@@ -1,4 +1,4 @@
-import { EllipsisVertical, ImageOff, ImagePlus, CodeXml, Code, Trash2 } from 'lucide-react-native';
+import { EllipsisVertical, ImageOff, ImagePlus, CodeXml, Code, Trash2, ListMinus, ListPlus } from 'lucide-react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { Animated, Image, Modal, Pressable, Text, TextInput, View } from 'react-native';
 import { useCallback, useRef, useState, lazy, Suspense, useEffect } from 'react';
@@ -35,6 +35,7 @@ export default function QuestionForm({
     question: "",
     lessonId: "",
     language: null,
+    explanation: "",
     type: "multiple_choice",
     answers: [
       { answer: "", isCorrect: false },
@@ -56,6 +57,7 @@ export default function QuestionForm({
 
   const [codeVisible, setCodeVisible] = useState(!!defaultValues?.code?.trim());
   const [imageVisible, setImageVisible] = useState(!!defaultValues?.image?.trim());
+  const [explanationVisible, setExplanationVisible] = useState(!!defaultValues?.explanation?.trim());
 
   const { control, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
@@ -146,6 +148,7 @@ export default function QuestionForm({
       image: null,
       question: "",
       type: data.type,
+      explanation: null,
       language: data.language ??  null,
       lessonId: data.lessonId,
       answers: data.type === "identification"
@@ -291,6 +294,36 @@ export default function QuestionForm({
             </View>
           )}
 
+          {explanationVisible && (
+          <Controller
+            name="explanation"
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <View>
+                <Text className="mb-2 text-sm font-semibold text-gray-600">
+                  Explanation
+                </Text>
+
+                <TextInput
+                  multiline
+                  value={value ?? ""}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  textAlignVertical="top"
+                  placeholder="Enter explanation"
+                  className="rounded-xl bg-gray-100 px-2 py-4 font-semibold min-h-24"
+                />
+
+                {errors.explanation && (
+                  <Text className="text-red-400">
+                    {errors.explanation.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+        )}
+
           {errors.answers?.root?.message && (
             <Text className="text-red-400 mb-2">{errors.answers.root.message}</Text>
           )}
@@ -417,6 +450,27 @@ export default function QuestionForm({
                   <View className='flex-row items-center gap-2'>
                     <ImagePlus size={16} />
                     <Text className="text-xl">Add image</Text>
+                  </View>
+                )}
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
+                  closeBottomSheet(() => {
+                    setExplanationVisible((visible) => !visible);
+                  });
+                }}
+                className="rounded-3xl p-4 active:bg-gray-100"
+              >
+                {explanationVisible ? (
+                  <View className='flex-row items-center gap-2'>
+                    <ListMinus size={16} />
+                    <Text className="text-xl">Remove Explanation</Text>
+                  </View>
+                ) : (
+                  <View className='flex-row items-center gap-2'>
+                    <ListPlus size={16} />
+                    <Text className="text-xl">Add Explanation</Text>
                   </View>
                 )}
               </Pressable>

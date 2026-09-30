@@ -29,13 +29,6 @@ const config: ExpoConfig = {
 
   plugins: [
     [
-      "expo-notifications",
-      {
-        icon: "./assets/images/notification-icon.png",
-        color: "#FFFFFF",
-      },
-    ],
-    [
       "expo-splash-screen",
       {
         backgroundColor: "#FFFFFF",

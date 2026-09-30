@@ -35,7 +35,7 @@ export default function FavoriteItem({
         onLongPress(id);
       }}
       onPress={() => router.push({
-        pathname: `/quiz/play`,
+        pathname: `/quiz/start`,
         params: { lessonId: id }
       })}
       className="flex flex-row items-center gap-2 bg-gray-50 rounded-lg px-2 py-2 active:bg-gray-100"

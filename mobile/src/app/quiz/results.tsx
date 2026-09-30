@@ -3,9 +3,17 @@ import { CircleCheck, CircleX } from 'lucide-react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { UserAnswer } from './play';
 
 import DebouncedPressable from '@/components/shared/DebouncedPressable';
+
+export type QuizResults = {
+  questionId: string;
+  answerId: string | null;
+  answerText: string;
+  isCorrect: boolean;
+  correctAnswerId: string | null;
+  correctAnswerText: string;
+};
 
 type QuizResultsProps = {
   questions: {
@@ -24,18 +32,22 @@ type QuizResultsProps = {
       };
     }[];
   }[];
-  userAnswers: UserAnswer[];
+  quizResults: QuizResults[];
 };
 
-export default function QuizResults({
+export default function QuizResultsScreen({
   questions,
-  userAnswers,
+  quizResults,
 }: QuizResultsProps) {
 
   const insets = useSafeAreaInsets();
 
-  const score = userAnswers.filter(
-    (answer) => answer.isCorrect,
+  const score = questions.filter(
+    (question) => {
+      return [...quizResults].reverse().find(
+        (answer) => answer.questionId === question.id,
+      )?.isCorrect;
+    }
   ).length;
 
   return (
@@ -70,7 +82,7 @@ export default function QuizResults({
         showsVerticalScrollIndicator={false}
       >
         {questions.map((question, index) => {
-          const userAnswer = userAnswers.find(
+          const userAnswer = quizResults.find(
             (answer) => answer.questionId === question.id,
           );
 

@@ -1,4 +1,4 @@
-import { categories, subjects, lessons, questions, answers, questionAnswers, logs } from './schema';
+import { categories, subjects, lessons, questions, answers, questionAnswers, progress, history } from './schema';
 import { File, Paths } from 'expo-file-system';
 import { db } from './client';
 
@@ -15,7 +15,8 @@ type BackupPayload = {
     questions: (typeof questions.$inferSelect)[];
     answers: (typeof answers.$inferSelect)[];
     questionAnswers: (typeof questionAnswers.$inferSelect)[];
-    logs: (typeof logs.$inferSelect)[];
+    progress: (typeof progress.$inferSelect)[];
+    history: (typeof history.$inferSelect)[];
   };
 };
 
@@ -27,7 +28,8 @@ export async function exportData() {
     questionsData,
     answersData,
     questionAnswersData,
-    logsData,
+    progressData,
+    historyData,
   ] = await Promise.all([
     db.select().from(categories),
     db.select().from(subjects),
@@ -35,11 +37,12 @@ export async function exportData() {
     db.select().from(questions),
     db.select().from(answers),
     db.select().from(questionAnswers),
-    db.select().from(logs),
+    db.select().from(progress),
+    db.select().from(history),
   ]);
 
   const payload: BackupPayload = {
-    version: 2,
+    version: 3,
     exportedAt: new Date().toISOString(),
     data: {
       categories: categoriesData,
@@ -48,7 +51,8 @@ export async function exportData() {
       questions: questionsData,
       answers: answersData,
       questionAnswers: questionAnswersData,
-      logs: logsData,
+      progress: progressData,
+      history: historyData,
     },
   };
 
@@ -98,7 +102,8 @@ export async function importData() {
     questions: qsns = [],
     answers: ans = [],
     questionAnswers: qas = [],
-    logs: lgs = [],
+    progress: prog = [],
+    history: hist = [],
   } = payload.data;
 
   const toDate = (value: string | number | Date | null | undefined): Date | null => {
@@ -191,13 +196,26 @@ export async function importData() {
         .onConflictDoNothing();
     }
 
-    if (lgs.length) {
+    if (prog.length) {
       await tx
-        .insert(logs)
+        .insert(progress)
         .values(
-          lgs.map((l) => ({
-            ...l,
-            reviewedAt: toDate(l.reviewedAt)!,
+          prog.map((p) => ({
+            ...p,
+            lastattemptedAt: toDate(p.lastattemptedAt),
+            nextattemptedAt: toDate(p.nextattemptedAt),
+          })),
+        )
+        .onConflictDoNothing();
+    }
+
+    if (hist.length) {
+      await tx
+        .insert(history)
+        .values(
+          hist.map((h) => ({
+            ...h,
+            attemptedAt: toDate(h.attemptedAt)!,
           })),
         )
         .onConflictDoNothing();
@@ -213,7 +231,8 @@ export async function importData() {
       questions: qsns.length,
       answers: ans.length,
       questionAnswers: qas.length,
-      logs: lgs.length,
+      progress: prog.length,
+      history: hist.length,
     },
   };
 }

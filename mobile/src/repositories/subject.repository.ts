@@ -1,6 +1,5 @@
-import { subjects, progress } from "@/db/schema";
-import { todayKey } from "@/constants/date";
 import { eq, isNull } from "drizzle-orm";
+import { subjects } from "@/db/schema";
 import { db } from "@/db/client";
 
 import * as Crypto from "expo-crypto";
@@ -16,53 +15,57 @@ export async function getSubjects() {
 export async function getSubjectsByCategory(
   categoryId?: string | null,
 ) {
-  const date = todayKey();
+  const now = new Date();
 
-  let query;
-
-  if (categoryId?.trim()) {
-    query = await db.query.subjects
-    .findMany({
-      where: eq(
-        subjects.categoryId,
-        categoryId,
-      ),
-      with: {
-        lessons: {
-          with: {
-            questions: true,
-            progress: {
-              where: eq(
-                progress.sessionDate,
-                date,
-              ),
+  const subjectsData = await db.query.subjects
+  .findMany({
+    where: categoryId?.trim()
+      ? eq(subjects.categoryId, categoryId)
+      : isNull(subjects.categoryId),
+    with: {
+      lessons: {
+        with: {
+          questions: {
+            with: {
+              progress: true,
             },
           },
         },
       },
+    },
+  });
+
+  const subjectsWithDueCount = subjectsData.map((subject) => {
+    const lessons = subject.lessons.map((lesson) => {
+      const dueQuestions = lesson.questions.filter((question) => {
+        const progress = question.progress;
+
+        if (!progress) {
+          return true;
+        }
+
+        if (progress.nextattemptedAt === null) {
+          return true;
+        }
+
+        return progress.nextattemptedAt.getTime() <= now.getTime();
+      });
+
+      const dueCount = dueQuestions.length;
+
+      return {
+        ...lesson,
+        dueCount,
+      };
     });
 
-  } else {
-    query = await db.query.subjects
-    .findMany({
-      where: isNull(subjects.categoryId),
-      with: {
-        lessons: {
-          with: {
-            questions: true,
-            progress: {
-              where: eq(
-                progress.sessionDate,
-                date,
-              ),
-            },
-          },
-        },
-      },
-    });
-  }
+    return {
+      ...subject,
+      lessons,
+    };
+  });
 
-  return query;
+  return subjectsWithDueCount;
 }
 
 export async function getSubjectById(id: string) {

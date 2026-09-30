@@ -33,7 +33,7 @@ export default function BrowseQuestionScreen() {
     return questions.find(
       (question) => question.id === selectedQuestionId
     );
-  }, [selectedQuestionId]);
+  }, [selectedQuestionId, questions]);
 
   const deleteQuestionMutation = useMutation({
     mutationFn: deleteQuestion,

@@ -31,7 +31,7 @@ export default function LessonItem({
       }}
       onPress={() =>
         router.push({
-          pathname: "/quiz/play",
+          pathname: "/quiz/start",
           params: { lessonId: id },
         })
       }

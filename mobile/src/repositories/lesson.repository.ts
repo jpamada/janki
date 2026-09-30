@@ -1,4 +1,4 @@
-import { eq, isNull } from "drizzle-orm";
+import { count, eq, isNull } from "drizzle-orm";
 import { lessons } from "@/db/schema";
 import { db } from "@/db/client";
 
@@ -15,22 +15,45 @@ export async function getLessons() {
   return query;
 }
 
-export async function createLesson(
-  input: {
-    name: string;
-    subjectId: string;
+export async function getFavoriteLessons() {
+  const query = await db.query.lessons
+  .findMany({
+    where: eq(lessons.favorite, true),
+    with: {
+      subject: true,
+    },
+  });
+
+  return query;
+}
+
+export async function createLesson(input: {
+  name: string;
+  subjectId: string;
 }) {
   const lessonId = Crypto.randomUUID();
 
-  await db
-  .insert(lessons)
-  .values({
-    id: lessonId,
-    name: input.name,
-    subjectId: input.subjectId,
-    createdAt: new Date()
+  await db.transaction(async (tx) => {
+    const [query] = await tx
+    .select({
+      count: count(),
+    })
+    .from(lessons)
+    .where(
+      eq(lessons.subjectId, input.subjectId)
+    );
+
+    await tx
+    .insert(lessons)
+    .values({
+      id: lessonId,
+      name: input.name,
+      position: query.count,
+      subjectId: input.subjectId,
+      createdAt: new Date(),
+    });
   });
-};
+}
 
 export async function updateLesson(
   id: string,
@@ -65,17 +88,6 @@ export async function toggleLessonFavorite(
   .where(
     eq(lessons.id, id)
   );
-}
-
-export async function getFavoriteLessons() {
-  const query = await db.query.lessons.findMany({
-    where: eq(lessons.favorite, true),
-    with: {
-      subject: true,
-    },
-  });
-
-  return query;
 }
 
 export async function deleteLesson(id: string) {

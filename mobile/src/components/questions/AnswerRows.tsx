@@ -15,7 +15,9 @@ function AnswerRow({ control, index, errorMessage, onRemove }: AnswerRowProps) {
   return (
     <View className='px-1 py-2'>
       <View className='flex flex-row justify-between items-center mb-1'>
-        <Text className='text-gray-600 text-lg font-semibold'>{index + 1}</Text>
+        <Text className='text-gray-600 text-lg font-semibold'>
+          {index + 1}
+        </Text>
 
         <View className='flex flex-row'>
           <Controller

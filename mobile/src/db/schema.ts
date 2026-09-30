@@ -55,6 +55,8 @@ export const lessons = sqliteTable("lessons", {
     subjectId: text("subject_id").notNull(),
 
     name: text("name").notNull(),
+    
+    position: integer("position").notNull().default(0),
 
     favorite: integer("favorite", {
         mode: "boolean"
@@ -89,20 +91,22 @@ export const questions = sqliteTable("questions", {
 
     lessonId: text("lesson_id").notNull(),
 
+    question: text("question").notNull(),
+
+    explanation: text("explanation"),
+
+    image: text("image"),
+
+    code: text("code"),
+
+    language: text("language"),
+
     type: text("type", {
         enum: [
             "multiple_choice",
             "identification",
         ],
     }).notNull().default("multiple_choice"),
-
-    question: text("question").notNull(),
-
-    code: text("code"),
-
-    image: text("image"),
-
-    language: text("language"),
 
     createdAt: integer("created_at", {
         mode: "timestamp_ms",
@@ -131,16 +135,16 @@ export const progress = sqliteTable("progress", {
 
     questionId: text("question_id").notNull(),
 
-    lessonId: text("lesson_id").notNull(),
+    reviewInterval: text("review_interval", {
+        enum: ["1_day", "3_days", "7_days"],
+    }),
 
-    sessionDate: text("session_date").notNull(),
+    lastattemptedAt: integer("last_attempt_date", {
+        mode: "timestamp_ms",
+    }),
 
-    status: text("status", {
-        enum: ["unanswered", "correct", "incorrect"],
-    }).notNull().default("unanswered"),
-
-    answeredAt: integer("answered_at", { 
-        mode: "timestamp_ms" 
+    nextattemptedAt: integer("next_attempt_date", {
+        mode: "timestamp_ms",
     }),
 
 }, (table) => [
@@ -150,20 +154,45 @@ export const progress = sqliteTable("progress", {
         name: "progress_question_id_fk",
     }).onDelete("cascade"),
 
-    foreignKey({
-        columns: [table.lessonId],
-        foreignColumns: [lessons.id],
-        name: "progress_lesson_id_fk",
-    }).onDelete("cascade"),
-
-    unique("progress_question_session_unique").on(
-        table.questionId,
-        table.sessionDate,
+    unique("progress_question_unique").on(
+        table.questionId
     ),
 
-    index("progress_lesson_session_idx").on(
-        table.lessonId,
-        table.sessionDate,
+    index("progress_next_attempt_date_idx").on(
+        table.nextattemptedAt
+    ),
+]);
+
+export const history = sqliteTable("history", {
+    id: text("id").primaryKey(),
+
+    questionId: text("question_id").notNull(),
+
+    answer: text("answer"),
+
+    responseTime: integer("response_time"),
+
+    attemptedAt: integer("attemptedAt", {
+        mode: "timestamp_ms"
+    }).notNull(),
+
+    status: text("status", {
+        enum: ["correct", "incorrect"],
+    }).notNull(),
+
+}, (table) => [
+    foreignKey({
+        columns: [table.questionId],
+        foreignColumns: [questions.id],
+        name: "question_history_id_fk",
+    }).onDelete("cascade"),
+
+    index("history_question_id_idx").on(
+        table.questionId
+    ),
+
+    index("history_attempt_date_idx").on(
+        table.attemptedAt
     ),
 ]);
 
@@ -239,30 +268,34 @@ export const questionAnswers = sqliteTable("question_answers", {
     }).onDelete("cascade"),
 ]);
 
-export const logs = sqliteTable("logs", {
-    id: text("id").primaryKey(),
+export const settings = sqliteTable("settings", {
+  id: text("id").primaryKey(),
 
-    questionId: text("question_id").notNull(),
+  theme: text("theme", {
+    enum: ["system", "light", "dark"],
+  }).notNull().default("system"),
 
-    isCorrect: integer("is_correct", { 
-        mode: "boolean" 
-    }).notNull(),
+  questionFontSize: integer("question_font_size")
+    .notNull()
+    .default(20),
 
-    reviewedAt: integer("reviewed_at", { 
-        mode: "timestamp_ms" 
-    }).notNull(),
+  questionTextAlign: text("question_text_align", {
+    enum: ["left", "center", "justify"],
+  }).notNull().default("left"),
 
-}, (table) => [
-    foreignKey({
-        columns: [table.questionId],
-        foreignColumns: [questions.id],
-        name: "logs_question_id_fk",
-    }).onDelete("cascade"),
+  soundEnabled: integer("sound_enabled", {
+    mode: "boolean",
+  }).notNull().default(true),
 
-    index("logs_question_id_idx").on(
-        table.questionId
-    ),
-    index("logs_reviewed_at_idx").on(
-        table.reviewedAt
-    ),
-]);
+  hapticsEnabled: integer("haptics_enabled", {
+    mode: "boolean",
+  }).notNull().default(true),
+
+  caseSensitive: integer("case_sensitive", {
+    mode: "boolean",
+  }).notNull().default(false),
+
+  showCorrectAnswer: integer("show_correct_answer", {
+    mode: "boolean",
+  }).notNull().default(true),
+});

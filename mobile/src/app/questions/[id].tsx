@@ -111,6 +111,7 @@ export default function QuestionsScreen() {
               question: question?.question ?? "",
               lessonId: question?.lessonId ?? "",
               language: question?.language ?? null,
+              explanation: question?.explanation ?? null,
               type: question?.type ?? "multiple_choice",
 
               answers:

@@ -1,12 +1,12 @@
-import { createQuizData } from '@/repositories/quiz.repository';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createQuizData } from '@/repositories/quiz.repository';
 import { QuestionFormData } from '@/schemas/question.schema';
+import { useSnackbar } from '@/providers/SnackbarContext';
 import { useEffect, useRef, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { View } from 'react-native';
 
 import QuestionForm from '@/components/questions/QuestionForm';
-import { useSnackbar } from '@/providers/SnackbarContext';
 
 export default function CreateQuestionScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
@@ -49,6 +49,7 @@ export default function CreateQuestionScreen() {
       language: data.language,
       question: data.question,
       lessonId: data.lessonId,
+      explanation: data.explanation,
     });
   };
 
@@ -84,6 +85,7 @@ export default function CreateQuestionScreen() {
           language: null,
           lessonId: lessonId,
           type: "multiple_choice",
+          explanation: "",
           answers: [
             {
               answer: "",

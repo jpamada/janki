@@ -1,95 +1,29 @@
-import { getFavoriteLessons, toggleLessonFavorite } from '@/repositories/lesson.repository';
-import { ActivityIndicator, Animated, Modal, Pressable, Text, View } from 'react-native';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Lightbulb, Star, StarMinus, StarPlus } from 'lucide-react-native';
-import { getReviewActivityDays } from '@/repositories/logs.repository';
+import { getDailyStatistics } from '@/repositories/statistics.repository';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { getLatestHistory } from '@/repositories/history.repository';
+import { ChevronRight, RotateCcwClock } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { computeReviewStats } from '@/helpers/logsStats.helper';
-import { useSnackbar } from '@/providers/SnackbarContext';
-import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { FlatList } from 'react-native-gesture-handler';
+import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useState } from 'react';
 
-import FavoriteItem from '@/components/lessons/FavoriteItem';
-import ReviewHeatmap from '@/components/logs/LogsHeatmap';
-import LogsStats from '@/components/logs/LogsStats';
+import HistoryItem from '@/components/history/HistoryItem';
+import Heatmap from '@/components/statistics/Heatmap';
+import Stats from '@/components/statistics/Stats';
 import Header from '@/components/shared/Header';
 
 export default function StatisticsScreen() {
-  const { showSnackbar } = useSnackbar();
-
-  const lessonSheet = useBottomSheet();
-
   const insets = useSafeAreaInsets();
-  const queryClient = useQueryClient();
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
-
-  const { data: favorites = [], isPending: favoritesPending } = useQuery({
-    queryKey: ["favorites"],
-    queryFn: getFavoriteLessons
+  const { data: statistic, isPending: statsPending } = useQuery({
+    queryKey: ["dailyStatistics"],
+    queryFn: getDailyStatistics,
   });
 
-  const { data: reviewActivityRows = [], isPending: statsPending } = useQuery({
-    queryKey: ['logsStats'],
-    queryFn: getReviewActivityDays,
-  });
-
-  const reviewStats = computeReviewStats(reviewActivityRows);
-
-  const selectedLesson = favorites.find(
-    (lesson) => lesson.id === selectedLessonId,
-  );
-
-  const toggleFavoriteMutation = useMutation({
-    mutationFn: ({ id, favorite }: {
-      id: string;
-      favorite: boolean;
-    }) => toggleLessonFavorite(id, favorite),
-
-    onSuccess: async (_, variables) => {
-      await queryClient.invalidateQueries({
-        queryKey: ["lessons"],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["favorites"],
-      });
-
-      setModalVisible(false);
-      setSelectedLessonId(null);
-
-      if (variables.favorite) {
-        showSnackbar({ message: "Added to favorites" });
-
-      } else {
-        showSnackbar({ message: "Removed from favorites" });
-      }
-    },
-
-    onError: (error) => {
-      console.error(error);
-      showSnackbar({ message: "Something went wrong. Please try again." });
-    }
-  });
-
-  const handleLessonLongPress = (id: string) => {
-    setSelectedLessonId(id);
-    lessonSheet.open();
-  };
-
-  const handleToggleFavorite = (id: string, favorite: boolean) => {
-    toggleFavoriteMutation.mutate({
-      id,
-      favorite,
-    });
-  };
-
-  const handleRemoveFavorite = (id: string) => {
-    setSelectedLessonId(id);
-    setModalVisible(true);
-  };
+  const { data: history, isPending: historyPending } = useQuery({
+    queryKey: ['latestHistory'],
+    queryFn: getLatestHistory
+  })
 
   return (
     <View 
@@ -97,7 +31,7 @@ export default function StatisticsScreen() {
     >
       <Header title="Stats" />
 
-      {favoritesPending || statsPending ? (
+      {historyPending || statsPending ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="small" color="#4b5563" />
         </View>
@@ -105,205 +39,63 @@ export default function StatisticsScreen() {
       ) : (
         <View className="flex-1">
           <FlatList
-            data={favorites}
+            data={history}
             className='px-6 py-4'
             keyExtractor={(item) => item.id}
             contentContainerClassName="gap-2"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
               flexGrow: 1,
-              paddingBottom: 32,
+              paddingBottom: insets.bottom
             }}
             ListHeaderComponent={
               <>
-                <LogsStats {...reviewStats} />
-                <ReviewHeatmap />
+                <View className='flex flex-col gap-8'>
+                  <Stats
+                    accuracy={statistic?.accuracy ?? 0}
+                    totalReviews={statistic?.totalReviews ?? 0}
+                    correctReviews={statistic?.correctReviews ?? 0}
+                  />
+                  
+                  <Heatmap />
+                </View>
 
-                <Text className='text-gray-600 text-lg font-bold mb-2'>
-                  Favorites
-                </Text>
+                <View className='flex flex-row items-center justify-between mt-8'>
+                  <Text className='text-gray-600 text-lg font-bold'>History</Text>
+                  <Pressable
+                    onPress={() => {
+                      router.push("/history")
+                    }}
+                    className='flex flex-row items-center gap-1 py-2 px-2 rounded-xl active:bg-gray-50'
+                  >
+                    <Text className='text-gray-400 font-semibold'>
+                      Show More
+                    </Text>
+                    <ChevronRight size={16} color="#9ca3af" />
+                  </Pressable>
+                </View>
               </>
             }
             renderItem={({ item }) => (
-              <FavoriteItem
+              <HistoryItem
                 id={item.id}
-                title={item.name}
-                subject={item.subject}
-                favorite={item.favorite}
-                onLongPress={handleLessonLongPress}
-                onRemoveFavorite={handleRemoveFavorite}
+                questionId={item.questionId}
+                responseTime={item.responseTime}
+                attemptedAt={item.attemptedAt}
+                status={item.status}
               />
             )}
             ListEmptyComponent={
               <View className='flex-1 justify-center items-center'>
-                <Star size={64} color="#d1d5db" />
+                <RotateCcwClock size={64} color="#d1d5db" />
                 <Text className='text-gray-300 font-semibold'>
-                  No Favorites found
+                  No History found
                 </Text>
               </View>
             }
           />
         </View>
       )}
-
-    <Modal
-      transparent
-      animationType="none"
-      visible={lessonSheet.visible}
-      onRequestClose={() => lessonSheet.close()}
-    >
-      <View className="flex-1 justify-end">
-        <Animated.View
-          className="absolute inset-0 bg-black/40"
-          style={{ opacity: lessonSheet.backdropOpacity }}
-        >
-          <Pressable
-            className="flex-1"
-            onPress={() => {
-              lessonSheet.close(() => {
-                setSelectedLessonId(null);
-              });
-            }}
-          />
-        </Animated.View>
-
-        <Animated.View
-          style={{
-            transform: [{
-              translateY: lessonSheet.translateY,
-            }],
-          }}
-          className="rounded-t-3xl bg-gray-50 px-4 py-8"
-        >
-          <View className="rounded-3xl bg-white">
-            <Pressable
-              onPress={() => {
-                setSelectedLessonId(null);
-                lessonSheet.close(() => {
-                  router.push({
-                    pathname: "/questions/create",
-                    params: { lessonId: selectedLessonId }
-                  });
-                });
-              }}
-              className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
-            >
-              <Lightbulb size={16} />
-              <Text className="text-xl">
-                Add Question
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => {
-                setSelectedLessonId(null);
-                lessonSheet.close(() => {
-                  router.push({
-                    pathname: "/questions/browse",
-                    params: { lessonId: selectedLessonId }
-                  });
-                });
-              }}
-              className="flex-row items-center gap-2 p-4 active:bg-gray-100"
-            >
-              <Lightbulb size={16} />
-              <Text className="text-xl">
-                Browse Questions
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => {
-                lessonSheet.close(() => {
-                  if (!selectedLessonId) return;
-                  setModalVisible(true);
-                });
-              }}
-              className="flex-row items-center gap-2 p-4 active:bg-gray-100"
-            >
-              {selectedLesson?.favorite ? 
-                <>
-                  <StarMinus size={16} />
-                  <Text className="text-xl">
-                    Remove From Favorites
-                  </Text>
-                </>
-              : <>
-                  <StarPlus size={16} />
-                  <Text className="text-xl">
-                    Add to Favorites
-                  </Text>
-                </>
-              }  
-            </Pressable>
-            </View>
-
-            <View style={{ height: insets.bottom }} />
-          </Animated.View>
-        </View>
-      </Modal>
-
-      <Modal
-        transparent
-        animationType="fade"
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <Pressable
-          className="flex-1 items-center justify-center bg-black/40"
-          onPress={() => {
-            setSelectedLessonId(null);
-            setModalVisible(false);
-          }}
-        >
-          <Pressable
-            className="w-[90%] rounded-2xl bg-white p-6"
-            onPress={(event) => event.stopPropagation()}
-          >
-            <View>
-              <Text className="text-xl font-bold">
-                Confirm Action
-              </Text>
-
-              <Text className="mt-2 text-gray-500">
-                Are you sure you want to remove this lesson from your favorites?
-              </Text>
-
-              <View className="mt-6 flex-row justify-end gap-2">
-                <Pressable
-                  onPress={() => {
-                    setSelectedLessonId(null);
-                    setModalVisible(false);
-                  }}
-                  className="rounded-full px-6 py-3 active:bg-gray-100"
-                >
-                  <Text className="font-semibold text-gray-600">
-                    Cancel
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => {
-                    if (!selectedLesson) return;
-                    handleToggleFavorite(
-                      selectedLesson.id,
-                      false
-                    );
-                  }}
-                  disabled={toggleFavoriteMutation.isPending}
-                  className="rounded-full bg-red-500 px-6 py-3 active:bg-red-400"
-                >
-                  <Text className="font-semibold text-white">
-                    {toggleFavoriteMutation.isPending
-                      ? "Removing..."
-                      : "Remove"}
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
     </View>
   );
 }

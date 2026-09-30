@@ -13,6 +13,11 @@ export const questionSchema = z.object({
     .min(1, 'Question is required')
     .max(500, 'Question is too long'),
 
+  explanation: z
+    .string()
+    .max(400, 'Explanation is too long')
+    .nullable(),
+
   code: z
     .string()
     .nullable(),

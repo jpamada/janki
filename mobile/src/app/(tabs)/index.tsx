@@ -3,9 +3,9 @@ import { FolderClosed, Lightbulb, PenLine, Plus, SearchX, StarMinus, StarPlus, T
 import { createLesson, deleteLesson, toggleLessonFavorite, updateLesson } from "@/repositories/lesson.repository";
 import { ActivityIndicator, Animated, FlatList, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCategories } from "@/repositories/category.repository";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SubjectFormData } from "@/schemas/subject.schema";
 import { useSnackbar } from "@/providers/SnackbarContext";
 import { LessonFormData } from "@/schemas/lesson.schema";
@@ -40,12 +40,12 @@ export default function HomeScreen() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-  const { data: subjects = [], isLoading, error } = useQuery({
+  const { data: subjects = [], isPending: subjectsPending, error } = useQuery({
     queryKey: ["subjects", selectedCategoryId],
     queryFn: () => getSubjectsByCategory(selectedCategoryId)
   });
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isPending: categoriesPending } = useQuery({
     queryKey: ['categories'],
     queryFn: getCategories,
   });
@@ -270,8 +270,8 @@ export default function HomeScreen() {
 
   const handleToggleFavorite = (id: string, favorite: boolean) => {
     toggleFavoriteMutation.mutate({
-      id,
-      favorite,
+      id: id,
+      favorite: favorite,
     });
   };
 
@@ -376,7 +376,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       <View className="flex-1">
-        {isLoading ? (
+        {subjectsPending || categoriesPending ? (
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="small" color="#4b5563" />
           </View>

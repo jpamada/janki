@@ -1,8 +1,8 @@
-import { LayoutGrid, CloudUpload, CloudDownload, Trash2, Palette } from 'lucide-react-native';
+import { LayoutGrid, CloudUpload, CloudDownload, Trash2, Palette, Star } from 'lucide-react-native';
 import { View, ScrollView, Pressable, Text, Modal, Image } from 'react-native';
 import { deleteProgress } from '@/repositories/progress.repository';
-import { useSnackbar } from '@/providers/SnackbarContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSnackbar } from '@/providers/SnackbarContext';
 import { exportData, importData } from '@/db/backup';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -20,26 +20,31 @@ export default function SettingsScreen() {
 
   const deleteProgressMutation = useMutation({
     mutationFn: deleteProgress,
+
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["reviewHeatmap"],
       });
-      await queryClient.invalidateQueries({
-        queryKey: ["logsStats"],
+      await queryClient.invalidateQueries({ 
+        queryKey: ['statistics'] 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ['dailyStatistics'] 
       });
       await queryClient.invalidateQueries({
         queryKey: ["subjects"],
       });
-      setResetModalVisible(false);
       showSnackbar({
         message: "Review data successfully reset",
       });
+      setResetModalVisible(false);
     },
+
     onError: (error) => {
-      console.error(error);
       showSnackbar({
         message: "Something went wrong. Please try again.",
       });
+      console.error(error);
     },
   });
 
@@ -86,12 +91,13 @@ export default function SettingsScreen() {
           </Text>
 
           <Pressable
+            onPress={() => router.push(`/settings/appearance`)}
             className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'
           >
             <View className='bg-white rounded-xl p-4'>
               <Palette color="#9ca3af" />
             </View>
-            <Text className='text-gray-600 text-lg font-bold'>Appearance</Text>
+            <Text className='text-gray-600 text-lg font-bold'>User Interface</Text>
           </Pressable>
 
           <Text className="text-gray-400 text-sm font-semibold mb-2">
@@ -99,7 +105,7 @@ export default function SettingsScreen() {
           </Text>
 
           <DebouncedPressable
-            onPress={() => router.push(`/categories`)}
+            onPress={() => router.push(`/settings/categories`)}
             className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'
           >
             <View className='bg-white rounded-xl p-4'>
@@ -108,6 +114,19 @@ export default function SettingsScreen() {
 
             <Text className='text-gray-600 text-lg font-bold'>
               Categories
+            </Text>
+          </DebouncedPressable>
+
+          <DebouncedPressable
+            onPress={() => router.push(`/settings/favorites`)}
+            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'
+          >
+            <View className='bg-white rounded-xl p-4'>
+              <Star color="#9ca3af" />
+            </View>
+
+            <Text className='text-gray-600 text-lg font-bold'>
+              Favorites
             </Text>
           </DebouncedPressable>
 

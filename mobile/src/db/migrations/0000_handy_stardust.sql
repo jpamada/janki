@@ -17,10 +17,23 @@ CREATE TABLE `categories` (
 	`deleted_at` integer
 );
 --> statement-breakpoint
+CREATE TABLE `history` (
+	`id` text PRIMARY KEY NOT NULL,
+	`question_id` text NOT NULL,
+	`answer` text,
+	`response_time` integer,
+	`attemptedAt` integer NOT NULL,
+	`status` text NOT NULL,
+	FOREIGN KEY (`question_id`) REFERENCES `questions`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `history_question_id_idx` ON `history` (`question_id`);--> statement-breakpoint
+CREATE INDEX `history_attempt_date_idx` ON `history` (`attemptedAt`);--> statement-breakpoint
 CREATE TABLE `lessons` (
 	`id` text PRIMARY KEY NOT NULL,
 	`subject_id` text NOT NULL,
 	`name` text NOT NULL,
+	`position` integer DEFAULT 0 NOT NULL,
 	`favorite` integer DEFAULT false NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer,
@@ -29,29 +42,17 @@ CREATE TABLE `lessons` (
 );
 --> statement-breakpoint
 CREATE INDEX `lessons_subject_id_idx` ON `lessons` (`subject_id`);--> statement-breakpoint
-CREATE TABLE `logs` (
-	`id` text PRIMARY KEY NOT NULL,
-	`question_id` text NOT NULL,
-	`is_correct` integer NOT NULL,
-	`reviewed_at` integer NOT NULL,
-	FOREIGN KEY (`question_id`) REFERENCES `questions`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-CREATE INDEX `logs_question_id_idx` ON `logs` (`question_id`);--> statement-breakpoint
-CREATE INDEX `logs_reviewed_at_idx` ON `logs` (`reviewed_at`);--> statement-breakpoint
 CREATE TABLE `progress` (
 	`id` text PRIMARY KEY NOT NULL,
 	`question_id` text NOT NULL,
-	`lesson_id` text NOT NULL,
-	`session_date` text NOT NULL,
-	`status` text DEFAULT 'unanswered' NOT NULL,
-	`answered_at` integer,
-	FOREIGN KEY (`question_id`) REFERENCES `questions`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`lesson_id`) REFERENCES `lessons`(`id`) ON UPDATE no action ON DELETE cascade
+	`review_interval` text,
+	`last_attempt_date` integer,
+	`next_attempt_date` integer,
+	FOREIGN KEY (`question_id`) REFERENCES `questions`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE INDEX `progress_lesson_session_idx` ON `progress` (`lesson_id`,`session_date`);--> statement-breakpoint
-CREATE UNIQUE INDEX `progress_question_session_unique` ON `progress` (`question_id`,`session_date`);--> statement-breakpoint
+CREATE INDEX `progress_next_attempt_date_idx` ON `progress` (`next_attempt_date`);--> statement-breakpoint
+CREATE UNIQUE INDEX `progress_question_unique` ON `progress` (`question_id`);--> statement-breakpoint
 CREATE TABLE `question_answers` (
 	`id` text PRIMARY KEY NOT NULL,
 	`question_id` text NOT NULL,
@@ -68,11 +69,12 @@ CREATE UNIQUE INDEX `question_answer_unique` ON `question_answers` (`question_id
 CREATE TABLE `questions` (
 	`id` text PRIMARY KEY NOT NULL,
 	`lesson_id` text NOT NULL,
-	`type` text DEFAULT 'multiple_choice' NOT NULL,
 	`question` text NOT NULL,
-	`code` text,
+	`explanation` text,
 	`image` text,
+	`code` text,
 	`language` text,
+	`type` text DEFAULT 'multiple_choice' NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer,
 	`deleted_at` integer,
@@ -80,6 +82,17 @@ CREATE TABLE `questions` (
 );
 --> statement-breakpoint
 CREATE INDEX `questions_lesson_id_idx` ON `questions` (`lesson_id`);--> statement-breakpoint
+CREATE TABLE `settings` (
+	`id` text PRIMARY KEY NOT NULL,
+	`theme` text DEFAULT 'system' NOT NULL,
+	`question_font_size` integer DEFAULT 16 NOT NULL,
+	`question_text_align` text DEFAULT 'left' NOT NULL,
+	`sound_enabled` integer DEFAULT true NOT NULL,
+	`haptics_enabled` integer DEFAULT true NOT NULL,
+	`case_sensitive` integer DEFAULT false NOT NULL,
+	`show_correct_answer` integer DEFAULT true NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE `subjects` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,

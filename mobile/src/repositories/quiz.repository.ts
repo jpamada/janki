@@ -1,6 +1,5 @@
-import { answers, progress, questionAnswers, questions } from "@/db/schema";
-import { todayKey } from "@/constants/date";
-import { and, eq, sql } from "drizzle-orm";
+import { answers, questionAnswers, questions } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 
 import * as Crypto from "expo-crypto";
@@ -31,6 +30,7 @@ export async function createQuizData(
     code: string | null;
     image: string | null;
     language: string | null;
+    explanation: string | null;
     type: "multiple_choice" | "identification";
     answers: {
       answer: string;
@@ -51,6 +51,7 @@ export async function createQuizData(
       image: input.image,
       language: input.language,
       lessonId: input.lessonId,
+      explanation: input.explanation,
       createdAt: new Date(),
     });
 
@@ -87,6 +88,7 @@ export async function updateQuizData(
     code: string | null;
     image: string | null;
     language: string | null;
+    explanation: string | null;
     type: "multiple_choice" | "identification";
 
     answers: {
@@ -105,6 +107,7 @@ export async function updateQuizData(
       question: input.question,
       language: input.language,
       lessonId: input.lessonId,
+      explanation: input.explanation,
       updatedAt: new Date(),
     })
     .where(
@@ -166,72 +169,3 @@ export async function deleteQuizData(id: string) {
     eq(questions.id, id)
   );
 };
-
-export async function startOrResumeQuiz(
-  lessonId: string, 
-  questionIds: string[]
-) {
-
-  const today = todayKey();
-
-  const existingQuestions = await db
-  .select()
-  .from(progress)
-  .where(
-    and(
-      eq(progress.lessonId, lessonId), 
-      eq(progress.sessionDate, today)
-    )
-  );
-
-  const existingQuestionIds = new Set(
-    existingQuestions.map(
-      (question) => question.questionId
-    )
-  );
-
-  const missingQuestionIds = questionIds.filter(
-    (id) => !existingQuestionIds.has(id)
-  );
-
-  if (missingQuestionIds.length > 0) {
-    await db
-    .insert(progress)
-    .values(
-      missingQuestionIds.map((questionId) => ({
-        id: Crypto.randomUUID(),
-        questionId: questionId,
-        lessonId: lessonId,
-        sessionDate: today,
-        status: "unanswered" as const,
-      })),
-    );
-  }
-
-  const allQuestions = [
-    ...existingQuestions,
-    ...missingQuestionIds.map(
-      (questionId) => ({ 
-        questionId: questionId, 
-        status: "unanswered" as const 
-      })
-    ),
-  ];
-
-  const quizQuestions = allQuestions
-  .filter((row) => row.status !== "correct")
-  .map((row) => row.questionId);
-
-  return quizQuestions;
-}
-
-export async function resetQuiz(lessonId: string) {
-  await db
-    .delete(progress)
-    .where(
-      and(
-        eq(progress.lessonId, lessonId),
-        eq(progress.sessionDate, todayKey()),
-      ),
-    );
-}

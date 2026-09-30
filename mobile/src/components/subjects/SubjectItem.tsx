@@ -1,4 +1,4 @@
-import { Check, FolderClosed, FolderOpen, Star } from "lucide-react-native";
+import { FolderClosed, FolderOpen, Star } from "lucide-react-native";
 import { Pressable, View, Text } from "react-native";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -17,10 +17,7 @@ type SubjectItemProps = {
       questions: {
         id: string;
       }[];
-      progress: {
-        sessionDate: string;
-        status: 'unanswered' | 'correct' | 'incorrect';
-      }[];
+      dueCount: number;
     }[];
   };
   onLessonLongPress: (id: string) => void;
@@ -65,17 +62,14 @@ export default function SubjectItem({
       {subjectIsOpen && (
         <View>
           {subject?.lessons?.map((lesson) => {
-            const correctCount = lesson.progress.filter(
-              (item) => item.status === 'correct',
-            ).length;
-
-            const remainingCount = lesson.questions.length - correctCount;
+            const hasQuestions = lesson.questions.length > 0;
+            const isCompleted = hasQuestions && lesson.dueCount === 0;
 
             return (
               <DebouncedPressable
                 key={lesson.id}
                 onPress={() => router.push({
-                  pathname: "/quiz/play",
+                  pathname: "/quiz/start",
                   params: { lessonId: lesson.id }
                 })}
                 onLongPress={() => {
@@ -105,13 +99,13 @@ export default function SubjectItem({
                   </View>
 
                   <View className="flex flex-row items-center gap-2 ms-12">                   
-                    {lesson?.questions?.length === 0 ? (
+                    {!hasQuestions ? (
                       <View className="flex flex-row items-center gap-1">
                         <Text className="text-sm text-gray-400">
                           Empty
                         </Text>
                       </View>
-                    ) : (remainingCount === 0 && correctCount > 0) ? (
+                    ) : isCompleted ? (
                       <View className="flex flex-row items-center gap-1">
                         <Text className="text-sm text-gray-400">
                           Completed
@@ -120,7 +114,7 @@ export default function SubjectItem({
                       
                     ) : (
                       <Text className="text-sm text-gray-400">
-                        {remainingCount} left
+                        {lesson.dueCount} left
                       </Text>
                     )}
                   </View>
