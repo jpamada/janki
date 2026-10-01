@@ -117,7 +117,7 @@ export default function FavoritesScreen() {
               <View className='flex-1 justify-center items-center'>
                 <Star size={64} color="#d1d5db" />
                 <Text className='text-gray-300 font-semibold'>
-                  No Favorites found
+                  No Favorites yet
                 </Text>
               </View>
             }

@@ -1,6 +1,6 @@
-import { sql, gte, and, lte } from 'drizzle-orm';
+import { sql, gte, and, lte, eq } from 'drizzle-orm';
 import { count } from '@/db/sql/aggregates';
-import { history } from "@/db/schema";
+import { history, lessons, questions, subjects } from "@/db/schema";
 import { db } from "@/db/client";
 
 export async function getStatistics() {
@@ -12,16 +12,75 @@ export async function getStatistics() {
     )
   `;
 
-  const statistics = await db
-  .select({
-    day: day,
-    count: count,
-    status: history.status,
-  })
-  .from(history)
-  .groupBy(day, history.status)
-  .orderBy(day);
+  const [
+    statistics,
+    subjectsQuery,
+    lessonsQuery,
+    questionsQuery,
+    subjectsAccuracyQuery,
+  ] = await Promise.all([
+    db
+    .select({
+      day: day,
+      count: count,
+      status: history.status,
+    })
+    .from(history)
+    .groupBy(day, history.status)
+    .orderBy(day),  
 
+    db
+    .select({
+      count: count,
+    })
+    .from(subjects),
+
+    db
+    .select({
+      count: count,
+    })
+    .from(lessons),
+
+    db
+    .select({
+      count: count,
+    })
+    .from(questions),
+
+    db
+    .select({
+      subjectId: subjects.id,
+      subjectName: subjects.name,
+      correct: sql<number>`
+        SUM(
+          CASE
+            WHEN ${history.status} = 'correct' THEN 1
+            ELSE 0
+          END
+        )
+      `,
+      total: count,
+    })
+    .from(history)
+    .innerJoin(
+      questions,
+      eq(history.questionId, questions.id)
+    )
+    .innerJoin(
+      lessons,
+      eq(questions.lessonId, lessons.id)
+    )
+    .innerJoin(
+      subjects,
+      eq(lessons.subjectId, subjects.id)
+    )
+    .groupBy(
+      subjects.id,
+      subjects.name
+    )
+  ])
+
+  
   const correctReviews = statistics
   .filter((review) => review.status === "correct")
   .reduce((total, review) => total + review.count, 0);
@@ -42,14 +101,31 @@ export async function getStatistics() {
 
   const accuracy = totalReviews > 0 ? Math.round((correctReviews / totalReviews) * 100) : 0;
 
+  const subjectCount = subjectsQuery[0]?.count ?? 0;
+  const lessonCount = lessonsQuery[0]?.count ?? 0;
+  const questionCount = questionsQuery[0]?.count ?? 0;
+
+  const subjectsAccuracy = subjectsAccuracyQuery.map((subject) => ({
+    subjectId: subject.subjectId,
+    subjectName: subject.subjectName,
+    accuracy: subject.total > 0
+      ? Math.round((subject.correct / subject.total) * 100)
+      : 0,
+  }));
+
   return {
     accuracy: accuracy,
     activeDays: activeDays,
+    statistics: statistics,
     totalReviews: totalReviews,
     dailyAverage: dailyAverage,
     correctReviews: correctReviews,
-    statistics: statistics,
     incorrectReviews: incorrectReviews,
+
+    lessonCount: lessonCount,
+    subjectCount: subjectCount,
+    questionCount: questionCount,
+    subjectsAccuracy: subjectsAccuracy ?? []
   };
 }
 

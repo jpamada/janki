@@ -169,7 +169,7 @@ export default function CategoryScreen() {
       ) : (
         <View className="flex-1 items-center justify-center">
           <SearchX size={64} color="#9ca3af" />
-          <Text className="text-gray-400">No category found</Text>
+          <Text className="text-gray-400">No category yet</Text>
         </View>
       )}
 

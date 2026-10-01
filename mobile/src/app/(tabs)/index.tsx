@@ -414,7 +414,7 @@ export default function HomeScreen() {
               <View className='flex-1 justify-center items-center '>
                 <SearchX size={64} color="#9ca3af" />
                 <Text className='text-gray-400 font-semibold'>
-                  No subjects found
+                  No subjects yet
                 </Text>
               </View>
             }

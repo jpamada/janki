@@ -6,6 +6,7 @@ import { useMemo } from "react";
 
 import HistoryItem from "@/components/history/HistoryItem";
 import Header from "@/components/shared/Header";
+import { RotateCcwClock } from "lucide-react-native";
 
 const PAGE_SIZE = 20;
 
@@ -78,7 +79,8 @@ export default function HistoryScreen() {
           onEndReachedThreshold={0.5}
           ListEmptyComponent={
             <View className="flex-1 justify-center items-center py-16">
-              <Text className="text-gray-400 font-semibold">
+              <RotateCcwClock size={32} color="#d1d5db" />
+              <Text className='text-gray-300 font-semibold'>
                 No history yet
               </Text>
             </View>

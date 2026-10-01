@@ -13,6 +13,7 @@ import { type ReviewInterval } from '@/helpers/progress.helper';
 import { getQuizData } from '@/repositories/quiz.repository';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSnackbar } from '@/providers/SnackbarContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { Picker } from '@react-native-picker/picker';
 import { useSfx } from '@/providers/SfxProvider';
@@ -28,6 +29,7 @@ const CodeHighlighter = lazy(
 
 export default function QuizStartScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
+  const { settings } = useSettings();
 
   const { playAnswerSfx, playCompletedSfx } = useSfx();
   const { showSnackbar } = useSnackbar();
@@ -61,11 +63,6 @@ export default function QuizStartScreen() {
     enabled: !!lessonId,
   });
 
-  const { data: settings } = useQuery({
-    queryKey: ["settings"],
-    queryFn: getSettings,
-  });
-
   const questions = useMemo(() =>
     queuedQuestions.flatMap((id) => {
       const question = quizData.find((q) => q.id === id);
@@ -91,6 +88,12 @@ export default function QuizStartScreen() {
       });
       await queryClient.invalidateQueries({ 
         queryKey: ['dailyStatistics'] 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ['historyList'] 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ['latestHistory'] 
       });
     },
 

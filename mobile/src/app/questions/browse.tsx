@@ -108,7 +108,7 @@ export default function BrowseQuestionScreen() {
         ): (
           <View className='flex-1 justify-center items-center'>
             <SearchX size={64} color="#9ca3af" />
-            <Text className='text-gray-400 font-semibold'>No questions found</Text>
+            <Text className='text-gray-400 font-semibold'>No questions yet</Text>
           </View>
         )}
 

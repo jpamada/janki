@@ -182,7 +182,7 @@ export default function QuestionsScreen() {
       ) : (
         <View className='flex-1 justify-center items-center'>
           <SearchX size={64} color="#9ca3af" />
-          <Text className='text-gray-400 font-semibold'>No question found</Text>
+          <Text className='text-gray-400 font-semibold'>No question yet</Text>
         </View>
       )}
     </View>

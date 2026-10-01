@@ -31,7 +31,7 @@ export default function Stats({
       <View className="flex-row gap-2">
         <View className="flex-1 items-center gap-1 p-4 bg-gray-50 rounded-xl">
           <Text className="text-xl font-bold text-gray-800">{correctReviews}</Text>
-          <Text className="text-xs text-center text-gray-500">Correct Reviews</Text>
+          <Text className="text-xs text-center text-gray-500">Correct{"\n"} Reviews</Text>
         </View>
 
         <View className="flex-1 items-center gap-1 p-4 bg-gray-50 rounded-xl">
@@ -41,7 +41,7 @@ export default function Stats({
 
         <View className="flex-1 items-center gap-1 p-4 bg-gray-50 rounded-xl">
           <Text className="text-xl font-bold text-gray-800">{accuracy}%</Text>
-          <Text className="text-xs text-center text-gray-500">Review Accuracy</Text>
+          <Text className="text-xs text-center text-gray-500">Review{"\n"} Accuracy</Text>
         </View>
       </View>
     </View>

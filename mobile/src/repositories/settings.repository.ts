@@ -21,7 +21,7 @@ export async function getSettings() {
     eq(settings.id, "default")
   );
 
-  return query;
+  return query ?? null;
 }
 
 export async function updateTheme(

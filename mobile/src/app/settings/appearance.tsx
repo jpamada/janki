@@ -1,21 +1,19 @@
-import { getSettings, updateCaseSensitivity, updateFontSize, updateHapticsEnabled, updateShowCorrectAnswer, updateSoundEnabled, updateTextAlign, updateTheme } from "@/repositories/settings.repository";
+import { updateCaseSensitivity, updateFontSize, updateHapticsEnabled, updateShowCorrectAnswer, updateSoundEnabled, updateTextAlign, updateTheme } from "@/repositories/settings.repository";
 import { AArrowUp, BookCheck, CaseSensitive, Palette, TextAlignStart, Vibrate, Volume2 } from "lucide-react-native";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, Text, View } from "react-native";
 import { Switch } from "react-native-gesture-handler";
 import { Picker } from "@react-native-picker/picker";
 
 import Header from "@/components/shared/Header";
+import { useSettings } from "@/contexts/SettingsContext";
 
 export default function AppearanceScreen() {
+  const { settings } = useSettings();
+
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
-
-  const { data: settings } = useQuery({
-    queryKey: ["settings"],
-    queryFn: getSettings,
-  });
 
   const updateThemeMutation = useMutation({
     mutationFn: updateTheme,
