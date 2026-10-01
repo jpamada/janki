@@ -1,7 +1,7 @@
 import { getDueQuestionIds, recordCorrectAnswer, recordIncorrectAnswer, resetProgressForQuestions } from '@/repositories/progress.repository';
-import { CaseSensitive, FileQuestionMark, Lightbulb, LogOut, Settings, TextAlignStart, Trophy } from 'lucide-react-native';
-import { Animated, ActivityIndicator, Modal, Pressable, Text, TextInput, View, Image } from 'react-native';
-import { getSettings, updateFontSize, updateTextAlign } from '@/repositories/settings.repository';
+import { AArrowUp, BookCheck, CaseSensitive, FileQuestionMark, Lightbulb, LogOut, Settings, TextAlignStart, Trophy, Volume2 } from 'lucide-react-native';
+import { Animated, ActivityIndicator, Modal, Pressable, Text, TextInput, View, Image, Switch } from 'react-native';
+import { getSettings, updateCaseSensitivity, updateFontSize, updateHapticsEnabled, updateShowCorrectAnswer, updateSoundEnabled, updateTextAlign } from '@/repositories/settings.repository';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { atomOneLight } from "react-syntax-highlighter/dist/esm/styles/hljs";
@@ -166,6 +166,36 @@ export default function QuizStartScreen() {
 
   const updateFontSizeMutation = useMutation({
     mutationFn: updateFontSize,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["settings"],
+      });
+    },
+  });
+
+  const updateCaseSensitivityMutation = useMutation({
+    mutationFn: updateCaseSensitivity,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["settings"],
+      });
+    },
+  });
+
+  const updateShowCorrectAnswerMutation = useMutation({
+    mutationFn: updateShowCorrectAnswer,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["settings"],
+      });
+    },
+  });
+
+  const updateSoundEnabledMutation = useMutation({
+    mutationFn: updateSoundEnabled,
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -379,6 +409,18 @@ export default function QuizStartScreen() {
     setQueuedQuestionIndex(0);
     setIsQuizIncomplete(false);
     setIdentificationInput('');
+  };
+
+  const toggleCaseSensitivity = (value: boolean) => {
+    updateCaseSensitivityMutation.mutate(value);
+  };
+
+  const toggleShowCorrectAnswer = (value: boolean) => {
+    updateShowCorrectAnswerMutation.mutate(value);
+  };
+
+  const toggleSoundEnabled = (value: boolean) => {
+    updateSoundEnabledMutation.mutate(value);
   };
 
   useEffect(() => {
@@ -696,7 +738,7 @@ export default function QuizStartScreen() {
                 >
                   <View className="flex-row items-center justify-between rounded-t-xl bg-white p-4">
                     <View className="flex-row items-center gap-2">
-                      <CaseSensitive size={16} />
+                      <AArrowUp size={16} />
                       <Text className='text-xl'>Font Size</Text>
                     </View>
 
@@ -783,6 +825,48 @@ export default function QuizStartScreen() {
                       </Picker>
                     </View>
                   </View>
+
+                  <View className="flex-row items-center justify-between rounded-t-xl bg-white p-4">
+                    <View className="flex-row items-center gap-2">
+                      <CaseSensitive size={16} />
+                      <Text className='text-xl'>Case Sensitive</Text>
+                    </View>
+
+                    <View className="bg-gray-100 rounded-xl p-1">
+                      <Switch
+                        value={settings?.caseSensitive}
+                        onValueChange={toggleCaseSensitivity}
+                      />
+                    </View>
+                  </View> 
+
+                  <View className="flex-row items-center justify-between rounded-t-xl bg-white p-4">
+                    <View className="flex-row items-center gap-2">
+                      <BookCheck size={16} />
+                      <Text className='text-xl'>Show Correct Answer</Text>
+                    </View>
+
+                    <View className="bg-gray-100 rounded-xl p-1">
+                      <Switch
+                        value={settings?.showCorrectAnswer}
+                        onValueChange={toggleShowCorrectAnswer}
+                      />
+                    </View>
+                  </View> 
+
+                  <View className="flex-row items-center justify-between rounded-t-xl bg-white p-4">
+                    <View className="flex-row items-center gap-2">
+                      <Volume2 size={16} />
+                      <Text className='text-xl'>Sounds</Text>
+                    </View>
+
+                    <View className="bg-gray-100 rounded-xl p-1">
+                      <Switch
+                        value={settings?.soundEnabled}
+                        onValueChange={toggleSoundEnabled}
+                      />
+                    </View>
+                  </View> 
 
                   <Pressable
                     onPress={() => {

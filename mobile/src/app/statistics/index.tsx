@@ -149,12 +149,19 @@ export default function BrowseStatistics() {
 
             <View className="flex-col gap-6 border-2 border-gray-300 rounded-xl p-4">
               {((statistic?.subjectsAccuracy?.length ?? 0) > 0) ? (
-                 statistic?.subjectsAccuracy?.map((subject) => (
-                  <View key={subject.subjectId} className="flex-row items-center justify-between">
-                    <Text className="text-gray-600 font-semibold">{subject.subjectName}</Text>
-                    <Text className="font-semibold">{subject.accuracy}%</Text>
+                <>
+                  {statistic?.subjectsAccuracy?.map((subject) => (
+                    <View key={subject.subjectId} className="flex-row items-center justify-between">
+                      <Text className="text-gray-600 font-semibold">{subject.subjectName}</Text>
+                      <Text className="font-semibold">{subject.accuracy}%</Text>
+                    </View>
+                  ))}
+
+                  <View className="flex-row items-center justify-between border-t-2 pt-2 border-gray-100">
+                    <Text className="text-gray-600 font-semibold">Overall</Text>
+                    <Text className="font-semibold">{statistic?.accuracy}%</Text>
                   </View>
-                ))
+                </>
               ) : (
                 <View className='justify-center items-center py-12'>
                   <Lightbulb size={32} color="#d1d5db" />
@@ -163,7 +170,6 @@ export default function BrowseStatistics() {
                   </Text>
                 </View>
               )}
-             
             </View>
           </View>
         )}

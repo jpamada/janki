@@ -78,9 +78,9 @@ export async function getStatistics() {
       subjects.id,
       subjects.name
     )
+    .orderBy()
   ])
 
-  
   const correctReviews = statistics
   .filter((review) => review.status === "correct")
   .reduce((total, review) => total + review.count, 0);
@@ -105,13 +105,13 @@ export async function getStatistics() {
   const lessonCount = lessonsQuery[0]?.count ?? 0;
   const questionCount = questionsQuery[0]?.count ?? 0;
 
-  const subjectsAccuracy = subjectsAccuracyQuery.map((subject) => ({
+  const subjectsAccuracy = subjectsAccuracyQuery
+  .map((subject) => ({
     subjectId: subject.subjectId,
     subjectName: subject.subjectName,
-    accuracy: subject.total > 0
-      ? Math.round((subject.correct / subject.total) * 100)
-      : 0,
-  }));
+    accuracy: subject.total > 0 ? Math.round((subject.correct / subject.total) * 100) : 0,
+  }))
+  .sort((a, b) => b.accuracy - a.accuracy);
 
   return {
     accuracy: accuracy,
