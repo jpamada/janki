@@ -3,11 +3,11 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import { SnackbarProvider } from '@/providers/SnackbarContext';
+import { SnackbarProvider } from '@/contexts/SnackbarContext';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/providers/query-provider';
-import { SfxProvider } from '@/providers/SfxProvider';
+import { SfxProvider } from '@/contexts/SfxContext';
 import { Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { db } from '@/db/client';
@@ -38,65 +38,65 @@ export default function RootLayout() {
   }
 
   return (
-    <SfxProvider>
-      <SafeAreaProvider> 
-        <KeyboardProvider>
-          <GestureHandlerRootView
-            style={{ flex: 1 }}>
-              <SnackbarProvider>
-                  <QueryClientProvider 
-                    client={queryClient}>
-                      <SettingsProvider>
-                    <Stack>
-                      <Stack.Screen
-                        name="(tabs)"
-                        options={{
-                          headerShown: false,
-                          animation: "slide_from_right",
-                        }}
-                      />
-                      <Stack.Screen
-                        name="questions"
-                        options={{ 
-                          headerShown: false,
-                          animation: "slide_from_right",
-                        }}
-                      />
-                      <Stack.Screen
-                        name="quiz"
-                        options={{ 
-                          headerShown: false,
-                          animation: "slide_from_right",
-                        }}
-                      />
-                      <Stack.Screen
-                        name="history"
-                        options={{ 
-                          headerShown: false,
-                          animation: "slide_from_right",
-                        }}
-                      />
-                      <Stack.Screen
-                        name="statistics"
-                        options={{ 
-                          headerShown: false,
-                          animation: "slide_from_right",
-                        }}
-                      />
-                      <Stack.Screen
-                        name="settings"
-                        options={{ 
-                          headerShown: false,
-                          animation: "slide_from_right",
-                        }}
-                      />
-                    </Stack>
-                  </SettingsProvider>
-              </QueryClientProvider>
-            </SnackbarProvider>
-          </GestureHandlerRootView>
-        </KeyboardProvider>
-      </SafeAreaProvider>
-    </SfxProvider>
+    <SafeAreaProvider> 
+      <KeyboardProvider>
+        <GestureHandlerRootView
+          style={{ flex: 1 }}>
+          <SnackbarProvider>
+            <QueryClientProvider 
+              client={queryClient}>
+              <SettingsProvider>
+                <SfxProvider>
+                  <Stack>
+                    <Stack.Screen
+                      name="(tabs)"
+                      options={{
+                        headerShown: false,
+                        animation: "slide_from_right",
+                      }}
+                    />
+                    <Stack.Screen
+                      name="questions"
+                      options={{ 
+                        headerShown: false,
+                        animation: "slide_from_right",
+                      }}
+                    />
+                    <Stack.Screen
+                      name="quiz"
+                      options={{ 
+                        headerShown: false,
+                        animation: "slide_from_right",
+                      }}
+                    />
+                    <Stack.Screen
+                      name="history"
+                      options={{ 
+                        headerShown: false,
+                        animation: "slide_from_right",
+                      }}
+                    />
+                    <Stack.Screen
+                      name="statistics"
+                      options={{ 
+                        headerShown: false,
+                        animation: "slide_from_right",
+                      }}
+                    />
+                    <Stack.Screen
+                      name="settings"
+                      options={{ 
+                        headerShown: false,
+                        animation: "slide_from_right",
+                      }}
+                    />
+                  </Stack>
+                </SfxProvider>
+              </SettingsProvider>
+            </QueryClientProvider>
+          </SnackbarProvider>
+        </GestureHandlerRootView>
+      </KeyboardProvider>
+    </SafeAreaProvider>
   );
 }

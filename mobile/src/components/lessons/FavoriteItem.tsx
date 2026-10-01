@@ -3,7 +3,7 @@ import { Star } from "lucide-react-native";
 import { router } from "expo-router";
 
 import DebouncedPressable from "../shared/DebouncedPressable";
-import * as Haptics from "expo-haptics";
+import { useSfx } from "@/contexts/SfxContext";
 
 type Subject = {
   id: string;
@@ -27,11 +27,11 @@ export default function FavoriteItem({
   onLongPress,
   onRemoveFavorite
 }: LessonItem) {
-
+  const { hapticVibration } = useSfx();
   return (
     <DebouncedPressable
       onLongPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        hapticVibration();
         onLongPress(id);
       }}
       onPress={() => router.push({

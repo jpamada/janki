@@ -2,7 +2,7 @@ import { LayoutGrid, CloudUpload, CloudDownload, Trash2, Palette, Star } from 'l
 import { View, ScrollView, Pressable, Text, Modal, Image } from 'react-native';
 import { deleteProgress } from '@/repositories/progress.repository';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSnackbar } from '@/providers/SnackbarContext';
+import { useSnackbar } from '@/contexts/SnackbarContext';
 import { exportData, importData } from '@/db/backup';
 import { router } from 'expo-router';
 import { useState } from 'react';

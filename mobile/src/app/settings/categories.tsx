@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CategoryFormData } from '@/schemas/category.schema';
 import { Plus, SearchX, Trash2 } from 'lucide-react-native';
-import { useSnackbar } from '@/providers/SnackbarContext';
+import { useSnackbar } from '@/contexts/SnackbarContext';
 import { useState } from 'react';
 
 import CategoryForm from '@/components/categories/CategoryForm';

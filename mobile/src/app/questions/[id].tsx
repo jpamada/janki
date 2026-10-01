@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { updateQuizData } from "@/repositories/quiz.repository";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { QuestionFormData } from "@/schemas/question.schema";
-import { useSnackbar } from "@/providers/SnackbarContext";
+import { useSnackbar } from "@/contexts/SnackbarContext";
 import { SearchX, Trash2 } from "lucide-react-native";
 import { useState } from "react";
 

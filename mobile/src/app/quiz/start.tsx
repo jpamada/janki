@@ -12,11 +12,11 @@ import { getResponseTime, shuffle } from '@/helpers/quiz.helper';
 import { type ReviewInterval } from '@/helpers/progress.helper';
 import { getQuizData } from '@/repositories/quiz.repository';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useSnackbar } from '@/providers/SnackbarContext';
+import { useSnackbar } from '@/contexts/SnackbarContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { Picker } from '@react-native-picker/picker';
-import { useSfx } from '@/providers/SfxProvider';
+import { useSfx } from '@/contexts/SfxContext';
 
 import DebouncedPressable from '@/components/shared/DebouncedPressable';
 import EmptyStateScreen from '@/components/shared/EmptyState';

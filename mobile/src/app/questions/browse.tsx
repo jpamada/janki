@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PenLine, Plus, SearchX, Trash2 } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
-import { useSnackbar } from "@/providers/SnackbarContext";
+import { useSnackbar } from "@/contexts/SnackbarContext";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
 import { useMemo, useState } from "react";
 

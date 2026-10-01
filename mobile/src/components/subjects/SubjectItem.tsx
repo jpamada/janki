@@ -3,8 +3,8 @@ import { Pressable, View, Text } from "react-native";
 import { router } from "expo-router";
 import { useState } from "react";
 
-import * as Haptics from 'expo-haptics';
 import DebouncedPressable from "../shared/DebouncedPressable";
+import { useSfx } from "@/contexts/SfxContext";
 
 type SubjectItemProps = {
   subject: {
@@ -31,6 +31,7 @@ export default function SubjectItem({
   onSubjectLongPress,
   onToggleFavorite,
 }: SubjectItemProps) {
+  const { hapticVibration } = useSfx();
 
   const [subjectIsOpen, setSubjectIsOpen] = useState(false);
 
@@ -39,7 +40,7 @@ export default function SubjectItem({
       <Pressable
         delayLongPress={500}
         onLongPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          hapticVibration();
           onSubjectLongPress(subject.id);
         }}
         onPress={() => {
@@ -73,7 +74,7 @@ export default function SubjectItem({
                   params: { lessonId: lesson.id }
                 })}
                 onLongPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  hapticVibration();
                   onLessonLongPress(lesson.id);
                 }}
                 className="flex-row items-center justify-between gap-2 px-2 py-2 active:bg-gray-100"

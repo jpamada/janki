@@ -3,7 +3,7 @@ import { getFavoriteLessons, toggleLessonFavorite } from "@/repositories/lesson.
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Lightbulb, Star, StarMinus, StarPlus } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useSnackbar } from "@/providers/SnackbarContext";
+import { useSnackbar } from "@/contexts/SnackbarContext";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
 import { useMemo, useState } from "react";
 import { router } from "expo-router";

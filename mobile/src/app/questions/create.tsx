@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createQuizData } from '@/repositories/quiz.repository';
 import { QuestionFormData } from '@/schemas/question.schema';
-import { useSnackbar } from '@/providers/SnackbarContext';
+import { useSnackbar } from '@/contexts/SnackbarContext';
 import { useEffect, useRef, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { View } from 'react-native';

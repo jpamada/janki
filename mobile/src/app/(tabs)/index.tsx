@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCategories } from "@/repositories/category.repository";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SubjectFormData } from "@/schemas/subject.schema";
-import { useSnackbar } from "@/providers/SnackbarContext";
+import { useSnackbar } from "@/contexts/SnackbarContext";
 import { LessonFormData } from "@/schemas/lesson.schema";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
 import { router, useFocusEffect } from "expo-router";

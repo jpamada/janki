@@ -1,14 +1,20 @@
 import { createContext, useContext, useMemo } from 'react';
+import { useSettings } from './SettingsContext';
 import { useAudioPlayer } from 'expo-audio';
+
+import * as Haptics from "expo-haptics";
 
 type SfxContextValue = {
   playAnswerSfx: (correct: boolean) => void;
   playCompletedSfx: () => void;
+  hapticVibration: () => void;
 };
 
 const SfxContext = createContext<SfxContextValue | null>(null);
 
 export function SfxProvider({ children }: { children: React.ReactNode }) {
+  const { settings } = useSettings();
+
   const correctPlayer = useAudioPlayer(require('@/assets/sounds/CorrectSfx.mp3'));
   const incorrectPlayer = useAudioPlayer(require('@/assets/sounds/WrongSfx.mp3'));
   const completedPlayer = useAudioPlayer(require('@/assets/sounds/CompletedSfx.mp3'));
@@ -16,16 +22,29 @@ export function SfxProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(
     () => ({
       playAnswerSfx: (correct: boolean) => {
-        const player = correct ? correctPlayer : incorrectPlayer;
-        player.seekTo(0);
-        player.play();
+        if (settings?.soundEnabled) {
+          const player = correct
+            ? correctPlayer
+            : incorrectPlayer;
+
+          player.seekTo(0);
+          player.play();
+        }
       },
       playCompletedSfx: () => {
-        completedPlayer.seekTo(0);
-        completedPlayer.play();
+        if (settings?.soundEnabled) {
+          completedPlayer.seekTo(0);
+          completedPlayer.play();
+        }
       },
+      hapticVibration: () => {
+        if (settings?.hapticsEnabled) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+      }
     }),
-    [correctPlayer, incorrectPlayer, completedPlayer],
+    
+    [correctPlayer, incorrectPlayer, completedPlayer, settings],
   );
 
   return (

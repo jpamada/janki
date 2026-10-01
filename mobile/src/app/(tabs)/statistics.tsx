@@ -86,7 +86,7 @@ export default function StatisticsScreen() {
               />
             )}
             ListEmptyComponent={
-              <View className='flex-1 justify-center items-center py-4'>
+              <View className='flex-1 justify-center items-center bg-gray-50 rounded-xl py-6'>
                 <RotateCcwClock size={32} color="#d1d5db" />
                 <Text className='text-gray-300 font-semibold'>
                   No history yet

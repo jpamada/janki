@@ -117,15 +117,20 @@ export default function AppearanceScreen() {
           System
         </Text>
 
-        <View className='flex flex-row items-center  justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'>
-          <View className="flex flex-row items-center gap-2">
+        <View className='flex flex-row items-center  justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
+          <View className="flex-1 flex-row items-center gap-4 min-w-0">
             <View className='bg-white rounded-xl p-2'>
               <Palette color="#9ca3af" />
             </View>
 
-            <Text className='text-gray-600 font-bold'>
-              Theme
-            </Text>
+            <View className="flex-1 min-w-0 gap-1">
+              <Text className='text-gray-600 font-bold'>
+                Theme
+              </Text>
+              <Text className="text-gray-400 text-sm">
+                Change the theme of the app.
+              </Text>
+            </View>
           </View>
 
           <View className="bg-gray-100 rounded-xl">
@@ -164,15 +169,20 @@ export default function AppearanceScreen() {
         </Text>
 
         <View className="flex flex-col">
-          <View className='flex flex-row items-center  justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'>
-            <View className="flex flex-row items-center gap-2">
+          <View className='flex-row items-center  justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
+            <View className="flex-1 flex-row items-center gap-4 min-w-0">
               <View className='bg-white rounded-xl p-2'>
                 <AArrowUp color="#9ca3af" />
               </View>
 
-              <Text className='text-gray-600 font-bold'>
-                Font Size
-              </Text>
+              <View className="flex-1 min-w-0 gap-1">
+                <Text className='text-gray-600 font-bold'>
+                  Font Size
+                </Text>
+                <Text className="text-gray-400 text-sm">
+                  Adjusts question font size.
+                </Text>
+              </View>
             </View>
 
             <View className="bg-gray-100 rounded-xl">
@@ -214,15 +224,20 @@ export default function AppearanceScreen() {
             </View>
           </View>
 
-          <View className='flex flex-row items-center  justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'>
-            <View className="flex flex-row items-center gap-2">
+          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
+            <View className="flex-1 flex-row items-center gap-4 min-w-0">
               <View className='bg-white rounded-xl p-2'>
                 <TextAlignStart color="#9ca3af" />
               </View>
 
-              <Text className='text-gray-600 font-bold'>
-                Text Align
-              </Text>
+              <View className="flex-1 min-w-0 gap-1">
+                <Text className='text-gray-600 font-bold'>
+                  Text Align
+                </Text>
+                <Text className="text-gray-400 text-sm">
+                  Enable to align question texts.
+                </Text>
+              </View>
             </View>
 
             <View className="bg-gray-100 rounded-xl">
@@ -264,7 +279,7 @@ export default function AppearanceScreen() {
             </View>
           </View>
 
-          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'>
+          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
             <View className="flex-1 flex-row items-center gap-4 min-w-0">
               <View className='bg-white rounded-xl p-2'>
                 <CaseSensitive color="#9ca3af" />
@@ -275,7 +290,7 @@ export default function AppearanceScreen() {
                   Case Sensitive
                 </Text>
                 <Text className="text-gray-400 text-sm">
-                  
+                  Enable to make answers more accurate.
                 </Text>
               </View>
             </View>
@@ -288,7 +303,7 @@ export default function AppearanceScreen() {
             </View>
           </View>
 
-          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'>
+          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
             <View className="flex-1 flex-row items-center gap-4 min-w-0">
               <View className='bg-white rounded-xl p-2'>
                 <BookCheck color="#9ca3af" />
@@ -316,7 +331,7 @@ export default function AppearanceScreen() {
             Sounds
           </Text>
 
-          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'>
+          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
             <View className="flex-1 flex-row items-center gap-4 min-w-0">
               <View className='bg-white rounded-xl p-2'>
                 <Volume2 color="#9ca3af" />
@@ -340,7 +355,7 @@ export default function AppearanceScreen() {
             </View>
           </View>
 
-          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'>
+          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
             <View className="flex-1 flex-row items-center gap-4 min-w-0">
               <View className='bg-white rounded-xl p-2'>
                 <Vibrate color="#9ca3af" />

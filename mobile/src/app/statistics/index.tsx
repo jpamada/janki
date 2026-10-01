@@ -3,8 +3,8 @@ import { getDailyStatistics, getStatistics } from "@/repositories/statistics.rep
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 
+import { BookCheck, BookText, BookX, Lightbulb } from "lucide-react-native";
 import Header from "@/components/shared/Header";
-import { Book, BookCheck, BookText, BookX, Calendar, Lightbulb } from "lucide-react-native";
 
 export default function BrowseStatistics() {
   const insets = useSafeAreaInsets();

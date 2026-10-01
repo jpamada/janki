@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { Text } from "react-native";
 
 import DebouncedPressable from "../shared/DebouncedPressable";
-import * as Haptics from "expo-haptics";
+import { useSfx } from "@/contexts/SfxContext";
 
 type QuestionItemProps = {
   id: string;
@@ -17,11 +17,12 @@ export default function QuestionItem({
   question,
   onLongPress
 }: QuestionItemProps) {
-  
+  const { hapticVibration } = useSfx();
+
   return (
     <DebouncedPressable
       onLongPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        hapticVibration();
         onLongPress(id);
       }}
       onPress={() => {

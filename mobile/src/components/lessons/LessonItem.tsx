@@ -1,8 +1,7 @@
 import { Pressable, Text } from "react-native";
 import { Star } from "lucide-react-native";
 import { router } from "expo-router";
-
-import * as Haptics from "expo-haptics";
+import { useSfx } from "@/contexts/SfxContext";
 
 type LessonItemProps = {
   id: string;
@@ -20,13 +19,12 @@ export default function LessonItem({
   onLongPress,
   onToggleFavorite,
 }: LessonItemProps) {
+  const { hapticVibration } = useSfx();
+
   return (
     <Pressable
       onLongPress={() => {
-        Haptics.impactAsync(
-          Haptics.ImpactFeedbackStyle.Light
-        );
-
+        hapticVibration();
         onLongPress(id);
       }}
       onPress={() =>
