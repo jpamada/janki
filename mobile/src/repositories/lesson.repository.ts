@@ -90,6 +90,37 @@ export async function toggleLessonFavorite(
   );
 }
 
+export async function swapLessonPosition(
+  lessonId: string,
+  targetLessonId: string,
+) {
+  await db.transaction(async (tx) => {
+    const [lesson] = await tx
+      .select({ position: lessons.position })
+      .from(lessons)
+      .where(eq(lessons.id, lessonId));
+
+    const [targetLesson] = await tx
+      .select({ position: lessons.position })
+      .from(lessons)
+      .where(eq(lessons.id, targetLessonId));
+
+    if (!lesson || !targetLesson) {
+      throw new Error("Lesson not found");
+    }
+
+    await tx
+      .update(lessons)
+      .set({ position: targetLesson.position })
+      .where(eq(lessons.id, lessonId));
+
+    await tx
+      .update(lessons)
+      .set({ position: lesson.position })
+      .where(eq(lessons.id, targetLessonId));
+  });
+}
+
 export async function deleteLesson(id: string) {
   await db
   .delete(lessons)

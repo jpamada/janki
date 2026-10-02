@@ -1,6 +1,6 @@
 import { createSubject, deleteSubject, getSubjectsByCategory, hasDefaultSubjects, updateSubject } from "@/repositories/subject.repository";
-import { FolderClosed, Lightbulb, PenLine, Plus, SearchX, StarMinus, StarPlus, Trash2, X } from "lucide-react-native";
-import { createLesson, deleteLesson, toggleLessonFavorite, updateLesson } from "@/repositories/lesson.repository";
+import { FolderClosed, Lightbulb, ListOrdered, PenLine, Plus, SearchX, StarMinus, StarPlus, Trash2, X } from "lucide-react-native";
+import { createLesson, deleteLesson, swapLessonPosition, toggleLessonFavorite, updateLesson } from "@/repositories/lesson.repository";
 import { ActivityIndicator, Animated, FlatList, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -33,6 +33,7 @@ export default function HomeScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [fabVisible, setFabVisible] = useState(false);
   
+  const [positionModalVisible, setPositionModalVisible] = useState(false);
   const [subjectModalVisible, setSubjectModalVisible] = useState(false);
   const [lessonModalVisible, setLessonModalVisible] = useState(false);
 
@@ -68,7 +69,17 @@ export default function HomeScreen() {
       (subject) => subject.lessons.find(
       (lesson) => lesson.id === selectedLessonId)
     ).find(Boolean);
-  }, [subjects, selectedLessonId])
+  }, [subjects, selectedLessonId]);
+
+  const selectedSubjectLessons = useMemo(() => {
+    if (!selectedLesson) return [];
+
+    const subject = subjects.find(
+      (subject) => subject.id === selectedLesson.subjectId
+    );
+
+    return subject?.lessons ?? [];
+  }, [subjects, selectedLesson]);
 
   const createSubjectMutation = useMutation({
     mutationFn: createSubject,
@@ -220,6 +231,34 @@ export default function HomeScreen() {
     }
   });
 
+  const swapLessonPositionMutation = useMutation({
+    mutationFn: ({
+      lessonId,
+      targetLessonId,
+    }: {
+      lessonId: string;
+      targetLessonId: string;
+    }) => swapLessonPosition(lessonId, targetLessonId),
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["subjects", selectedCategoryId],
+      });
+
+      showSnackbar({
+        message: "Lesson position changed",
+      });
+      resetForm();
+    },
+
+    onError: (error) => {
+      console.error(error.message);
+      showSnackbar({
+        message: "Something went wrong. Please try again.",
+      });
+    },
+  });
+
   const toggleFavoriteMutation = useMutation({
     mutationFn: ({ id, favorite }: { 
       id: string; 
@@ -346,6 +385,7 @@ export default function HomeScreen() {
     setSelectedSubjectId(null);
     setLessonModalVisible(false);
     setSubjectModalVisible(false);
+    setPositionModalVisible(false);
   }
 
   useEffect(() => {
@@ -648,6 +688,18 @@ export default function HomeScreen() {
 
               <Pressable
                 onPress={() => {
+                  lessonSheet.close(() => {
+                    setPositionModalVisible(true);
+                  });
+                }}
+                className="flex-row items-center gap-2 p-4 active:bg-gray-100"
+              >
+                <ListOrdered size={16} />
+                <Text className="text-xl">Change Position</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
                   if (!selectedLesson) return;
                   lessonSheet.close(() => {
                     toggleFavoriteMutation.mutate({
@@ -821,6 +873,63 @@ export default function HomeScreen() {
                 }}
               />
             )}
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        transparent
+        animationType="fade"
+        visible={positionModalVisible}
+        onRequestClose={resetForm}
+      >
+        <Pressable
+          className="flex-1 items-center justify-center bg-black/40"
+          onPress={resetForm}
+        >
+          <Pressable
+            className="w-[90%] max-h-[70%] rounded-2xl bg-white p-6"
+            onPress={(event) => event.stopPropagation()}
+          >
+            <Text className="mb-4 text-xl font-bold">
+              Change Position
+            </Text>
+
+            <FlatList
+              data={selectedSubjectLessons.filter(
+                (lesson) => lesson.id !== selectedLessonId
+              )}
+              keyExtractor={(lesson) => lesson.id}
+              renderItem={({ item }) => (
+                <Pressable
+                  onPress={() => {
+                    if (!selectedLessonId) return;
+
+                    swapLessonPositionMutation.mutate({
+                      lessonId: selectedLessonId,
+                      targetLessonId: item.id,
+                    });
+
+                    resetForm();
+                  }}
+                  className="rounded-xl p-4 active:bg-gray-100"
+                >
+                  <Text className="text-lg font-medium">
+                    {item.name}
+                  </Text>
+                </Pressable>
+              )}
+              ListEmptyComponent={
+                <View className="flex flex-col gap-4">
+                  <View className='flex-1 justify-center items-center bg-gray-50 rounded-xl py-4'>
+                    <SearchX size={32} color="#9ca3af" />
+                    <Text className='text-gray-400 font-semibold'>
+                      No other lessons yet
+                    </Text>
+                  </View>
+                </View>
+              }
+            />
           </Pressable>
         </Pressable>
       </Modal>

@@ -31,6 +31,9 @@ export async function getSubjectsByCategory(
             },
           },
         },
+        orderBy: (lessonsTable, { asc }) => [
+          asc(lessonsTable.position),
+        ],
       },
     },
   });
