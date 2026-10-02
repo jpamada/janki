@@ -12,6 +12,7 @@ CREATE INDEX `answers_lesson_id_idx` ON `answers` (`lesson_id`);--> statement-br
 CREATE TABLE `categories` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
+	`position` integer DEFAULT 0 NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer,
 	`deleted_at` integer
@@ -84,7 +85,7 @@ CREATE TABLE `questions` (
 CREATE INDEX `questions_lesson_id_idx` ON `questions` (`lesson_id`);--> statement-breakpoint
 CREATE TABLE `settings` (
 	`id` text PRIMARY KEY NOT NULL,
-	`theme` text DEFAULT 'system' NOT NULL,
+	`theme` text DEFAULT 'light' NOT NULL,
 	`question_font_size` integer DEFAULT 20 NOT NULL,
 	`question_text_align` text DEFAULT 'left' NOT NULL,
 	`sound_enabled` integer DEFAULT true NOT NULL,

@@ -7,8 +7,8 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { ScrollView, Text, View } from "react-native";
 import { Switch } from "react-native-gesture-handler";
 
-import Header from "@/components/shared/Header";
 import CustomPicker from "@/components/shared/CustomPicker";
+import Header from "@/components/shared/Header";
 
 export default function AppearanceScreen() {
   const { settings } = useSettings();
@@ -77,16 +77,16 @@ export default function AppearanceScreen() {
   );
 
   return (
-    <View className='flex-1 bg-white'>
+    <View 
+      className='flex-1 bg-white' 
+      style={{paddingBottom: insets.bottom}}
+    >
       <Header title="Visuals and Sound" back />
 
       <ScrollView
         className="flex-1 px-6 py-4"
         showsVerticalScrollIndicator={false}
         contentContainerClassName="pb-8"
-        contentContainerStyle={{
-          paddingBottom: insets.bottom + 24,
-        }}
       >
         <Text className="text-gray-400 text-sm font-semibold mb-2">
           System

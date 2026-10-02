@@ -1,4 +1,4 @@
-import { initializeSettings } from '@/repositories/settings.repository';
+import { useInitializeSettings } from '@/providers/useInitializeSettings';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -9,7 +9,6 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/providers/query-provider';
 import { SfxProvider } from '@/contexts/SfxContext';
 import { Stack } from 'expo-router';
-import { useEffect } from 'react';
 import { db } from '@/db/client';
 
 import AppLoadingScreen from '@/components/shared/AppLoadingScreen';
@@ -20,7 +19,6 @@ import "@/providers/registerCodeLanguages";
 import "react-native-code-highlighter";
 import "react-syntax-highlighter";
 import '../../global.css';
-import { useInitializeSettings } from '@/providers/useInitializeSettings';
 
 export default function RootLayout() {
   const { success, error } = useMigrations(db, migrations);

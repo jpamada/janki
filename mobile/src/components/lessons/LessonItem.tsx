@@ -1,7 +1,7 @@
 import { Pressable, Text } from "react-native";
+import { useSfx } from "@/contexts/SfxContext";
 import { Star } from "lucide-react-native";
 import { router } from "expo-router";
-import { useSfx } from "@/contexts/SfxContext";
 
 type LessonItemProps = {
   id: string;

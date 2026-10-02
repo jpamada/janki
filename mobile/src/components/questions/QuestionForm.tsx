@@ -10,12 +10,12 @@ import { setEditorLanguage } from '@/providers/setEditorLanguage';
 import { getEditorHeight } from '@/helpers/codeditor.helper';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { LANGUAGES } from '@/constants/languages';
 
 import * as DocumentPicker from 'expo-document-picker';
+import CustomPicker from '../shared/CustomPicker';
 import Header from '../shared/Header';
 import AnswerRows from './AnswerRows';
-import CustomPicker from '../shared/CustomPicker';
-import { LANGUAGES } from '@/constants/languages';
 
 const CodeEditor = lazy(() => import ('@actualwave/react-native-codeditor'));
 
@@ -78,11 +78,6 @@ export default function QuestionForm({
   const questionType = useWatch({ 
     control, 
     name: 'type' 
-  });
-
-  const language = useWatch({
-    control,
-    name: 'language',
   });
 
   const handleTypeChange = useCallback((type: QuestionFormData['type']) => {

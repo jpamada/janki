@@ -1,10 +1,11 @@
-import { createCategory, deleteCategory, getCategories, updateCategory } from '@/repositories/category.repository';
-import { ActivityIndicator, FlatList, Modal, Pressable, Text, View } from 'react-native';
+import { createCategory, deleteCategory, getCategories, swapCategoryPosition, updateCategory } from '@/repositories/category.repository';
+import { ActivityIndicator, Animated, FlatList, Modal, Pressable, Text, View } from 'react-native';
+import { ListOrdered, PenLine, Plus, SearchX, Trash2 } from 'lucide-react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CategoryFormData } from '@/schemas/category.schema';
-import { Plus, SearchX, Trash2 } from 'lucide-react-native';
 import { useSnackbar } from '@/contexts/SnackbarContext';
+import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { useState } from 'react';
 
 import CategoryForm from '@/components/categories/CategoryForm';
@@ -14,12 +15,14 @@ import Header from '@/components/shared/Header';
 export default function CategoryScreen() {
   const { showSnackbar } = useSnackbar();
 
-  const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
+  const categorySheet = useBottomSheet();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [positionModalVisible, setPositionModalVisible] = useState(false);
   
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
@@ -69,6 +72,34 @@ export default function CategoryScreen() {
     },
   });
 
+  const swapCategoryPositionMutation = useMutation({
+    mutationFn: ({
+      categoryId,
+      targetCategoryId,
+    }: {
+      categoryId: string;
+      targetCategoryId: string;
+    }) => swapCategoryPosition(categoryId, targetCategoryId),
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['categories'],
+      });
+      showSnackbar({
+        message: 'Category position changed',
+      });
+      setPositionModalVisible(false);
+      setSelectedCategoryId(null);
+    },
+
+    onError: (error) => {
+      console.error(error.message);
+      showSnackbar({
+        message: 'Something went wrong. Please try again.',
+      });
+    },
+  });
+
   const deleteCategoryMutation = useMutation({
     mutationFn: deleteCategory,
 
@@ -113,16 +144,9 @@ export default function CategoryScreen() {
     }
   };
 
-  const handleEditCategory = (id: string) => {
+  const handleCategoryLongPress = (id: string) => {
     setSelectedCategoryId(id);
-    setIsEditing(true);
-    setModalVisible(true);
-  };
-
-  const handleDeleteCategory = async (id: string) => {
-    setSelectedCategoryId(id);
-    setIsDeleting(true);
-    setModalVisible(true);
+    categorySheet.open();
   };
 
   const handleConfirmDelete = async () => {
@@ -158,8 +182,7 @@ export default function CategoryScreen() {
             <CategoryItem
               id={item.id}
               name={item.name}
-              onEdit={handleEditCategory}
-              onDelete={handleDeleteCategory}
+              onLongPress={handleCategoryLongPress}
             />
           )}
           contentContainerClassName="gap-2 p-4"
@@ -185,6 +208,73 @@ export default function CategoryScreen() {
           <Plus size={24} color="#4b5563" strokeWidth={2.5} />
         </Pressable>
       </View>
+
+      <Modal
+        transparent
+        animationType="none"
+        visible={categorySheet.visible}
+        onRequestClose={() => categorySheet.close()}
+      >
+        <View className="flex-1 justify-end">
+          <Animated.View
+            className="absolute inset-0 bg-black/40"
+            style={{ opacity: categorySheet.backdropOpacity }}
+          >
+            <Pressable
+              className="flex-1"
+              onPress={() => {
+                setIsDeleting(false);
+                setIsEditing(false);
+                setSelectedCategoryId(null);
+                categorySheet.close();
+              }}
+            />
+          </Animated.View>
+
+          <Animated.View
+            style={{ transform: [{ translateY: categorySheet.translateY }] }}
+            className="rounded-t-3xl bg-gray-50 px-4 py-8"
+          >
+            <View className="rounded-3xl bg-white">
+              <Pressable
+                onPress={() => {
+                  categorySheet.close(() => {
+                    setPositionModalVisible(true);
+                  });
+                }}
+                className="flex-row items-center gap-2 p-4 active:bg-gray-100"
+              >
+                <ListOrdered size={16} />
+                <Text className="text-xl">Change Position</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
+                  setIsEditing(true);
+                  categorySheet.close(() => setModalVisible(true));
+                }}
+                className="flex-row items-center gap-2 p-4 active:bg-gray-100"
+              >
+                <PenLine size={16} />
+                <Text className="text-xl">Update</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
+                  setIsDeleting(true);
+                  categorySheet.close(() => setModalVisible(true));
+                }}
+                className="flex-row items-center gap-2 rounded-b-3xl p-4 active:bg-gray-100"
+              >
+                <Trash2 color="#f87171" size={16} />
+                <Text className="text-center text-xl text-red-400">Delete</Text>
+              </Pressable>
+            </View>
+
+            <View style={{ height: insets.bottom }} />
+          </Animated.View>
+        </View>
+      </Modal>
 
       <Modal
         transparent
@@ -257,6 +347,70 @@ export default function CategoryScreen() {
                 }}
               />
             )}
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        transparent
+        animationType="fade"
+        visible={positionModalVisible}
+        onRequestClose={() => {
+          setPositionModalVisible(false);
+          setSelectedCategoryId(null);
+        }}
+      >
+        <Pressable
+          className="flex-1 items-center justify-center bg-black/40"
+          onPress={() => {
+            setPositionModalVisible(false);
+            setSelectedCategoryId(null);
+          }}
+        >
+          <Pressable
+            className="w-[90%] max-h-[80%] rounded-2xl bg-white p-6"
+            onPress={(event) => event.stopPropagation()}
+          >
+            <Text className="mb-4 text-xl font-bold">
+              Categories
+            </Text>
+
+            <FlatList
+              data={categories.filter(
+                (category) => category.id !== selectedCategoryId,
+              )}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              contentContainerClassName="gap-2"
+              renderItem={({ item }) => (
+                <Pressable
+                  disabled={swapCategoryPositionMutation.isPending}
+                  onPress={() => {
+                    if (!selectedCategoryId) return;
+
+                    swapCategoryPositionMutation.mutate({
+                      categoryId: selectedCategoryId,
+                      targetCategoryId: item.id,
+                    });
+                  }}
+                  className="flex-row items-center rounded-xl p-4 active:bg-gray-100"
+                >
+                  <Text className="flex-1 text-lg">
+                    {item.name}
+                  </Text>
+                </Pressable>
+              )}
+              ListEmptyComponent={
+                <View className="flex flex-col gap-4">
+                  <View className='flex-1 justify-center items-center bg-gray-50 rounded-xl py-4'>
+                    <SearchX size={32} color="#9ca3af" />
+                    <Text className='text-gray-400 font-semibold'>
+                      No other categories yet
+                    </Text>
+                  </View>
+                </View>
+              }
+            />
           </Pressable>
         </Pressable>
       </Modal>

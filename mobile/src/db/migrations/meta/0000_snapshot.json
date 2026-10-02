@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "25025384-a7e8-425e-9dcf-62f98c150403",
+  "id": "632f5904-a243-4641-b435-2dd54aee7bb2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "answers": {
@@ -94,6 +94,14 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
         },
         "created_at": {
           "name": "created_at",
@@ -590,7 +598,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'system'"
+          "default": "'light'"
         },
         "question_font_size": {
           "name": "question_font_size",

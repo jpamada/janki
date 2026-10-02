@@ -5,6 +5,8 @@ export const categories = sqliteTable("categories", {
 
     name: text("name").notNull(),
 
+    position: integer("position").notNull().default(0),
+
     createdAt: integer("created_at", {
         mode: "timestamp_ms"
     }).notNull(),
@@ -273,7 +275,7 @@ export const settings = sqliteTable("settings", {
 
   theme: text("theme", {
     enum: ["system", "light", "dark"],
-  }).notNull().default("system"),
+  }).notNull().default("light"),
 
   questionFontSize: integer("question_font_size")
     .notNull()

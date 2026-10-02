@@ -1,10 +1,10 @@
 import { FolderClosed, FolderOpen, Star } from "lucide-react-native";
 import { Pressable, View, Text } from "react-native";
+import { useSfx } from "@/contexts/SfxContext";
 import { router } from "expo-router";
 import { useState } from "react";
 
 import DebouncedPressable from "../shared/DebouncedPressable";
-import { useSfx } from "@/contexts/SfxContext";
 
 type SubjectItemProps = {
   subject: {

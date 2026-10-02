@@ -4,10 +4,10 @@ import { useMinimumLoadingDuration } from '@/hooks/useMinimumLoadingDuration';
 import { useCallback, useEffect, useMemo, useState, Fragment } from 'react';
 import { Text, View, Pressable, LayoutChangeEvent } from 'react-native';
 import { getHeatmapData } from '@/repositories/statistics.repository';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { CELL_GAP, COLUMNS } from '@/constants/heatmapConsts';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 const SKELETON_ROWS = 5;
 

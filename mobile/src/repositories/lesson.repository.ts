@@ -1,4 +1,4 @@
-import { count, eq, isNull } from "drizzle-orm";
+import { eq, isNull, max } from "drizzle-orm";
 import { lessons } from "@/db/schema";
 import { db } from "@/db/client";
 
@@ -35,23 +35,23 @@ export async function createLesson(input: {
 
   await db.transaction(async (tx) => {
     const [query] = await tx
-    .select({
-      count: count(),
-    })
-    .from(lessons)
-    .where(
-      eq(lessons.subjectId, input.subjectId)
-    );
+      .select({
+        maxPosition: max(lessons.position),
+      })
+      .from(lessons)
+      .where(
+        eq(lessons.subjectId, input.subjectId)
+      );
 
     await tx
-    .insert(lessons)
-    .values({
-      id: lessonId,
-      name: input.name,
-      position: query.count,
-      subjectId: input.subjectId,
-      createdAt: new Date(),
-    });
+      .insert(lessons)
+      .values({
+        id: lessonId,
+        name: input.name,
+        position: (query.maxPosition ?? -1) + 1,
+        subjectId: input.subjectId,
+        createdAt: new Date(),
+      });
   });
 }
 
