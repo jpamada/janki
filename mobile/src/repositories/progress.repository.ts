@@ -1,6 +1,6 @@
 import { computeNextattemptedAt, type ReviewInterval } from "@/helpers/progress.helper";
 import { eq, inArray } from "drizzle-orm";
-import { progress } from "@/db/schema";
+import { history, progress } from "@/db/schema";
 import { db } from "@/db/client";
 
 import * as Crypto from "expo-crypto";
@@ -132,4 +132,7 @@ export async function resetProgressForQuestions(
 export async function deleteProgress() {
   await db
   .delete(progress);
+
+  await db
+  .delete(history);
 }

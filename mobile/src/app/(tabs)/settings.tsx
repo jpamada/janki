@@ -31,6 +31,12 @@ export default function SettingsScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ['dailyStatistics'] 
       });
+      await queryClient.invalidateQueries({ 
+        queryKey: ['history'] 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ['latestHistory'] 
+      });
       await queryClient.invalidateQueries({
         queryKey: ["subjects"],
       });

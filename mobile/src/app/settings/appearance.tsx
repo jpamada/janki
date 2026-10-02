@@ -6,9 +6,9 @@ import { useOptimisticToggle } from "@/hooks/useOptimisticToggle";
 import { useSettings } from "@/contexts/SettingsContext";
 import { ScrollView, Text, View } from "react-native";
 import { Switch } from "react-native-gesture-handler";
-import { Picker } from "@react-native-picker/picker";
 
 import Header from "@/components/shared/Header";
+import CustomPicker from "@/components/shared/CustomPicker";
 
 export default function AppearanceScreen() {
   const { settings } = useSettings();
@@ -53,7 +53,7 @@ export default function AppearanceScreen() {
   );
 
   const [showCorrectAnswer, toggleShowCorrectAnswer] = useOptimisticToggle(
-    settings?.caseSensitive,
+    settings?.showCorrectAnswer,
     updateShowCorrectAnswer,
     ["settings"],
   );
@@ -109,33 +109,15 @@ export default function AppearanceScreen() {
           </View>
 
           <View className="bg-gray-100 rounded-xl">
-            <Picker
+            <CustomPicker
+              title="Theme"
               selectedValue={settings?.theme ?? "light"}
-              onValueChange={(value) =>
-                updateThemeMutation.mutate(value)
-              }
-              style={{ 
-                width: 120, 
-                height: 50
-              }}
-            >
-              <Picker.Item 
-                label="Light" 
-                value="light" 
-                style={{
-                  fontSize: 12,
-                  color: "#6b7280",
-                }} 
-              />
-              <Picker.Item  
-                label="Dark" 
-                value="dark" 
-                style={{
-                  fontSize: 12,
-                  color: "#6b7280",
-                }}
-              />
-            </Picker>
+              onValueChange={(value) => updateThemeMutation.mutate(value)}
+              options={[
+                { label: 'Light', value: "light" },
+                { label: 'Dark', value: "dark" },
+              ]}
+            />
           </View>
         </View>
 
@@ -161,41 +143,16 @@ export default function AppearanceScreen() {
             </View>
 
             <View className="bg-gray-100 rounded-xl">
-              <Picker
+              <CustomPicker
+                title="Font Size"
                 selectedValue={settings?.questionFontSize ?? 20}
-                onValueChange={(value) =>
-                  updateFontSizeMutation.mutate(value)
-                }
-                style={{ 
-                  width: 120, 
-                  height: 50
-                }}
-              >
-                <Picker.Item 
-                  label="Small" 
-                  value={14}
-                  style={{
-                    fontSize: 12,
-                    color: "#6b7280",
-                  }} 
-                />
-                <Picker.Item  
-                  label="Default" 
-                  value={20}
-                  style={{
-                    fontSize: 12,
-                    color: "#6b7280",
-                  }}
-                />
-                <Picker.Item  
-                  label="Large" 
-                  value={36}
-                  style={{
-                    fontSize: 12,
-                    color: "#6b7280",
-                  }}
-                />
-              </Picker>
+                onValueChange={(value) => updateFontSizeMutation.mutate(value)}
+                options={[
+                  { label: 'Small', value: 14 },
+                  { label: 'Default', value: 20 },
+                  { label: 'Large', value: 36 },
+                ]}
+              />
             </View>
           </View>
 
@@ -216,41 +173,16 @@ export default function AppearanceScreen() {
             </View>
 
             <View className="bg-gray-100 rounded-xl">
-              <Picker
+              <CustomPicker
+                title='Text Alignment'
                 selectedValue={settings?.questionTextAlign ?? "left"}
-                onValueChange={(value) =>
-                  updateTextAlignMutation.mutate(value)
-                }
-                style={{ 
-                  width: 120, 
-                  height: 50
-                }}
-              >
-                <Picker.Item 
-                  label="Left" 
-                  value="left" 
-                  style={{
-                    fontSize: 12,
-                    color: "#6b7280",
-                  }} 
-                />
-                <Picker.Item  
-                  label="Center" 
-                  value="center" 
-                  style={{
-                    fontSize: 12,
-                    color: "#6b7280",
-                  }}
-                />
-                <Picker.Item  
-                  label="Justify" 
-                  value="justify" 
-                  style={{
-                    fontSize: 12,
-                    color: "#6b7280",
-                  }}
-                />
-              </Picker>
+                onValueChange={(value) => updateTextAlignMutation.mutate(value)}
+                options={[
+                  { label: "Left", value:"left" },
+                  { label: "Center", value:"center" },
+                  { label: "Justify", value:"justify" },
+                ]}
+              />
             </View>
           </View>
 

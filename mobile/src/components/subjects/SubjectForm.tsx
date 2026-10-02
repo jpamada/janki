@@ -3,8 +3,8 @@ import { getCategories } from '@/repositories/category.repository';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Picker } from '@react-native-picker/picker';
 import { useQuery } from '@tanstack/react-query';
+import CustomPicker from '../shared/CustomPicker';
 
 type SubjectFormProps = {
   isEditing: boolean;
@@ -81,28 +81,24 @@ export default function SubjectForm({
             </Text>
 
             <View className="bg-gray-100 rounded-xl">
-              <Picker selectedValue={value} onValueChange={onChange}>
-                <Picker.Item 
-                  label="Default" 
-                  value={null}
-                  style={{
-                    fontSize: 16,
-                    color: "#6b7280",
-                  }}
-                />
-
-                {categories.map((category) => (
-                  <Picker.Item
-                    key={category.id}
-                    label={category.name}
-                    value={category.id}
-                    style={{
-                      fontSize: 16,
-                      color: "#6b7280",
-                    }}
-                  />
-                ))}
-              </Picker>
+              <CustomPicker
+                title="Categories"
+                placeholder='Select Category'
+                className='py-4 justify-between font-normal'
+                contentContainerClassName='text-lg'
+                selectedValue={value}
+                onValueChange={onChange}
+                options={[
+                {
+                  label: 'Default',
+                  value: null,
+                },
+                ...categories.map((category) => ({
+                  label: category.name,
+                  value: category.id,
+                })),
+              ]}
+              />
             </View>
 
             {errors.categoryId && (

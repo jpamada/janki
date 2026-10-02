@@ -15,12 +15,12 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useSnackbar } from '@/contexts/SnackbarContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
-import { Picker } from '@react-native-picker/picker';
 import { useSfx } from '@/contexts/SfxContext';
 
 import DebouncedPressable from '@/components/shared/DebouncedPressable';
 import EmptyStateScreen from '@/components/shared/EmptyState';
 import QuizResultsScreen, { QuizResults } from './results';
+import CustomPicker from '@/components/shared/CustomPicker';
 import QuizContinueScreen from './continue';
 
 const CodeHighlighter = lazy(
@@ -90,7 +90,7 @@ export default function QuizStartScreen() {
         queryKey: ['dailyStatistics'] 
       });
       await queryClient.invalidateQueries({ 
-        queryKey: ['historyList'] 
+        queryKey: ['history'] 
       });
       await queryClient.invalidateQueries({ 
         queryKey: ['latestHistory'] 
@@ -753,41 +753,17 @@ export default function QuizStartScreen() {
                     </View>
 
                     <View className="bg-gray-100 rounded-xl">
-                      <Picker
+                      <CustomPicker
+                        title="Font Size"
+                        variant='modal'
                         selectedValue={settings?.questionFontSize ?? 20}
-                        onValueChange={(value) =>
-                          updateFontSizeMutation.mutate(value)
-                        }
-                        style={{ 
-                          width: 120, 
-                          height: 50
-                        }}
-                      >
-                        <Picker.Item 
-                          label="Small" 
-                          value={14}
-                          style={{
-                            fontSize: 16,
-                            color: "#6b7280",
-                          }} 
-                        />
-                        <Picker.Item  
-                          label="Default" 
-                          value={20}
-                          style={{
-                            fontSize: 16,
-                            color: "#6b7280",
-                          }}
-                        />
-                        <Picker.Item  
-                          label="Large" 
-                          value={36}
-                          style={{
-                            fontSize: 16,
-                            color: "#6b7280",
-                          }}
-                        />
-                      </Picker>
+                        onValueChange={(value) => updateFontSizeMutation.mutate(value)}
+                        options={[
+                          { label: 'Small', value: 14 },
+                          { label: 'Default', value: 20 },
+                          { label: 'Large', value: 36 },
+                        ]}
+                      />
                     </View>
                   </View> 
 
@@ -798,41 +774,17 @@ export default function QuizStartScreen() {
                     </View>
 
                     <View className="bg-gray-100 rounded-xl">
-                      <Picker
+                      <CustomPicker
+                        title='Text Alignment'
+                        variant='modal'
                         selectedValue={settings?.questionTextAlign ?? "left"}
-                        onValueChange={(value) =>
-                          updateTextAlignMutation.mutate(value)
-                        }
-                        style={{ 
-                          width: 120, 
-                          height: 50
-                        }}
-                      >
-                        <Picker.Item 
-                          label="Left" 
-                          value="left" 
-                          style={{
-                            fontSize: 16,
-                            color: "#6b7280",
-                          }} 
-                        />
-                        <Picker.Item  
-                          label="Center" 
-                          value="center" 
-                          style={{
-                            fontSize: 16,
-                            color: "#6b7280",
-                          }}
-                        />
-                        <Picker.Item  
-                          label="Justify" 
-                          value="justify" 
-                          style={{
-                            fontSize: 16,
-                            color: "#6b7280",
-                          }}
-                        />
-                      </Picker>
+                        onValueChange={(value) => updateTextAlignMutation.mutate(value)}
+                        options={[
+                          { label: "Left", value:"left" },
+                          { label: "Center", value:"center" },
+                          { label: "Justify", value:"justify" },
+                        ]}
+                      />
                     </View>
                   </View>
 

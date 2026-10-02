@@ -21,7 +21,7 @@ export default function HistoryScreen() {
     fetchNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["historyList"],
+    queryKey: ["history"],
     initialPageParam: 0,
     queryFn: ({ pageParam }) => getHistory(PAGE_SIZE, pageParam),
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {

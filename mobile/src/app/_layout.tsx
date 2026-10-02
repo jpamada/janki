@@ -38,9 +38,6 @@ export default function RootLayout() {
     return <AppLoadingScreen />;
   }
 
-  console.log('WeakRef:', typeof WeakRef);
-console.log('FinalizationRegistry:', typeof FinalizationRegistry);
-
   return (
     <SafeAreaProvider> 
       <KeyboardProvider>

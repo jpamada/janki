@@ -87,7 +87,7 @@ export default function HomeScreen() {
         queryKey: ["favorites"] 
       });
       await queryClient.invalidateQueries({
-        queryKey: ["historyList"]
+        queryKey: ["history"]
       });
       await queryClient.invalidateQueries({
         queryKey: ["latestHistory"]
@@ -151,7 +151,7 @@ export default function HomeScreen() {
         queryKey: ["favorites"] 
       });
       await queryClient.invalidateQueries({
-        queryKey: ["historyList"]
+        queryKey: ["history"]
       });
       await queryClient.invalidateQueries({
         queryKey: ["latestHistory"]
@@ -256,7 +256,7 @@ export default function HomeScreen() {
         queryKey: ["favorites"]
       });
       await queryClient.invalidateQueries({
-        queryKey: ["historyList"]
+        queryKey: ["history"]
       });
       await queryClient.invalidateQueries({
         queryKey: ["latestHistory"]

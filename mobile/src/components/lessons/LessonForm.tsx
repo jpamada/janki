@@ -3,8 +3,9 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 import { getSubjects } from '@/repositories/subject.repository';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Picker } from '@react-native-picker/picker';
 import { useQuery } from '@tanstack/react-query';
+
+import CustomPicker from '../shared/CustomPicker';
 
 type LessonFormProps = {
   isEditing: boolean;
@@ -81,28 +82,18 @@ export default function LessonForm({
             </Text>
 
             <View className="bg-gray-100 rounded-xl">
-              <Picker selectedValue={value} onValueChange={onChange}>
-                <Picker.Item 
-                  label="Select Subject" 
-                  value={null}
-                  style={{
-                    fontSize: 16,
-                    color: "#6b7280",
-                  }}
-                />
-
-                {subjects.map((subject) => (
-                  <Picker.Item
-                    key={subject.id}
-                    label={subject.name}
-                    value={subject.id}
-                    style={{
-                      fontSize: 16,
-                      color: "#6b7280",
-                    }}
-                  />
-                ))}
-              </Picker>
+              <CustomPicker
+                title="Subjects"
+                placeholder='Select Subject'
+                className='py-4 justify-between font-normal'
+                contentContainerClassName='text-lg'
+                selectedValue={value}
+                onValueChange={onChange}
+                options={subjects.map((subject) => ({
+                  label: subject.name,
+                  value: subject.id,
+                }))}
+              />
             </View>
 
             {errors.subjectId && (
