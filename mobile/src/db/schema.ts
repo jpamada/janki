@@ -1,3 +1,4 @@
+import { InferSelectModel } from "drizzle-orm";
 import { foreignKey, index, integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
 export const categories = sqliteTable("categories", {

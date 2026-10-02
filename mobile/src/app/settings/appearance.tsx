@@ -2,12 +2,13 @@ import { updateCaseSensitivity, updateFontSize, updateHapticsEnabled, updateShow
 import { AArrowUp, BookCheck, CaseSensitive, Palette, TextAlignStart, Vibrate, Volume2 } from "lucide-react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useOptimisticToggle } from "@/hooks/useOptimisticToggle";
+import { useSettings } from "@/contexts/SettingsContext";
 import { ScrollView, Text, View } from "react-native";
 import { Switch } from "react-native-gesture-handler";
 import { Picker } from "@react-native-picker/picker";
 
 import Header from "@/components/shared/Header";
-import { useSettings } from "@/contexts/SettingsContext";
 
 export default function AppearanceScreen() {
   const { settings } = useSettings();
@@ -45,75 +46,35 @@ export default function AppearanceScreen() {
     },
   });
 
-  const updateCaseSensitivityMutation = useMutation({
-    mutationFn: updateCaseSensitivity,
+  const [caseSensitive, toggleCaseSensitive] = useOptimisticToggle(
+    settings?.caseSensitive,
+    updateCaseSensitivity,
+    ["settings"],
+  );
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["settings"],
-      });
-    },
-  });
+  const [showCorrectAnswer, toggleShowCorrectAnswer] = useOptimisticToggle(
+    settings?.caseSensitive,
+    updateShowCorrectAnswer,
+    ["settings"],
+  );
 
-  const updateShowCorrectAnswerMutation = useMutation({
-    mutationFn: updateShowCorrectAnswer,
+  const [showExplanation, toggleShowExplanation] = useOptimisticToggle(
+    settings?.showExplanation,
+    updateShowExplanation,
+    ["settings"],
+  );
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["settings"],
-      });
-    },
-  });
+  const [soundEnabled, toggleSoundEnabled] = useOptimisticToggle(
+    settings?.soundEnabled,
+    updateSoundEnabled,
+    ["settings"],
+  );
 
-  const updateShowExplanationMutation = useMutation({
-    mutationFn: updateShowExplanation,
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["settings"],
-      });
-    },
-  });
-
-  const updateSoundEnabledMutation = useMutation({
-    mutationFn: updateSoundEnabled,
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["settings"],
-      });
-    },
-  });
-
-  const updateHapticsEnabledMutation = useMutation({
-    mutationFn: updateHapticsEnabled,
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["settings"],
-      });
-    },
-  });
-
-  const toggleCaseSensitivity = (value: boolean) => {
-    updateCaseSensitivityMutation.mutate(value);
-  };
-
-  const toggleShowCorrectAnswer = (value: boolean) => {
-    updateShowCorrectAnswerMutation.mutate(value);
-  };
-
-  const toggleShowExplanation = (value: boolean) => {
-    updateShowExplanationMutation.mutate(value);
-  };
-
-  const toggleSoundEnabled = (value: boolean) => {
-    updateSoundEnabledMutation.mutate(value);
-  };
-
-  const toggleHapticsEnabled = (value: boolean) => {
-    updateHapticsEnabledMutation.mutate(value);
-  };
+  const [hapticsEnabled, toggleHapticsEnabled] = useOptimisticToggle(
+    settings?.hapticsEnabled,
+    updateHapticsEnabled,
+    ["settings"],
+  );
 
   return (
     <View className='flex-1 bg-white'>
@@ -311,8 +272,8 @@ export default function AppearanceScreen() {
 
             <View className="bg-gray-100 rounded-xl p-1">
               <Switch 
-                value={settings?.caseSensitive}
-                onValueChange={toggleCaseSensitivity}
+                value={caseSensitive}
+                onValueChange={toggleCaseSensitive}
               />
             </View>
           </View>
@@ -335,7 +296,7 @@ export default function AppearanceScreen() {
 
             <View className="bg-gray-100 rounded-xl p-1">
               <Switch 
-                value={settings?.showCorrectAnswer}
+                value={showCorrectAnswer}
                 onValueChange={toggleShowCorrectAnswer}
               />
             </View>
@@ -359,7 +320,7 @@ export default function AppearanceScreen() {
 
             <View className="bg-gray-100 rounded-xl p-1">
               <Switch 
-                value={settings?.showExplanation}
+                value={showExplanation}
                 onValueChange={toggleShowExplanation}
               />
             </View>
@@ -387,7 +348,7 @@ export default function AppearanceScreen() {
 
             <View className="bg-gray-100 rounded-xl p-1">
               <Switch 
-                value={settings?.soundEnabled}
+                value={soundEnabled}
                 onValueChange={toggleSoundEnabled}
               />
             </View>
@@ -411,7 +372,7 @@ export default function AppearanceScreen() {
 
             <View className="bg-gray-100 rounded-xl p-1">
               <Switch 
-                value={settings?.hapticsEnabled}
+                value={hapticsEnabled}
                 onValueChange={toggleHapticsEnabled}
               />
             </View>

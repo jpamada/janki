@@ -174,45 +174,57 @@ export default function QuizStartScreen() {
     },
   });
 
-  const updateCaseSensitivityMutation = useMutation({
-    mutationFn: updateCaseSensitivity,
+  function useOptimisticToggle<T extends boolean>(
+    serverValue: T | undefined,
+    mutate: (value: T) => Promise<void>,
+    queryKey: readonly unknown[],
+  ) {
+    const queryClient = useQueryClient();
+    const [localValue, setLocalValue] = useState(serverValue ?? (false as T));
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["settings"],
-      });
-    },
-  });
+    const mutation = useMutation({
+      mutationFn: mutate,
+      onError: (_err, newValue) => setLocalValue((!newValue) as T),
+      onSettled: () => queryClient.invalidateQueries({ queryKey }),
+    });
 
-  const updateShowCorrectAnswerMutation = useMutation({
-    mutationFn: updateShowCorrectAnswer,
+    useEffect(() => {
+      if (serverValue !== undefined && !mutation.isPending) {
+        setLocalValue(serverValue);
+      }
+    }, [serverValue, mutation.isPending]);
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["settings"],
-      });
-    },
-  });
+    const toggle = (value: T) => {
+      setLocalValue(value);
+      mutation.mutate(value);
+    };
 
-  const updateShowExplanationMutation = useMutation({
-    mutationFn: updateShowExplanation,
+    return [localValue, toggle] as const;
+  }
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["settings"],
-      });
-    },
-  });
+  const [caseSensitive, toggleCaseSensitive] = useOptimisticToggle(
+    settings?.caseSensitive,
+    updateCaseSensitivity,
+    ["settings"],
+  );
 
-  const updateSoundEnabledMutation = useMutation({
-    mutationFn: updateSoundEnabled,
+  const [showCorrectAnswer, toggleShowCorrectAnswer] = useOptimisticToggle(
+    settings?.showCorrectAnswer,
+    updateShowCorrectAnswer,
+    ["settings"],
+  );
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["settings"],
-      });
-    },
-  });
+  const [showExplanation, toggleShowExplanation] = useOptimisticToggle(
+    settings?.showExplanation,
+    updateShowExplanation,
+    ["settings"],
+  );
+
+  const [soundEnabled, toggleSoundEnabled] = useOptimisticToggle(
+    settings?.soundEnabled,
+    updateSoundEnabled,
+    ["settings"],
+  );
 
   const handleQuizProgress = (completeCurrentQuestion: boolean) => {
     const updatedCompletedQuestionIds = new Set(
@@ -419,22 +431,6 @@ export default function QuizStartScreen() {
     setQueuedQuestionIndex(0);
     setIsQuizIncomplete(false);
     setIdentificationInput('');
-  };
-
-  const toggleCaseSensitivity = (value: boolean) => {
-    updateCaseSensitivityMutation.mutate(value);
-  };
-
-  const toggleShowCorrectAnswer = (value: boolean) => {
-    updateShowCorrectAnswerMutation.mutate(value);
-  };
-
-  const toggleShowExplanation = (value: boolean) => {
-    updateShowExplanationMutation.mutate(value);
-  };
-
-  const toggleSoundEnabled = (value: boolean) => {
-    updateSoundEnabledMutation.mutate(value);
   };
 
   useEffect(() => {
@@ -848,8 +844,8 @@ export default function QuizStartScreen() {
 
                     <View className="bg-gray-100 rounded-xl p-1">
                       <Switch
-                        value={settings?.caseSensitive}
-                        onValueChange={toggleCaseSensitivity}
+                        value={caseSensitive}
+                        onValueChange={toggleCaseSensitive}
                       />
                     </View>
                   </View> 
@@ -862,7 +858,7 @@ export default function QuizStartScreen() {
 
                     <View className="bg-gray-100 rounded-xl p-1">
                       <Switch
-                        value={settings?.showCorrectAnswer}
+                        value={showCorrectAnswer}
                         onValueChange={toggleShowCorrectAnswer}
                       />
                     </View>
@@ -876,7 +872,7 @@ export default function QuizStartScreen() {
 
                     <View className="bg-gray-100 rounded-xl p-1">
                       <Switch
-                        value={settings?.showExplanation}
+                        value={showExplanation}
                         onValueChange={toggleShowExplanation}
                       />
                     </View>
@@ -890,7 +886,7 @@ export default function QuizStartScreen() {
 
                     <View className="bg-gray-100 rounded-xl p-1">
                       <Switch
-                        value={settings?.soundEnabled}
+                        value={soundEnabled}
                         onValueChange={toggleSoundEnabled}
                       />
                     </View>
