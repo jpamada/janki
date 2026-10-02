@@ -12,9 +12,10 @@ import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import * as DocumentPicker from 'expo-document-picker';
-import LanguagePicker from './LanguagePicker';
 import Header from '../shared/Header';
 import AnswerRows from './AnswerRows';
+import CustomPicker from '../shared/CustomPicker';
+import { LANGUAGES } from '@/constants/languages';
 
 const CodeEditor = lazy(() => import ('@actualwave/react-native-codeditor'));
 
@@ -77,6 +78,11 @@ export default function QuestionForm({
   const questionType = useWatch({ 
     control, 
     name: 'type' 
+  });
+
+  const language = useWatch({
+    control,
+    name: 'language',
   });
 
   const handleTypeChange = useCallback((type: QuestionFormData['type']) => {
@@ -244,12 +250,26 @@ export default function QuestionForm({
               <View className="flex-row items-center justify-between">
                 <Text className="text-gray-600 text-sm font-semibold">Code</Text>
 
-                <LanguagePicker
+                <Controller
                   control={control}
-                  onSelect={(lang) => {
-                    setValue('language', lang);
-                    void setEditorLanguage(editorApiRef.current, lang);
-                  }}
+                  name="language"
+                  render={({ field }) => (
+                    <CustomPicker
+                      title="Languages"
+                      placeholder='Language'
+                      selectedValue={field.value}
+                      onValueChange={(lang) => {
+                        field.onChange(lang);
+                        if (lang) {
+                          void setEditorLanguage(editorApiRef.current, lang);
+                        }
+                      }}
+                      options={LANGUAGES.map((lang) => ({
+                        label: lang,
+                        value: lang,
+                      }))}
+                    />
+                  )}
                 />
               </View>
 

@@ -7,8 +7,8 @@ type UseBottomSheetOptions = {
 };
 
 export function useBottomSheet({
-  openDuration = 400,
-  closeDuration = 400,
+  openDuration = 300,
+  closeDuration = 300,
 }: UseBottomSheetOptions = {}) {
   const { height } = useWindowDimensions();
 
