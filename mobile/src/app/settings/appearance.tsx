@@ -1,4 +1,4 @@
-import { updateCaseSensitivity, updateFontSize, updateHapticsEnabled, updateShowCorrectAnswer, updateSoundEnabled, updateTextAlign, updateTheme } from "@/repositories/settings.repository";
+import { updateCaseSensitivity, updateFontSize, updateHapticsEnabled, updateShowCorrectAnswer, updateShowExplanation, updateSoundEnabled, updateTextAlign, updateTheme } from "@/repositories/settings.repository";
 import { AArrowUp, BookCheck, CaseSensitive, Palette, TextAlignStart, Vibrate, Volume2 } from "lucide-react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -65,6 +65,16 @@ export default function AppearanceScreen() {
     },
   });
 
+  const updateShowExplanationMutation = useMutation({
+    mutationFn: updateShowExplanation,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["settings"],
+      });
+    },
+  });
+
   const updateSoundEnabledMutation = useMutation({
     mutationFn: updateSoundEnabled,
 
@@ -91,6 +101,10 @@ export default function AppearanceScreen() {
 
   const toggleShowCorrectAnswer = (value: boolean) => {
     updateShowCorrectAnswerMutation.mutate(value);
+  };
+
+  const toggleShowExplanation = (value: boolean) => {
+    updateShowExplanationMutation.mutate(value);
   };
 
   const toggleSoundEnabled = (value: boolean) => {
@@ -323,6 +337,30 @@ export default function AppearanceScreen() {
               <Switch 
                 value={settings?.showCorrectAnswer}
                 onValueChange={toggleShowCorrectAnswer}
+              />
+            </View>
+          </View>
+
+          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
+            <View className="flex-1 flex-row items-center gap-4 min-w-0">
+              <View className='bg-white rounded-xl p-2'>
+                <BookCheck color="#9ca3af" />
+              </View>
+
+              <View className="flex-1 min-w-0 gap-1">
+                <Text className='text-gray-600 font-bold'>
+                  Show Explanation
+                </Text>
+                <Text className="text-gray-400 text-sm">
+                  Show the explanation after answering the question.
+                </Text>
+              </View>
+            </View>
+
+            <View className="bg-gray-100 rounded-xl p-1">
+              <Switch 
+                value={settings?.showExplanation}
+                onValueChange={toggleShowExplanation}
               />
             </View>
           </View>

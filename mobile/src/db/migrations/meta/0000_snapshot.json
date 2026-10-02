@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "6c6cf978-2904-4234-8275-99bab95708b5",
+  "id": "25025384-a7e8-425e-9dcf-62f98c150403",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "answers": {
@@ -598,7 +598,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": 16
+          "default": 20
         },
         "question_text_align": {
           "name": "question_text_align",
@@ -634,6 +634,14 @@
         },
         "show_correct_answer": {
           "name": "show_correct_answer",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "show_explanation": {
+          "name": "show_explanation",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,

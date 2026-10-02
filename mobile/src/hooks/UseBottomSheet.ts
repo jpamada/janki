@@ -1,17 +1,16 @@
-import { Animated, useAnimatedValue } from "react-native";
+import { Animated, useAnimatedValue, useWindowDimensions } from "react-native";
 import { useCallback, useState } from "react";
 
 type UseBottomSheetOptions = {
-  height?: number;
   openDuration?: number;
   closeDuration?: number;
 };
 
 export function useBottomSheet({
-  height = 400,
-  openDuration = 250,
-  closeDuration = 300,
+  openDuration = 400,
+  closeDuration = 400,
 }: UseBottomSheetOptions = {}) {
+  const { height } = useWindowDimensions();
 
   const [visible, setVisible] = useState(false);
 
@@ -40,34 +39,36 @@ export function useBottomSheet({
           duration: openDuration,
           useNativeDriver: true,
         }),
-        
       ]).start();
     });
   }, [height, openDuration, translateY, backdropOpacity]);
 
-  const close = useCallback((callback?: () => void) => {
-    translateY.stopAnimation();
-    backdropOpacity.stopAnimation();
+  const close = useCallback(
+    (callback?: () => void) => {
+      translateY.stopAnimation();
+      backdropOpacity.stopAnimation();
 
-    Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: height,
-        duration: closeDuration,
-        useNativeDriver: true,
-      }),
+      Animated.parallel([
+        Animated.timing(translateY, {
+          toValue: height,
+          duration: closeDuration,
+          useNativeDriver: true,
+        }),
 
-      Animated.timing(backdropOpacity, {
-        toValue: 0,
-        duration: closeDuration,
-        useNativeDriver: true,
-      }),
-    
-    ]).start(({ finished }) => {
-      if (!finished) return;
-      setVisible(false);
-      callback?.();
-    });
-  }, [height, closeDuration, translateY, backdropOpacity]);
+        Animated.timing(backdropOpacity, {
+          toValue: 0,
+          duration: closeDuration,
+          useNativeDriver: true,
+        }),
+      ]).start(({ finished }) => {
+        if (!finished) return;
+
+        setVisible(false);
+        callback?.();
+      });
+    },
+    [height, closeDuration, translateY, backdropOpacity],
+  );
 
   return {
     open,

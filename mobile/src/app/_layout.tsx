@@ -20,22 +20,26 @@ import "@/providers/registerCodeLanguages";
 import "react-native-code-highlighter";
 import "react-syntax-highlighter";
 import '../../global.css';
+import { useInitializeSettings } from '@/providers/useInitializeSettings';
 
 export default function RootLayout() {
   const { success, error } = useMigrations(db, migrations);
-
-  useEffect(() => {
-    if (!success) return;
-    initializeSettings();
-  }, [success])
+  const { settingsReady, initError } = useInitializeSettings(success);
 
   if (error) {
     return <AppErrorScreen errorMessage={error.message} />
   }
 
-  if (!success) {
+  if (initError) {
+    return <AppErrorScreen errorMessage={initError.message} />;
+  }
+
+  if (!success || !settingsReady) {
     return <AppLoadingScreen />;
   }
+
+  console.log('WeakRef:', typeof WeakRef);
+console.log('FinalizationRegistry:', typeof FinalizationRegistry);
 
   return (
     <SafeAreaProvider> 

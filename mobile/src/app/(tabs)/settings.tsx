@@ -23,7 +23,7 @@ export default function SettingsScreen() {
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["reviewHeatmap"],
+        queryKey: ["heatmap"],
       });
       await queryClient.invalidateQueries({ 
         queryKey: ['statistics'] 

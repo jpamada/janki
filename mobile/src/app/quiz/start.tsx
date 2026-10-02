@@ -1,7 +1,7 @@
-import { getDueQuestionIds, recordCorrectAnswer, recordIncorrectAnswer, resetProgressForQuestions } from '@/repositories/progress.repository';
+import { updateCaseSensitivity, updateFontSize, updateShowCorrectAnswer, updateShowExplanation, updateSoundEnabled, updateTextAlign } from '@/repositories/settings.repository';
 import { AArrowUp, BookCheck, CaseSensitive, FileQuestionMark, Lightbulb, LogOut, Settings, TextAlignStart, Trophy, Volume2 } from 'lucide-react-native';
+import { getDueQuestionIds, recordCorrectAnswer, recordIncorrectAnswer, resetProgressForQuestions } from '@/repositories/progress.repository';
 import { Animated, ActivityIndicator, Modal, Pressable, Text, TextInput, View, Image, Switch } from 'react-native';
-import { getSettings, updateCaseSensitivity, updateFontSize, updateHapticsEnabled, updateShowCorrectAnswer, updateSoundEnabled, updateTextAlign } from '@/repositories/settings.repository';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { atomOneLight } from "react-syntax-highlighter/dist/esm/styles/hljs";
@@ -81,7 +81,7 @@ export default function QuizStartScreen() {
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ 
-        queryKey: ['reviewHeatmap'] 
+        queryKey: ['heatmap'] 
       });
       await queryClient.invalidateQueries({ 
         queryKey: ['statistics'] 
@@ -186,6 +186,16 @@ export default function QuizStartScreen() {
 
   const updateShowCorrectAnswerMutation = useMutation({
     mutationFn: updateShowCorrectAnswer,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["settings"],
+      });
+    },
+  });
+
+  const updateShowExplanationMutation = useMutation({
+    mutationFn: updateShowExplanation,
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -419,6 +429,10 @@ export default function QuizStartScreen() {
     updateShowCorrectAnswerMutation.mutate(value);
   };
 
+  const toggleShowExplanation = (value: boolean) => {
+    updateShowExplanationMutation.mutate(value);
+  };
+
   const toggleSoundEnabled = (value: boolean) => {
     updateSoundEnabledMutation.mutate(value);
   };
@@ -647,7 +661,7 @@ export default function QuizStartScreen() {
                       </View>
                     )}
 
-                    {currentQuestion?.explanation && (
+                    {currentQuestion?.explanation && settings?.showExplanation && (
                        <View className="mt-6">
                         <Text className="text-lg font-semibold text-gray-400">
                           Explanation
@@ -850,6 +864,20 @@ export default function QuizStartScreen() {
                       <Switch
                         value={settings?.showCorrectAnswer}
                         onValueChange={toggleShowCorrectAnswer}
+                      />
+                    </View>
+                  </View> 
+
+                  <View className="flex-row items-center justify-between rounded-t-xl bg-white p-4">
+                    <View className="flex-row items-center gap-2">
+                      <BookCheck size={16} />
+                      <Text className='text-xl'>Show Explanation</Text>
+                    </View>
+
+                    <View className="bg-gray-100 rounded-xl p-1">
+                      <Switch
+                        value={settings?.showExplanation}
+                        onValueChange={toggleShowExplanation}
                       />
                     </View>
                   </View> 

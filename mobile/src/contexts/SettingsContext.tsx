@@ -3,13 +3,14 @@ import { getSettings } from "@/repositories/settings.repository";
 import { useQuery } from "@tanstack/react-query";
 
 type Settings = {
-  theme: "system" | "light" | "dark";
-  questionFontSize: number;
-  questionTextAlign: "left" | "center" | "justify";
   soundEnabled: boolean;
-  hapticsEnabled: boolean;
   caseSensitive: boolean;
+  hapticsEnabled: boolean;
+  showExplanation: boolean;
+  questionFontSize: number;
   showCorrectAnswer: boolean;
+  theme: "system" | "light" | "dark";
+  questionTextAlign: "left" | "center" | "justify";
 };
 
 type SettingsContextValue = {

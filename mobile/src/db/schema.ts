@@ -298,4 +298,8 @@ export const settings = sqliteTable("settings", {
   showCorrectAnswer: integer("show_correct_answer", {
     mode: "boolean",
   }).notNull().default(true),
+
+  showExplanation: integer("show_explanation", {
+    mode: "boolean",
+  }).notNull().default(true),
 });

@@ -86,6 +86,21 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });
+      await queryClient.invalidateQueries({
+        queryKey: ["historyList"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["latestHistory"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["statistics"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["dailyStatistics"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["heatmap"]
+      });
       showSnackbar({ message: "Subject successfully created" });
       resetForm();
     },
@@ -135,6 +150,21 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });
+      await queryClient.invalidateQueries({
+        queryKey: ["historyList"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["latestHistory"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["statistics"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["dailyStatistics"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["heatmap"]
+      });
       showSnackbar({ message: "Subject successfully deleted" });
       resetForm();
     },
@@ -150,6 +180,12 @@ export default function HomeScreen() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["statistics"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["dailyStatistics"]
       });
       showSnackbar({ message: "Lesson successfully created" });
       resetForm();
@@ -218,6 +254,21 @@ export default function HomeScreen() {
       });
       await queryClient.invalidateQueries({
         queryKey: ["favorites"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["historyList"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["latestHistory"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["statistics"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["dailyStatistics"]
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["heatmap"]
       });
       showSnackbar({ message: "Lesson successfully deleted" });
       resetForm();
@@ -363,7 +414,7 @@ export default function HomeScreen() {
         ))}
 
         <DebouncedPressable
-          onPress={() => router.push('/categories')}
+          onPress={() => router.push('/settings/categories')}
           className="flex flex-row items-center gap-1 bg-gray-50 rounded-full px-4 py-2 active:bg-gray-100"
         >
           <Plus color="#4b5563" strokeWidth={2} size={16} />
@@ -566,12 +617,11 @@ export default function HomeScreen() {
               <Pressable
                 onPress={() => {
                   const lessonId = selectedLessonId;
-                  lessonSheet.close(() => {
-                    setSelectedLessonId(null);
-                    router.push({
-                      pathname: "/questions/create",
-                      params: { lessonId },
-                    });
+                  setSelectedLessonId(null);
+                  lessonSheet.close();
+                  router.push({
+                    pathname: "/questions/create",
+                    params: { lessonId },
                   });
                 }}
                 className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
@@ -584,11 +634,10 @@ export default function HomeScreen() {
                 onPress={() => {
                   const lessonId = selectedLessonId;
                   setSelectedLessonId(null);
-                  lessonSheet.close(() => {
-                    router.push({
-                      pathname: "/questions/browse",
-                      params: { lessonId }
-                    });
+                  lessonSheet.close();;
+                  router.push({
+                    pathname: "/questions/browse",
+                    params: { lessonId }
                   });
                 }}
                 className="flex-row items-center gap-2 p-4 active:bg-gray-100"

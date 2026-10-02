@@ -113,7 +113,7 @@ export default function Heatmap({ onLoadingChange }: ReviewHeatmapProps) {
   const gridEnd = useMemo(() => endOfWeek(monthEnd), [monthEnd]);
 
   const { data: rows = [], isPending } = useQuery({
-    queryKey: ['reviewHeatmap', format(monthStart, 'yyyy-MM')],
+    queryKey: ['heatmap', format(monthStart, 'yyyy-MM')],
     queryFn: () => getHeatmapData(gridStart, gridEnd),
   });
 

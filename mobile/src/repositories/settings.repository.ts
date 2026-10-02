@@ -91,6 +91,19 @@ export async function updateShowCorrectAnswer(
   );
 }
 
+export async function updateShowExplanation(
+  isTrue: boolean,
+) {
+   await db
+  .update(settings)
+  .set({
+    showExplanation: isTrue
+  })
+  .where(
+    eq(settings.id, "default")
+  );
+}
+
 export async function updateHapticsEnabled(
   isTrue: boolean,
 ) {
