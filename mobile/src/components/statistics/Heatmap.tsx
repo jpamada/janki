@@ -7,7 +7,7 @@ import { getHeatmapData } from '@/repositories/statistics.repository';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { CELL_GAP, COLUMNS } from '@/constants/heatmapConsts';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 const SKELETON_ROWS = 5;
 
@@ -115,6 +115,7 @@ export default function Heatmap({ onLoadingChange }: ReviewHeatmapProps) {
   const { data: rows = [], isPending } = useQuery({
     queryKey: ['heatmap', format(monthStart, 'yyyy-MM')],
     queryFn: () => getHeatmapData(gridStart, gridEnd),
+    placeholderData: keepPreviousData,
   });
 
   const showSkeleton = useMinimumLoadingDuration(isPending, 400);
