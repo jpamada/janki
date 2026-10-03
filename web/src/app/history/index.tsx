@@ -1,0 +1,99 @@
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getHistory } from "@/repositories/history.repository";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+
+import HistoryItem from "@/components/history/HistoryItem";
+import Header from "@/components/shared/Header";
+import { RotateCcwClock } from "lucide-react-native";
+
+const PAGE_SIZE = 20;
+
+export default function HistoryScreen() {
+  const insets = useSafeAreaInsets();
+
+  const {
+    data,
+    error,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["history"],
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) => getHistory(PAGE_SIZE, pageParam),
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      if (lastPage.length < PAGE_SIZE) return undefined;
+      return lastPageParam + PAGE_SIZE;
+    },
+  });
+
+  const historyItems = useMemo(() => 
+    data?.pages.flat() ?? [], [data],
+  );
+
+  return (
+    <View
+      className="flex-1 bg-white"
+      style={{ paddingBottom: insets.bottom }}
+    >
+      <Header title="Quiz History" back={true} />
+
+      {isLoading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="small" color="#4b5563" />
+        </View>
+
+      ) : error ? (
+        <View className="flex-1 justify-center items-center">
+          <Text>Failed to load history</Text>
+        </View>
+
+      ) : (
+        <FlatList
+          data={historyItems}
+          keyExtractor={(item) => item.id}
+          className='p-4'
+          contentContainerClassName="gap-4"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: insets.bottom
+          }}
+          renderItem={({ item }) => (
+            <HistoryItem
+              id={item.id}
+              questionId={item.questionId}
+              responseTime={item.responseTime}
+              attemptedAt={item.attemptedAt}
+              status={item.status}
+            />
+          )}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}
+          onEndReachedThreshold={0.5}
+          ListEmptyComponent={
+            <View className="flex-1 justify-center items-center py-16">
+              <RotateCcwClock size={32} color="#d1d5db" />
+              <Text className='text-gray-300 font-semibold'>
+                No history yet
+              </Text>
+            </View>
+          }
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <View className="py-4">
+                <ActivityIndicator size="small" color="#4b5563" />
+              </View>
+            ) : null
+          }
+        />
+      )}
+    </View>
+  );
+}

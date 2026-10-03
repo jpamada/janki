@@ -86,7 +86,6 @@ export default function AppearanceScreen() {
       <ScrollView
         className="flex-1 px-6 py-4"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="pb-8"
       >
         <Text className="text-gray-400 text-sm font-semibold mb-2">
           System

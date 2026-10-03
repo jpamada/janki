@@ -89,7 +89,6 @@ export default function SettingsScreen() {
       <ScrollView
         className="flex-1 px-6 py-4"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="pb-8"
       >
         <View className="flex flex-col">
           <Text className="text-gray-400 text-sm font-semibold mb-2">
@@ -174,7 +173,7 @@ export default function SettingsScreen() {
             <View className="flex flex-row items-center">
               <Image
                 source={Icon}
-                className="h-8 w-8"
+                style={{ width: 32, height: 32 }}
                 resizeMode="contain"
               />
               <Text className="text-lg font-bold">Janki</Text>

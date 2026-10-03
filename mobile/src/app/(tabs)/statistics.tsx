@@ -1,9 +1,8 @@
+import { ActivityIndicator, Pressable, Text, View, FlatList } from 'react-native';
 import { getDailyStatistics } from '@/repositories/statistics.repository';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { getLatestHistory } from '@/repositories/history.repository';
 import { ChevronRight, RotateCcwClock } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FlatList } from 'react-native-gesture-handler';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 
