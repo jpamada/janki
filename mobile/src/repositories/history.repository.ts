@@ -1,5 +1,5 @@
-import { sql, desc } from 'drizzle-orm';
-import { history } from "@/db/schema";
+import { sql, desc, eq, asc } from 'drizzle-orm';
+import {  history } from "@/db/schema";
 import { db } from "@/db/client";
 
 import * as Crypto from "expo-crypto";
@@ -34,28 +34,58 @@ export async function getHistory(
   limit: number,
   offset: number,
 ) {
-  const query = await db
-  .select()
-  .from(history)
-  .orderBy(
-    desc(history.attemptedAt)
-  )
-  .limit(limit)
-  .offset(offset);
+  const query = await db.query.history
+  .findMany({
+    with: {
+      question: true
+    },
+    orderBy: desc(history.attemptedAt),
+    limit: limit,
+    offset: offset,
+  })
 
   return query ?? [];
 }
 
-export async function getLatestHistory() {
-  const query = await db
-  .select()
-  .from(history)
-  .orderBy(
-    desc(history.attemptedAt)
-  )
-  .limit(5);
 
-  return query;
+export async function getHistoryById(id: string) {
+  const query = await db.query.history.findFirst({
+    where: eq(history.id, id),
+    with: {
+      question: {
+        with: {
+          questionAnswers: {
+            with: {
+              answer: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return query ?? null;
+}
+
+export async function getLatestHistory() {
+ const query = await db.query.history
+ .findMany({
+    with: {
+      question: {
+        with: {
+          questionAnswers: {
+            with: {
+              answer: true,
+            },
+          },
+        },
+      },
+    },
+    limit: 5,
+    orderBy: desc(history.attemptedAt)
+  });
+
+  return query ?? null;
 }
 
 export async function getHistoryByDay(day: string) {

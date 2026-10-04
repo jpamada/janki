@@ -110,10 +110,9 @@ type HeatmapProps = {
   onLayout: (event: LayoutChangeEvent) => void;
 };
 
-
 export default function Heatmap({
   rows,
-  isPending,
+  isPending = true,
   viewDate,
   onViewDateChange,
   gridStart,

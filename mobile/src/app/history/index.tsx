@@ -29,7 +29,7 @@ export default function HistoryScreen() {
       return lastPageParam + PAGE_SIZE;
     },
   });
-
+  
   const historyItems = useMemo(() => 
     data?.pages.flat() ?? [], [data],
   );
@@ -65,6 +65,7 @@ export default function HistoryScreen() {
           renderItem={({ item }) => (
             <HistoryItem
               id={item.id}
+              question={item.question.question}
               questionId={item.questionId}
               responseTime={item.responseTime}
               attemptedAt={item.attemptedAt}
