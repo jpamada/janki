@@ -180,10 +180,12 @@ export default function QuestionForm({
       />
 
       <KeyboardAwareScrollView
+        mode="layout"
         bottomOffset={20}
+        extraKeyboardSpace={12}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        className="flex-1 mb-2 pb-32"
+        className="flex-1"
       >
         <View className='gap-4 bg-white rounded-xl shadow-lg p-4 m-4 pb-8'>
 
@@ -397,14 +399,17 @@ export default function QuestionForm({
         </View>
       </KeyboardAwareScrollView>
 
-      <KeyboardStickyView offset={{ closed: 0, opened: insets.top }}>
+      <KeyboardStickyView offset={{ closed: 0, opened: 0 }}>
         {onCreateSuccess && (
           <View className="h-12 flex-row items-center bg-gray-600 rounded-xl px-4 mx-2 my-2">
             <Text className="flex-1 text-white font-medium">1 question added</Text>
           </View>
         )}
 
-        <View className="flex-row items-center border-t border-gray-200 bg-white px-4 py-6" style={{ paddingBottom: insets.bottom }}>
+        <View 
+          className="flex-row items-center border-t border-gray-200 bg-white px-4 py-6" 
+          style={{ paddingBottom: insets.bottom }}
+        >
           <Pressable
             disabled={isSubmitting}
             onPress={handleSubmit(handleFormSubmit)}
