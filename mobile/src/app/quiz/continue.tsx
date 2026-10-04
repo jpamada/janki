@@ -1,6 +1,5 @@
 import { House, RotateCcw, Trophy } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
-import { router } from "expo-router";
 
 type Question = {
   id: string;
@@ -11,6 +10,7 @@ type QuizContinueProps = {
   completedQuestionIds: Set<string>;
   onTryAgain: () => void;
   onQuizComplete: () => void;
+  onExit: () => void;
 };
 
 export default function QuizContinueScreen({
@@ -18,6 +18,7 @@ export default function QuizContinueScreen({
   questions,
   onTryAgain,
   onQuizComplete,
+  onExit,
 }: QuizContinueProps) {
 
   const remainingCount = questions.filter(
@@ -34,7 +35,7 @@ export default function QuizContinueScreen({
 
       <View className='flex flex-row items-center gap-2'>
         <Pressable
-          onPress={() => router.push("/(tabs)")}
+          onPress={onExit}
           className="rounded-xl px-8 py-4 bg-gray-100 active:bg-gray-200"
         >
           <House strokeWidth={3} color="#4b5563"  />

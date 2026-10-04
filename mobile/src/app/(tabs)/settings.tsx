@@ -1,5 +1,5 @@
 import { LayoutGrid, CloudUpload, CloudDownload, Trash2, Palette, Star } from 'lucide-react-native';
-import { View, ScrollView, Pressable, Text, Modal, Image } from 'react-native';
+import { View, ScrollView, Pressable, Text, Modal } from 'react-native';
 import { deleteProgress } from '@/repositories/progress.repository';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from '@/contexts/SnackbarContext';
@@ -8,7 +8,6 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 
 import DebouncedPressable from '@/components/shared/DebouncedPressable';
-import Icon from "../../../assets/images/icon-transparent.png"
 import Header from '../../components/shared/Header';
 
 export default function SettingsScreen() {
@@ -169,21 +168,6 @@ export default function SettingsScreen() {
             </View>
             <Text className='text-gray-600 text-lg font-bold'>Delete Progress</Text>
           </Pressable>
-
-          <View className="flex flex-col items-center rounded-3xl p-4">
-            <View className="flex flex-row items-center">
-              <Image
-                source={Icon}
-                style={{ width: 32, height: 32 }}
-                resizeMode="contain"
-              />
-              <Text className="text-lg font-bold">Janki</Text>
-            </View>
-
-            <Text className="text-gray-400 font-semibold">
-              version 1.0.0
-            </Text>
-          </View>
         </View>
       </ScrollView>
 

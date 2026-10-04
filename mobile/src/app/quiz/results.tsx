@@ -82,7 +82,7 @@ export default function QuizResultsScreen({
         showsVerticalScrollIndicator={false}
       >
         {questions.map((question, index) => {
-          const userAnswer = quizResults.find(
+          const userAnswer = [...quizResults].reverse().find(
             (answer) => answer.questionId === question.id,
           );
 

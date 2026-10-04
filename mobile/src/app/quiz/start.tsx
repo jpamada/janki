@@ -54,6 +54,13 @@ export default function QuizStartScreen() {
   const [completedQuestionIds, setCompletedQuestionIds] = useState<Set<string>>(new Set());
   const [quizResults, setQuizResults] = useState<QuizResults[]>([]);
 
+  // The full, stable set of question IDs for this quiz session — set once
+  // at session start, NEVER shrunk by retries (unlike queuedQuestions,
+  // which only ever holds the current pass's subset). This is what the
+  // results/continue screens use so they always reflect every question
+  // answered this session, not just the most recent retry pass.
+  const [sessionQuestionIds, setSessionQuestionIds] = useState<string[]>([]);
+
   const [queuedQuestions, setQueuedQuestions] = useState<string[]>([]);
   const [queuedQuestionIndex, setQueuedQuestionIndex] = useState(0);
 
@@ -68,6 +75,14 @@ export default function QuizStartScreen() {
       const question = quizData.find((q) => q.id === id);
       return question ? [question] : [];
     }), [queuedQuestions, quizData],
+  );
+
+  // Full-session question list, for results/continue screens only.
+  const sessionQuestions = useMemo(() =>
+    sessionQuestionIds.flatMap((id) => {
+      const question = quizData.find((q) => q.id === id);
+      return question ? [question] : [];
+    }), [sessionQuestionIds, quizData],
   );
 
   const currentQuestion = questions[queuedQuestionIndex];
@@ -400,8 +415,10 @@ export default function QuizStartScreen() {
       await resetProgressForQuestions(allIds);
 
       setQueuedQuestions(shuffle(allIds));
+      setSessionQuestionIds(allIds);
       setQueuedQuestionIndex(0);
       setCompletedQuestionIds(new Set());
+      setQuizResults([]);
       setIsQuizIncomplete(false);
       setIsQuizComplete(false);
       setIsCorrect(null);
@@ -431,6 +448,21 @@ export default function QuizStartScreen() {
     setQueuedQuestionIndex(0);
     setIsQuizIncomplete(false);
     setIdentificationInput('');
+  };
+
+  const handleExitQuiz = () => {
+    setQueuedQuestions([]);
+    setSessionQuestionIds([]);
+    setQueuedQuestionIndex(0);
+    setCompletedQuestionIds(new Set());
+    setQuizResults([]);
+    setIsQuizIncomplete(false);
+    setIsQuizComplete(false);
+    setIsCorrect(null);
+    setIdentificationInput('');
+    setQuizSessionInitialized(false);
+    syncedQuestionIdsRef.current = new Set();
+    router.push("/(tabs)");
   };
 
   useEffect(() => {
@@ -472,6 +504,7 @@ export default function QuizStartScreen() {
           );
 
           setQueuedQuestions(shuffle(dueIds));
+          setSessionQuestionIds(dueIds);
           syncedQuestionIdsRef.current = currentQuestionIds;
 
         } catch (error) {
@@ -497,6 +530,9 @@ export default function QuizStartScreen() {
           setQueuedQuestions(
             (prev) => [...prev, ...shuffle(dueQuestionIds)]
           );
+          setSessionQuestionIds(
+            (prev) => [...prev, ...dueQuestionIds]
+          );
         }
 
         syncedQuestionIdsRef.current = currentQuestionIds;
@@ -513,7 +549,7 @@ export default function QuizStartScreen() {
   if (isQuizComplete) {
     return (
       <QuizResultsScreen
-        questions={questions}
+        questions={sessionQuestions}
         quizResults={quizResults}
       />
     );
@@ -522,10 +558,11 @@ export default function QuizStartScreen() {
   if (isQuizIncomplete) {
     return (
       <QuizContinueScreen
-        questions={questions}
+        questions={sessionQuestions}
         completedQuestionIds={completedQuestionIds}
         onTryAgain={handleTryAgain}
         onQuizComplete={() => setIsQuizComplete(true)}
+        onExit={handleExitQuiz}
       />
     );
   }
@@ -869,6 +906,7 @@ export default function QuizStartScreen() {
                   <Pressable
                     onPress={() => {
                       settingSheet.close();
+                      handleExitQuiz();
                       router.back();
                     }}
                     className="flex-row items-center gap-2 rounded-b-xl bg-white p-4 active:bg-gray-100"
