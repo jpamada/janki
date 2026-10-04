@@ -1,22 +1,45 @@
-import { ActivityIndicator, Pressable, Text, View, FlatList } from 'react-native';
-import { getDailyStatistics } from '@/repositories/statistics.repository';
+import { ActivityIndicator, Pressable, Text, View, FlatList, LayoutChangeEvent } from 'react-native';
+import { getDailyStatistics, getHeatmapData } from '@/repositories/statistics.repository';
 import { getLatestHistory } from '@/repositories/history.repository';
 import { ChevronRight, RotateCcwClock } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 
 import HistoryItem from '@/components/history/HistoryItem';
 import Heatmap from '@/components/statistics/Heatmap';
 import Stats from '@/components/statistics/Stats';
 import Header from '@/components/shared/Header';
+import { useTodayKey } from '@/hooks/useTodayKey';
+import { useCallback, useMemo, useState } from 'react';
+import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from 'date-fns';
 
 export default function StatisticsScreen() {
   const insets = useSafeAreaInsets();
+  const todayKey = useTodayKey();
+
+  const [viewDate, setViewDate] = useState(() => new Date());
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  const monthStart = useMemo(() => startOfMonth(viewDate), [viewDate]);
+  const monthEnd = useMemo(() => endOfMonth(viewDate), [viewDate]);
+
+  const gridStart = useMemo(() => startOfWeek(monthStart), [monthStart]);
+  const gridEnd = useMemo(() => endOfWeek(monthEnd), [monthEnd]);
+
+  const handleLayout = useCallback((event: LayoutChangeEvent) => {
+    setContainerWidth(event.nativeEvent.layout.width);
+  }, []);
 
   const { data: statistic, isPending: statsPending } = useQuery({
-    queryKey: ["dailyStatistics"],
+    queryKey: ["dailyStatistics", todayKey],
     queryFn: getDailyStatistics,
+  });
+
+  const { data: heatmapData = [], isPending } = useQuery({
+    queryKey: ['heatmap', todayKey, format(monthStart, 'yyyy-MM')],
+    queryFn: () => getHeatmapData(gridStart, gridEnd),
+    placeholderData: keepPreviousData,
   });
 
   const { data: history, isPending: historyPending } = useQuery({
@@ -56,7 +79,17 @@ export default function StatisticsScreen() {
                     correctReviews={statistic?.correctReviews ?? 0}
                   />
                   
-                  <Heatmap />
+                  <Heatmap
+                      rows={heatmapData}
+                      isPending={isPending}
+                      viewDate={viewDate}
+                      gridStart={gridStart}
+                      gridEnd={gridEnd}
+                      monthStart={monthStart}
+                      onLayout={handleLayout}
+                      onViewDateChange={setViewDate}
+                      containerWidth={containerWidth}
+                    />
                 </View>
 
                 <View className='flex flex-row items-center justify-between mt-8'>

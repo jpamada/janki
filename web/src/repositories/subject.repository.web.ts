@@ -21,6 +21,7 @@ export async function getSubjectsByCategory(
       .sort((a, b) => a.position - b.position)
       .map((lesson) => ({
         ...lesson,
+        questions: [],
         dueCount: 0,
       })),
   }));

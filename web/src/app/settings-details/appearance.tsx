@@ -84,7 +84,8 @@ export default function AppearanceScreen() {
       <Header title="Visuals and Sound" back />
 
       <ScrollView
-        className="flex-1 px-6 py-4"
+        className="flex-1"
+        contentContainerClassName="px-6 py-4"
         showsVerticalScrollIndicator={false}
       >
         <Text className="text-gray-400 text-sm font-semibold mb-2">

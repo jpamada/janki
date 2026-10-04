@@ -1,11 +1,21 @@
-import { webQuestions } from "./web-data";
+import { webQuestions } from './web-data';
 
-export async function getQuizData(
-  lessonId: string,
-) {
-  return webQuestions.filter(
-    (question) => question.lessonId === lessonId,
-  );
+export async function getQuizData(lessonId: string) {
+  return webQuestions
+    .filter((question) => question.lessonId === lessonId)
+    .map((question) => ({
+      ...question,
+      type: 'identification' as const,
+      questionAnswers: [
+        {
+          answer: {
+            id: `${question.id}-answer`,
+            answer: question.answer,
+          },
+          isCorrect: true,
+        },
+      ],
+    }));
 }
 
 export async function createQuizData(input: {

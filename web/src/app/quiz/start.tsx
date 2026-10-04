@@ -564,6 +564,7 @@ export default function QuizStartScreen() {
             className="bg-white"
             contentContainerStyle={{ 
               flexGrow: 1,
+              
             }}
           >
             <View className={`rounded-lg ${currentQuestion?.code ? "bg-gray-50" : "bg-white"}`}>

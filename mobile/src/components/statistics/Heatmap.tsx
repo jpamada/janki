@@ -1,19 +1,13 @@
-import { addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, format } from 'date-fns';
 import { bucketColor, computeHeatmapWeeks, type HeatmapDay } from '@/helpers/logsHeatmap.helper';
 import { useMinimumLoadingDuration } from '@/hooks/useMinimumLoadingDuration';
-import { useCallback, useEffect, useMemo, useState, Fragment } from 'react';
 import { Text, View, Pressable, LayoutChangeEvent } from 'react-native';
-import { getHeatmapData } from '@/repositories/statistics.repository';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { CELL_GAP, COLUMNS } from '@/constants/heatmapConsts';
+import { addMonths, subMonths, format } from 'date-fns';
+import { useMemo, Fragment } from 'react';
 
 const SKELETON_ROWS = 5;
-
-type ReviewHeatmapProps = {
-  onLoadingChange?: (isPending: boolean) => void;
-};
 
 type HeatmapGridProps = {
   weeks: HeatmapDay[][];
@@ -99,30 +93,36 @@ function HeatmapSkeleton({ width, cellSize, onLayout }: HeatmapSkeletonProps) {
   );
 }
 
-export default function Heatmap({ onLoadingChange }: ReviewHeatmapProps) {
-  const [viewDate, setViewDate] = useState(() => new Date());
-  const [containerWidth, setContainerWidth] = useState(0);
+type HeatmapRow = {
+  day: string;
+  count: number | string;
+};
 
-  const handleLayout = useCallback((event: LayoutChangeEvent) => {
-    setContainerWidth(event.nativeEvent.layout.width);
-  }, []);
+type HeatmapProps = {
+  rows: HeatmapRow[];
+  isPending: boolean;
+  viewDate: Date;
+  onViewDateChange: (updater: (date: Date) => Date) => void;
+  gridStart: Date;
+  gridEnd: Date;
+  monthStart: Date;
+  containerWidth: number;
+  onLayout: (event: LayoutChangeEvent) => void;
+};
 
-  const monthStart = useMemo(() => startOfMonth(viewDate), [viewDate]);
-  const monthEnd = useMemo(() => endOfMonth(viewDate), [viewDate]);
-  const gridStart = useMemo(() => startOfWeek(monthStart), [monthStart]);
-  const gridEnd = useMemo(() => endOfWeek(monthEnd), [monthEnd]);
 
-  const { data: rows = [], isPending } = useQuery({
-    queryKey: ['heatmap', format(monthStart, 'yyyy-MM')],
-    queryFn: () => getHeatmapData(gridStart, gridEnd),
-    placeholderData: keepPreviousData,
-  });
-
+export default function Heatmap({
+  rows,
+  isPending,
+  viewDate,
+  onViewDateChange,
+  gridStart,
+  gridEnd,
+  monthStart,
+  containerWidth,
+  onLayout,
+}: HeatmapProps) {
   const showSkeleton = useMinimumLoadingDuration(isPending, 400);
-
-  useEffect(() => {
-    onLoadingChange?.(isPending);
-  }, [isPending, onLoadingChange]);
 
   const weeks = useMemo(
     () => computeHeatmapWeeks(rows, gridStart, gridEnd, monthStart),
@@ -143,7 +143,7 @@ export default function Heatmap({ onLoadingChange }: ReviewHeatmapProps) {
 
         <View className="flex-row items-center justify-end gap-2">
           <Pressable
-            onPress={() => setViewDate((d) => subMonths(d, 1))}
+            onPress={() => onViewDateChange((d) => subMonths(d, 1))}
             className="p-2 bg-gray-50 rounded-full active:bg-gray-100"
           >
             <ChevronLeft size={20} color="#4b5563" />
@@ -154,7 +154,7 @@ export default function Heatmap({ onLoadingChange }: ReviewHeatmapProps) {
           </Text>
 
           <Pressable
-            onPress={() => setViewDate((d) => addMonths(d, 1))}
+            onPress={() => onViewDateChange((d) => addMonths(d, 1))}
             className="p-2 bg-gray-50 rounded-full active:bg-gray-100"
           >
             <ChevronRight size={20} color="#4b5563" />
@@ -166,7 +166,7 @@ export default function Heatmap({ onLoadingChange }: ReviewHeatmapProps) {
         <HeatmapSkeleton
           width={width}
           cellSize={cellSize}
-          onLayout={handleLayout}
+          onLayout={onLayout}
         />
       ) : (
         <HeatmapGrid
@@ -174,7 +174,7 @@ export default function Heatmap({ onLoadingChange }: ReviewHeatmapProps) {
           cellSize={cellSize}
           width={width}
           height={height}
-          onLayout={handleLayout}
+          onLayout={onLayout}
         />
       )}
     </View>

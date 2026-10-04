@@ -1,7 +1,7 @@
 import { createSubject, deleteSubject, getSubjectsByCategory, hasDefaultSubjects, updateSubject } from "@/repositories/subject.repository";
 import { FolderClosed, Lightbulb, ListOrdered, PenLine, Plus, SearchX, StarMinus, StarPlus, Trash2, X } from "lucide-react-native";
 import { createLesson, deleteLesson, swapLessonPosition, toggleLessonFavorite, updateLesson } from "@/repositories/lesson.repository";
-import { ActivityIndicator, Animated, FlatList, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Animated, FlatList, Modal, Pressable, ScrollView, Text, View, type ScrollViewInstance } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCategories } from "@/repositories/category.repository";
@@ -21,8 +21,7 @@ import Header from "@/components/shared/Header";
 export default function HomeScreen() {
   const { showSnackbar } = useSnackbar();
 
-  const categoryScrollRef = useRef<ScrollView>(null);
-
+  
   const subjectSheet = useBottomSheet();
   const lessonSheet = useBottomSheet();
 
@@ -37,6 +36,8 @@ export default function HomeScreen() {
   const [subjectModalVisible, setSubjectModalVisible] = useState(false);
   const [lessonModalVisible, setLessonModalVisible] = useState(false);
 
+  const categoryScrollRef = useRef<ScrollViewInstance>(null);
+  
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -454,7 +455,7 @@ export default function HomeScreen() {
         ))}
 
         <DebouncedPressable
-          onPress={() => router.push('/settings/categories')}
+          onPress={() => router.push('/settings-details/categories')}
           className="flex flex-row items-center gap-1 bg-gray-50 rounded-full px-4 py-2 active:bg-gray-100"
         >
           <Plus color="#4b5563" strokeWidth={2} size={16} />

@@ -27,7 +27,8 @@ export default function BrowseStatistics() {
       <Header title="Statistics" back={true} />
 
       <ScrollView
-        className="flex-1 px-6 py-4"
+        className="flex-1"
+        contentContainerClassName="px-6 py-4"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: insets.bottom,

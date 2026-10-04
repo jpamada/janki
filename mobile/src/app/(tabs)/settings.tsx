@@ -87,7 +87,8 @@ export default function SettingsScreen() {
       <Header title="Settings" />
 
       <ScrollView
-        className="flex-1 px-6 py-4"
+        className="flex-1"
+        contentContainerClassName='px-6 py-4'
         showsVerticalScrollIndicator={false}
       >
         <View className="flex flex-col">

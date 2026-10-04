@@ -1,6 +1,6 @@
-import { BottomTabBarButtonProps } from 'expo-router/build/react-navigation/bottom-tabs';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChartColumn, Home, Settings,  } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BottomTabBarButtonProps } from 'expo-router/js-tabs';
 import { Pressable } from 'react-native';
 import { Tabs } from 'expo-router';
 
