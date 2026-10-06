@@ -1,4 +1,5 @@
 import { House, RotateCcw, Trophy } from "lucide-react-native";
+import { useColorScheme } from "nativewind";
 import { Pressable, Text, View } from "react-native";
 
 type Question = {
@@ -20,39 +21,52 @@ export default function QuizContinueScreen({
   onQuizComplete,
   onExit,
 }: QuizContinueProps) {
+  const { colorScheme } = useColorScheme();
 
   const remainingCount = questions.filter(
     (q) => !completedQuestionIds.has(q.id),
   ).length;
 
   return (
-    <View className="flex-1 bg-white items-center justify-center gap-6 p-6">
-      <Trophy color="#4b5563" size={72} />
+    <View className="flex-1 bg-white items-center justify-center gap-6 p-6 dark:bg-neutral-900">
+      <Trophy size={72} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
 
-      <Text className="text-center text-xl font-semibold text-gray-700">
+      <Text className="text-center text-xl font-semibold text-gray-700 dark:text-neutral-300">
         {remainingCount} question{remainingCount === 1 ? '' : 's'} left to get right
       </Text>
 
       <View className='flex flex-row items-center gap-2'>
         <Pressable
           onPress={onExit}
-          className="rounded-xl px-8 py-4 bg-gray-100 active:bg-gray-200"
+          className="
+            rounded-xl px-8 py-4 
+            bg-gray-100 active:bg-gray-200
+            dark:bg-neutral-800 dark:active:bg-neutral-700
+          "
         >
-          <House strokeWidth={3} color="#4b5563"  />
+          <House strokeWidth={2} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"}  />
         </Pressable>
 
         <Pressable
           onPress={onTryAgain}
-          className="rounded-xl bg-gray-600 px-8 py-4 active:bg-gray-700"
+          className="
+            rounded-xl px-8 py-4 
+            bg-gray-100 active:bg-gray-200
+            dark:bg-neutral-800 dark:active:bg-neutral-700
+          "
         >
-          <RotateCcw strokeWidth={3} color="#ffffff" />
+          <RotateCcw strokeWidth={2} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
         </Pressable>
 
         <Pressable
           onPress={onQuizComplete}
-          className="rounded-xl bg-gray-100 px-8 py-4 active:bg-gray-200"
+          className="
+            rounded-xl px-8 py-4 
+            bg-gray-100 active:bg-gray-200
+            dark:bg-neutral-800 dark:active:bg-neutral-700
+          "
         >
-          <Trophy strokeWidth={3} color="#4b5563" />
+          <Trophy strokeWidth={2} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
         </Pressable>
       </View>
     </View>

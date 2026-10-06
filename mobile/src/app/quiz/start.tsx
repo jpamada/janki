@@ -3,8 +3,8 @@ import { AArrowUp, BookCheck, CaseSensitive, FileQuestionMark, Lightbulb, LogOut
 import { getDueQuestionIds, recordCorrectAnswer, recordIncorrectAnswer, resetProgressForQuestions } from '@/repositories/progress.repository';
 import { Animated, ActivityIndicator, Modal, Pressable, Text, TextInput, View, Image, Switch } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
+import { atomOneLight, atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { atomOneLight } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createHistory } from '@/repositories/history.repository';
@@ -15,10 +15,12 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useSnackbar } from '@/contexts/SnackbarContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
+import { useColorScheme } from 'nativewind';
 import { useSfx } from '@/contexts/SfxContext';
 
-import DebouncedPressable from '@/components/shared/DebouncedPressable';
+import DebouncedPressable from '@/components/shared/pressables/DebouncedPressable';
 import EmptyStateScreen from '@/components/shared/EmptyState';
+import BottomSheet from '@/components/shared/BottomSheet';
 import QuizResultsScreen, { QuizResults } from './results';
 import CustomPicker from '@/components/shared/CustomPicker';
 import QuizContinueScreen from './continue';
@@ -32,6 +34,7 @@ export default function QuizStartScreen() {
   const { settings } = useSettings();
 
   const { playAnswerSfx, playCompletedSfx } = useSfx();
+  const { colorScheme } = useColorScheme();
   const { showSnackbar } = useSnackbar();
 
   const insets = useSafeAreaInsets();
@@ -562,7 +565,7 @@ export default function QuizStartScreen() {
   }
 
   return (
-    <View className={`flex-1 ${currentQuestion?.code ? "bg-gray-50" : "bg-white"}`}>
+    <View className={`flex-1 ${currentQuestion?.code ? "bg-gray-50" : "bg-white"} dark:bg-neutral-900`}>
       {isLoading || !quizSessionInitialized ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="small" color="#4b5563" />
@@ -578,12 +581,12 @@ export default function QuizStartScreen() {
           <View className="mt-8 flex-row items-center gap-1 p-1">
             <Pressable
               onPress={() => settingSheet.open()}
-              className="rounded-xl p-3 active:bg-gray-100"
+              className="rounded-xl p-3 active:bg-gray-100 dark:active:bg-neutral-800"
             >
-              <Settings strokeWidth={2} color="#4a5462" />
+              <Settings strokeWidth={2} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"}  />
             </Pressable>
 
-            <View className="me-3 h-3 flex-1 overflow-hidden rounded-full bg-gray-100">
+            <View className="me-3 h-3 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white">
               <View className="h-full bg-gray-600" style={{ width: `${progress}%` }} />
             </View>
           </View>
@@ -592,14 +595,16 @@ export default function QuizStartScreen() {
             bottomOffset={20}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
-            className="bg-white"
+            className="bg-white dark:bg-neutral-900"
             contentContainerStyle={{ 
               flexGrow: 1,
             }}
           >
-            <View className={`rounded-lg ${currentQuestion?.code ? "bg-gray-50" : "bg-white"}`}>
+            <View className={`
+              ${currentQuestion?.code ? "bg-gray-50" : "bg-white"} dark:bg-neutral-900
+            `}>
               <Text
-                className="font-semibold px-4 pt-2 pb-4"
+                className="font-semibold px-4 pt-2 pb-4 dark:text-neutral-300"
                 style={{
                   textAlign: settings?.questionTextAlign ?? "left",
                   fontSize: settings?.questionFontSize ?? 20,
@@ -618,26 +623,24 @@ export default function QuizStartScreen() {
             )}
 
             {currentQuestion?.code && (
-              <View className="flex-1 bg-white w-auto">
+              <View className="flex-1 bg-white w-auto dark:bg-neutral-900">
                 <Suspense 
                   fallback={
                     <View 
-                      className="rounded-xl bg-white" 
+                      className="rounded-xl bg-white dark:bg-neutral-900" 
                     />
                   }
                 >
                   <CodeHighlighter
-                    hljsStyle={atomOneLight}
+                    hljsStyle={colorScheme === "light" ? atomOneLight : atomOneDark }
                     language={currentQuestion.language ?? "text"}
                     scrollViewProps={{
                       style: {
                         flex: 1,
-                        minHeight: 420,
-                        backgroundColor: "transparent",
+                        minHeight: 450,
                       },
                       contentContainerStyle: {
                         flexGrow: 1,
-                        backgroundColor: "transparent",
                         padding: 16,
                       },
                     }}
@@ -652,280 +655,306 @@ export default function QuizStartScreen() {
               </View>
             )}  
 
-            <Modal
-              transparent
-              animationType="none"
-              visible={resultSheet.visible}
-              onRequestClose={isCorrect ? undefined : handleContinueIncorrect}
+            <BottomSheet
+              sheet={resultSheet}
+              onBackdropPress={
+                isCorrect ? undefined : handleContinueIncorrect
+              }
+              onRequestClose={
+                isCorrect ? undefined : handleContinueIncorrect
+              }
             >
-              <View className="flex-1 justify-end">
-                <Animated.View
-                  className="absolute inset-0 bg-black/40"
-                  style={{ opacity: resultSheet.backdropOpacity }}
-                >
-                  {!isCorrect && (
-                    <Pressable className="flex-1" onPress={handleContinueIncorrect} />
-                  )}
-                </Animated.View>
+              <View className="p-6">
+                <Text className="text-3xl font-bold text-gray-800 dark:text-white">
+                  {isCorrect ? 'Correct!' : 'Incorrect'}
+                </Text>
 
-                <Animated.View
-                  style={{ transform: [{ translateY: resultSheet.translateY }] }}
-                  className="rounded-t-3xl bg-white"
-                >
-                  <View className="p-6">
-                    <Text className="text-3xl font-bold text-gray-800">
-                      {isCorrect ? 'Correct!' : 'Incorrect'}
+                {!isCorrect && settings?.showCorrectAnswer && (
+                  <View className="mt-6">
+                    <Text className="text-lg font-semibold text-gray-400">
+                      Correct Answer
                     </Text>
 
-                    {!isCorrect && settings?.showCorrectAnswer && (
-                      <View className="mt-6">
-                        <Text className="text-lg font-semibold text-gray-400">
-                          Correct Answer
-                        </Text>
-                        <Text className="mt-2 text-lg font-semibold">
-                          {currentQuestion.questionAnswers.find((item) => item.isCorrect)?.answer.answer}
-                        </Text>
-                      </View>
-                    )}
+                    <Text className="mt-2 text-lg font-semibold dark:text-white">
+                      {
+                        currentQuestion.questionAnswers.find(
+                          (item) => item.isCorrect,
+                        )?.answer.answer
+                      }
+                    </Text>
+                  </View>
+                )}
 
-                    {currentQuestion?.explanation && settings?.showExplanation && (
-                       <View className="mt-6">
-                        <Text className="text-lg font-semibold text-gray-400">
-                          Explanation
-                        </Text>
+                {currentQuestion?.explanation && settings?.showExplanation && (
+                  <View className="mt-6">
+                    <Text className="text-lg font-semibold text-gray-400">
+                      Explanation
+                    </Text>
 
-                         <Text className="mt-2 text-lg font-semibold text-gray-500">
-                          {currentQuestion?.explanation}
-                        </Text>
-                      </View>
-                     
-                    )}
+                    <Text className="mt-2 text-lg font-semibold text-gray-500">
+                      {currentQuestion.explanation}
+                    </Text>
+                  </View>
+                )}
 
-                    {isCorrect ? (
-                      <View className="mt-8 gap-2">
-                        <Text className="text-sm font-semibold text-gray-400 mb-1">
-                          Show this again in:
-                        </Text>
+                {isCorrect ? (
+                  <View className="mt-8 gap-2">
+                    <Text className="mb-1 text-sm font-semibold text-gray-400">
+                      Show this again in:
+                    </Text>
 
-                        <View className="flex-row items-center gap-2">
-                          <DebouncedPressable
-                            key={"1_day"}
-                            disabled={recordCorrectMutation.isPending}
-                            onPress={() => handleSubmitInterval("1_day")}
-                            className="flex-1 rounded-lg bg-gray-600 px-4 py-2 active:bg-gray-700 disabled:bg-gray-400"
-                          >
-                            <Text className="text-center text-lg font-semibold text-white">
-                              1 Day
-                            </Text>
-                          </DebouncedPressable>
-
-                          <DebouncedPressable
-                            key={"3_days"}
-                            disabled={recordCorrectMutation.isPending}
-                            onPress={() => handleSubmitInterval("3_days")}
-                            className="flex-1 rounded-lg bg-gray-600 px-4 py-2 active:bg-gray-700 disabled:bg-gray-400"
-                          >
-                            <Text className="text-center text-lg font-semibold text-white">
-                              3 Days
-                            </Text>
-                          </DebouncedPressable>
-
-                          <DebouncedPressable
-                            key={"7_days"}
-                            disabled={recordCorrectMutation.isPending}
-                            onPress={() => handleSubmitInterval("7_days")}
-                            className="flex-1 rounded-lg bg-gray-600 px-4 py-2 active:bg-gray-700 disabled:bg-gray-400"
-                          >
-                            <Text className="text-center text-lg font-semibold text-white">
-                              7 Days
-                            </Text>
-                          </DebouncedPressable>
-                        </View>
-                      </View>
-                    ) : (
-                      <Pressable
-                        onPress={handleContinueIncorrect}
-                        className="mt-8 rounded-lg bg-gray-600 p-4 active:bg-gray-700"
-                      >                        
+                    <View className="flex-row items-center gap-2">
+                      <DebouncedPressable
+                        disabled={recordCorrectMutation.isPending}
+                        onPress={() => handleSubmitInterval('1_day')}
+                        className="flex-1 rounded-lg bg-gray-600 px-4 py-2 active:bg-gray-700 disabled:bg-gray-400"
+                      >
                         <Text className="text-center text-lg font-semibold text-white">
-                          Continue
+                          1 Day
                         </Text>
-                      </Pressable>
-                    )}
+                      </DebouncedPressable>
+
+                      <DebouncedPressable
+                        disabled={recordCorrectMutation.isPending}
+                        onPress={() => handleSubmitInterval('3_days')}
+                        className="flex-1 rounded-lg bg-gray-600 px-4 py-2 active:bg-gray-700 disabled:bg-gray-400"
+                      >
+                        <Text className="text-center text-lg font-semibold text-white">
+                          3 Days
+                        </Text>
+                      </DebouncedPressable>
+
+                      <DebouncedPressable
+                        disabled={recordCorrectMutation.isPending}
+                        onPress={() => handleSubmitInterval('7_days')}
+                        className="flex-1 rounded-lg bg-gray-600 px-4 py-2 active:bg-gray-700 disabled:bg-gray-400"
+                      >
+                        <Text className="text-center text-lg font-semibold text-white">
+                          7 Days
+                        </Text>
+                      </DebouncedPressable>
+                    </View>
                   </View>
-
-                  <View style={{ height: insets.bottom }} />
-                </Animated.View>
+                ) : (
+                  <Pressable
+                    onPress={handleContinueIncorrect}
+                    className="mt-8 rounded-lg bg-gray-600 p-4 active:bg-gray-700"
+                  >
+                    <Text className="text-center text-lg font-semibold text-white">
+                      Continue
+                    </Text>
+                  </Pressable>
+                )}
               </View>
-            </Modal>
-
-            <Modal
-              transparent
-              animationType="none"
-              visible={settingSheet.visible}
+            </BottomSheet>
+            
+            <BottomSheet
+              sheet={settingSheet}
               onRequestClose={() => settingSheet.close()}
+              className="px-4 py-8"
             >
-              <View className="flex-1 justify-end">
-                <Animated.View
-                  className="absolute inset-0 bg-black/40"
-                  style={{ opacity: settingSheet.backdropOpacity }}
-                >
-                  <Pressable className="flex-1" onPress={() => settingSheet.close()} />
-                </Animated.View>
+              <View className="
+                flex-row items-center justify-between 
+                bg-white rounded-t-xl p-4 
+                dark:bg-neutral-700
+              ">
+                <View className="flex-row items-center gap-2">
+                  <AArrowUp size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                  <Text className="text-xl dark:text-neutral-300">
+                    Font Size
+                  </Text>
+                </View>
 
-                <Animated.View
-                  style={{ transform: [{ translateY: settingSheet.translateY }] }}
-                  className="rounded-3xl bg-gray-50 px-4 py-6"
-                >
-                  <View className="flex-row items-center justify-between rounded-t-xl bg-white p-4">
-                    <View className="flex-row items-center gap-2">
-                      <AArrowUp size={16} />
-                      <Text className='text-xl'>Font Size</Text>
-                    </View>
+                <View className="bg-gray-100 rounded-xl">
+                  <CustomPicker
+                    title="Font Size"
+                    variant='modal'
+                    className="dark:bg-neutral-600"
+                    selectedValue={settings?.questionFontSize ?? 20}
+                    onValueChange={(value) => updateFontSizeMutation.mutate(value)}
+                    options={[
+                      { label: 'Small', value: 14 },
+                      { label: 'Default', value: 20 },
+                      { label: 'Large', value: 36 },
+                    ]}
+                  />
+                </View>
+              </View> 
 
-                    <View className="bg-gray-100 rounded-xl">
-                      <CustomPicker
-                        title="Font Size"
-                        variant='modal'
-                        selectedValue={settings?.questionFontSize ?? 20}
-                        onValueChange={(value) => updateFontSizeMutation.mutate(value)}
-                        options={[
-                          { label: 'Small', value: 14 },
-                          { label: 'Default', value: 20 },
-                          { label: 'Large', value: 36 },
-                        ]}
-                      />
-                    </View>
-                  </View> 
+              <View className="
+                flex-row items-center justify-between 
+                bg-white p-4 
+                dark:bg-neutral-700
+              ">
+                <View className="flex-row items-center gap-2">
+                  <TextAlignStart size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                  <Text className="text-xl dark:text-neutral-300">
+                    Text Alignment
+                  </Text>
+                </View>
 
-                  <View className="flex-row items-center justify-between rounded-t-xl bg-white p-4">
-                    <View className="flex-row items-center gap-2">
-                      <TextAlignStart size={16} />
-                      <Text className='text-xl'>Text Alignment</Text>
-                    </View>
-
-                    <View className="bg-gray-100 rounded-xl">
-                      <CustomPicker
-                        title='Text Alignment'
-                        variant='modal'
-                        selectedValue={settings?.questionTextAlign ?? "left"}
-                        onValueChange={(value) => updateTextAlignMutation.mutate(value)}
-                        options={[
-                          { label: "Left", value:"left" },
-                          { label: "Center", value:"center" },
-                          { label: "Justify", value:"justify" },
-                        ]}
-                      />
-                    </View>
-                  </View>
-
-                  <View className="flex-row items-center justify-between rounded-t-xl bg-white p-4">
-                    <View className="flex-row items-center gap-2">
-                      <CaseSensitive size={16} />
-                      <Text className='text-xl'>Case Sensitive</Text>
-                    </View>
-
-                    <View className="bg-gray-100 rounded-xl p-1">
-                      <Switch
-                        value={caseSensitive}
-                        onValueChange={toggleCaseSensitive}
-                      />
-                    </View>
-                  </View> 
-
-                  <View className="flex-row items-center justify-between rounded-t-xl bg-white p-4">
-                    <View className="flex-row items-center gap-2">
-                      <BookCheck size={16} />
-                      <Text className='text-xl'>Show Correct Answer</Text>
-                    </View>
-
-                    <View className="bg-gray-100 rounded-xl p-1">
-                      <Switch
-                        value={showCorrectAnswer}
-                        onValueChange={toggleShowCorrectAnswer}
-                      />
-                    </View>
-                  </View> 
-
-                  <View className="flex-row items-center justify-between rounded-t-xl bg-white p-4">
-                    <View className="flex-row items-center gap-2">
-                      <BookCheck size={16} />
-                      <Text className='text-xl'>Show Explanation</Text>
-                    </View>
-
-                    <View className="bg-gray-100 rounded-xl p-1">
-                      <Switch
-                        value={showExplanation}
-                        onValueChange={toggleShowExplanation}
-                      />
-                    </View>
-                  </View> 
-
-                  <View className="flex-row items-center justify-between rounded-t-xl bg-white p-4">
-                    <View className="flex-row items-center gap-2">
-                      <Volume2 size={16} />
-                      <Text className='text-xl'>Sounds</Text>
-                    </View>
-
-                    <View className="bg-gray-100 rounded-xl p-1">
-                      <Switch
-                        value={soundEnabled}
-                        onValueChange={toggleSoundEnabled}
-                      />
-                    </View>
-                  </View> 
-
-                  <Pressable
-                    onPress={() => {
-                      settingSheet.close();
-                      router.push({ pathname: '/questions/create', params: { lessonId } });
-                    }}
-                    className="flex-row items-center gap-2 rounded-t-xl bg-white p-4 active:bg-gray-100"
-                  >
-                    <Lightbulb size={16} />
-                    <Text className="text-xl">Add Question</Text>
-                  </Pressable>
-
-                  <Pressable
-                    onPress={() => {
-                      settingSheet.close();
-                      router.push({ pathname: '/questions/browse', params: { lessonId } });
-                    }}
-                    className="flex-row items-center gap-2 bg-white p-4 active:bg-gray-100"
-                  >
-                    <Lightbulb size={16} />
-                    <Text className="text-xl">Browse Questions</Text>
-                  </Pressable>
-
-                  <Pressable
-                    onPress={() => {
-                      settingSheet.close();
-                      handleExitQuiz();
-                      router.back();
-                    }}
-                    className="flex-row items-center gap-2 rounded-b-xl bg-white p-4 active:bg-gray-100"
-                  >
-                    <LogOut size={16} />
-                    <Text className="text-xl">Give Up</Text>
-                  </Pressable>
-
-                  <View style={{ height: insets.bottom }} />
-                </Animated.View>
+                <View className="bg-gray-100 rounded-xl">
+                  <CustomPicker
+                    title='Text Alignment'
+                    variant='modal'
+                    className="dark:bg-neutral-600"
+                    selectedValue={settings?.questionTextAlign ?? "left"}
+                    onValueChange={(value) => updateTextAlignMutation.mutate(value)}
+                    options={[
+                      { label: "Left", value:"left" },
+                      { label: "Center", value:"center" },
+                      { label: "Justify", value:"justify" },
+                    ]}
+                  />
+                </View>
               </View>
-            </Modal>
+
+              <View className="
+                flex-row items-center justify-between 
+                bg-white p-4 
+                dark:bg-neutral-700
+              ">
+                <View className="flex-row items-center gap-2">
+                  <CaseSensitive size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                  <Text className="text-xl dark:text-neutral-300">
+                    Case Sensitive
+                  </Text>
+                </View>
+
+                <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
+                  <Switch
+                    value={caseSensitive}
+                    onValueChange={toggleCaseSensitive}
+                  />
+                </View>
+              </View> 
+
+              <View className="
+                flex-row items-center justify-between 
+                bg-white p-4 
+                dark:bg-neutral-700
+              ">
+                <View className="flex-row items-center gap-2">
+                  <BookCheck size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                  <Text className="text-xl dark:text-neutral-300">
+                    Show Correct Answer
+                  </Text>
+                </View>
+
+                <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
+                  <Switch
+                    value={showCorrectAnswer}
+                    onValueChange={toggleShowCorrectAnswer}
+                  />
+                </View>
+              </View> 
+
+              <View className="
+                flex-row items-center justify-between 
+                bg-white p-4 
+                dark:bg-neutral-700
+              ">
+                <View className="flex-row items-center gap-2">
+                  <BookCheck size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                  <Text className="text-xl dark:text-neutral-300">
+                    Show Explanation
+                  </Text>
+                </View>
+
+                <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
+                  <Switch
+                    value={showExplanation}
+                    onValueChange={toggleShowExplanation}
+                  />
+                </View>
+              </View> 
+
+              <View className="
+                flex-row items-center justify-between 
+                bg-white p-4 
+                dark:bg-neutral-700
+              ">
+                <View className="flex-row items-center gap-2">
+                  <Volume2 size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                  <Text className="text-xl dark:text-neutral-300">
+                    Sounds
+                  </Text>
+                </View>
+
+                <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
+                  <Switch
+                    value={soundEnabled}
+                    onValueChange={toggleSoundEnabled}
+                  />
+                </View>
+              </View> 
+
+              <Pressable
+                onPress={() => {
+                  settingSheet.close();
+                  router.push({ pathname: '/questions/create', params: { lessonId } });
+                }}
+                className="
+                  flex-row items-center gap-2 p-4 
+                  bg-white active:bg-gray-100
+                  dark:bg-neutral-700 dark:active:bg-neutral-600
+                "
+              >
+                <Lightbulb size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                <Text className="text-xl dark:text-neutral-300">
+                  Add Question
+                </Text>
+              </Pressable>
+
+              <DebouncedPressable
+                onPress={() => {
+                  settingSheet.close();
+                  router.push({ pathname: '/questions/browse', params: { lessonId } });
+                }}
+                className="
+                  flex-row items-center gap-2 p-4 
+                  bg-white active:bg-gray-100
+                  dark:bg-neutral-700 dark:active:bg-neutral-600
+                "
+              >
+                <Lightbulb size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                <Text className="text-xl dark:text-neutral-300">
+                  Browse Questions
+                </Text>
+              </DebouncedPressable>
+
+              <DebouncedPressable
+                onPress={() => {
+                  settingSheet.close();
+                  handleExitQuiz();
+                  router.back();
+                }}
+                className="
+                  flex-row items-center gap-2 p-4 rounded-b-3xl
+                  bg-white active:bg-gray-100
+                  dark:bg-neutral-700 dark:active:bg-neutral-600
+                "
+              >
+                <LogOut size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                <Text className="text-xl dark:text-neutral-300">
+                  Give Up
+                </Text>
+              </DebouncedPressable>
+            </BottomSheet>
           </KeyboardAwareScrollView>
         </>
 
       ) : quizData.length > 0 ? (
         <View className="flex-1 items-center justify-center gap-6 p-6">
-          <Trophy color="#4b5563" size={72} />
-          <Text className="text-center text-xl font-semibold text-gray-700">
+          <Trophy color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} size={72} />
+
+          <Text className="text-center text-xl font-semibold text-gray-700 dark:text-neutral-300">
             You have answered every question correctly
           </Text>
 
           <DebouncedPressable
             onPress={handleQuizReset}
-            className="rounded-xl bg-gray-600 px-8 py-4 active:bg-gray-700"
+            className="rounded-xl bg-gray-600 px-8 py-4 active:bg-gray-700 dark:bg-neutral-700 dark:active:bg-neutral-600"
           >
             <Text className="text-center text-lg font-semibold text-white">
               Answer Again
@@ -943,16 +972,20 @@ export default function QuizStartScreen() {
 
       {currentQuestion && (
         <KeyboardStickyView offset={{ closed: 0, opened: insets.top }}>
-          <View className="gap-4 bg-white p-4" style={{ paddingBottom: insets.bottom }}>
+          <View className="gap-4 bg-white p-4 dark:bg-neutral-900" style={{ paddingBottom: insets.bottom }}>
             {currentQuestion.type === 'multiple_choice' ? (
               currentQuestion.questionAnswers.map((item) => (
                 <Pressable
                   key={item.answer.id}
                   disabled={resultSheet.visible}
                   onPress={() => handleSubmitMultipleChoice(item.answer.id)}
-                  className="rounded-xl bg-gray-600 p-4 active:bg-gray-700"
+                  className="
+                    rounded-xl 
+                    bg-gray-600 p-4 active:bg-gray-700 
+                    dark:bg-neutral-800 dark:active:bg-neutral-700
+                  "
                 >
-                  <Text className="text-center text-lg font-semibold text-white">
+                  <Text className="text-white text-center text-lg font-semibold">
                     {item.answer.answer}
                   </Text>
                 </Pressable>
@@ -965,13 +998,21 @@ export default function QuizStartScreen() {
                   editable={!resultSheet.visible}
                   placeholder="Type your answer"
                   autoCapitalize="none"
-                  className="rounded-xl bg-gray-100 px-4 py-4 text-lg font-semibold"
+                  className="
+                    rounded-xl px-4 py-4
+                    bg-gray-100 text-lg font-semibold 
+                    dark:bg-neutral-700 dark:text-neutral-300
+                  "
                 />
 
                 <Pressable
                   disabled={resultSheet.visible || !identificationInput.trim()}
                   onPress={handleSubmitIdentification}
-                  className="rounded-xl bg-gray-600 p-4 active:bg-gray-700 disabled:bg-gray-300"
+                  className="
+                    rounded-xl p-4
+                    bg-gray-600 active:bg-neutral-700 disabled:bg-neutral-200 
+                    dark:bg-neutral-700 dark:active:bg-neutral-600 dark:disabled:bg-neutral-400
+                  "
                 >
                   <Text className="text-center text-lg font-semibold text-white">Submit</Text>
                 </Pressable>

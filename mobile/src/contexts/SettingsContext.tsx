@@ -1,6 +1,7 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, type ReactNode } from "react";
 import { getSettings } from "@/repositories/settings.repository";
 import { useQuery } from "@tanstack/react-query";
+import { colorScheme } from 'nativewind';
 
 type Settings = {
   soundEnabled: boolean;
@@ -33,6 +34,12 @@ export function SettingsProvider({
     queryKey: ["settings"],
     queryFn: getSettings,
   });
+
+    useEffect(() => {
+    if (settings?.theme) {
+      colorScheme.set(settings.theme);
+    }
+  }, [settings?.theme]);
 
   return (
     <SettingsContext.Provider value={{ settings }}>

@@ -1,7 +1,7 @@
 import { Href, router } from "expo-router";
 import {  Text, View } from "react-native";
 
-import DebouncedPressable from "./DebouncedPressable";
+import DebouncedPressable from "./pressables/DebouncedPressable";
 
 type EmptyStateProps = {
   title: string;

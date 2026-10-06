@@ -1,41 +1,47 @@
 import { createSubject, deleteSubject, getSubjectsByCategory, hasDefaultSubjects, updateSubject } from "@/repositories/subject.repository";
-import { FolderClosed, Lightbulb, ListOrdered, PenLine, Plus, SearchX, StarMinus, StarPlus, Trash2, X } from "lucide-react-native";
 import { createLesson, deleteLesson, swapLessonPosition, toggleLessonFavorite, updateLesson } from "@/repositories/lesson.repository";
-import { ActivityIndicator, Animated, FlatList, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { FolderClosed, Lightbulb, ListOrdered, PenLine, Plus, SearchX, StarMinus, StarPlus, Trash2 } from "lucide-react-native";
+import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCategories } from "@/repositories/category.repository";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SubjectFormData } from "@/schemas/subject.schema";
 import { useSnackbar } from "@/contexts/SnackbarContext";
 import { LessonFormData } from "@/schemas/lesson.schema";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
 import { router, useFocusEffect } from "expo-router";
+import { useColorScheme } from "nativewind";
 
-import DebouncedPressable from "@/components/shared/DebouncedPressable";
+import DebouncedPressable from "@/components/shared/pressables/DebouncedPressable";
+import CollapsibleFab from "@/components/shared/fabs/CollapsibleFab";
+import CustomModal from "@/components/shared/modals/CustomModal";
+import DeleteModal from "@/components/shared/modals/DeleteModal";
 import SubjectItem from "@/components/subjects/SubjectItem";
 import SubjectForm from "@/components/subjects/SubjectForm";
+import BottomSheet from "@/components/shared/BottomSheet";
 import LessonForm from "@/components/lessons/LessonForm";
 import Header from "@/components/shared/Header";
+import EmptyList from "@/components/EmptyList";
 
 export default function HomeScreen() {
   const { showSnackbar } = useSnackbar();
+  const { colorScheme } = useColorScheme();
 
   const categoryScrollRef = useRef<ScrollView>(null);
 
   const subjectSheet = useBottomSheet();
   const lessonSheet = useBottomSheet();
-
-  const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [fabVisible, setFabVisible] = useState(false);
   
-  const [positionModalVisible, setPositionModalVisible] = useState(false);
-  const [subjectModalVisible, setSubjectModalVisible] = useState(false);
-  const [lessonModalVisible, setLessonModalVisible] = useState(false);
+  const [subjectFormModalVisible, setSubjectFormModalVisible] = useState(false);
+  const [subjectDeleteModalVisible, setSubjectDeleteModalVisible] = useState(false);
+
+  const [lessonFormModalVisible, setLessonFormModalVisible] = useState(false);
+  const [lessonDeleteModalVisible, setLessonDeleteModalVisible] = useState(false);
+  const [lessonPositionModalVisible, setLessonPositionModalVisible] = useState(false);
 
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
@@ -112,13 +118,16 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["heatmap"]
       });
-      showSnackbar({ message: "Subject successfully created" });
-      resetForm();
+      showSnackbar({ 
+        message: "Subject successfully created" 
+      });
+      resetState();
     },
 
     onError: (error) => {
-      console.error(error.message);
-      showSnackbar({ message: "Something went wrong. Please try again." });
+      showSnackbar({ 
+        message: "Something went wrong. Please try again." 
+      });
     }
   });
 
@@ -138,13 +147,16 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });
-      showSnackbar({ message: "Subject successfully updated" });
-      resetForm();
+      showSnackbar({ 
+        message: "Subject successfully updated" 
+      });
+      resetState();
     },
 
     onError: (error) => {
-      console.error(error.message);
-      showSnackbar({ message: "Something went wrong. Please try again." });
+      showSnackbar({ 
+        message: "Something went wrong. Please try again." 
+      });
     }
   });
 
@@ -176,12 +188,16 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["heatmap"]
       });
-      showSnackbar({ message: "Subject successfully deleted" });
-      resetForm();
+      showSnackbar({ 
+        message: "Subject successfully deleted" 
+      });
+      resetState();
     },
+
     onError: (error) => {
-      console.error(error.message);
-      showSnackbar({ message: "Something went wrong. Please try again." });
+      showSnackbar({ 
+        message: "Something went wrong. Please try again." 
+      });
     }
   });
 
@@ -198,13 +214,16 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["dailyStatistics"]
       });
-      showSnackbar({ message: "Lesson successfully created" });
-      resetForm();
+      showSnackbar({ 
+        message: "Lesson successfully created" 
+      });
+      resetState();
     },
 
     onError: (error) => {
-      console.error(error.message);
-      showSnackbar({ message: "Something went wrong. Please try again." });
+      showSnackbar({ 
+        message: "Something went wrong. Please try again." 
+      });
     }
   });
 
@@ -222,12 +241,13 @@ export default function HomeScreen() {
         queryKey: ["favorites"] 
       });
       showSnackbar({ message: "Lesson successfully updated" });
-      resetForm();
+      resetState();
     },
     
     onError: (error) => {
-      console.error(error.message);
-      showSnackbar({ message: "Something went wrong. Please try again." });
+      showSnackbar({ 
+        message: "Something went wrong. Please try again." 
+      });
     }
   });
 
@@ -248,11 +268,10 @@ export default function HomeScreen() {
       showSnackbar({
         message: "Lesson position changed",
       });
-      resetForm();
+      resetState();
     },
 
     onError: (error) => {
-      console.error(error.message);
       showSnackbar({
         message: "Something went wrong. Please try again.",
       });
@@ -272,15 +291,18 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });
-      
+
       if (variables.favorite) {
-        showSnackbar({ message: "Added to favorites" });
+        showSnackbar({ 
+          message: "Added to favorites" 
+        });
 
       } else {
-        showSnackbar({ message: "Removed from favorites" });
+        showSnackbar({ 
+          message: "Removed from favorites" 
+        });
       }
-
-      resetForm();
+      resetState();
     },
   });
 
@@ -309,13 +331,16 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["heatmap"]
       });
-      showSnackbar({ message: "Lesson successfully deleted" });
-      resetForm();
+      showSnackbar({ 
+        message: "Lesson successfully deleted" 
+      });
+      resetState();
     },
 
     onError: (error) => {
-      console.error(error.message);
-      showSnackbar({ message: "Something went wrong. Please try again." });
+      showSnackbar({ 
+        message: "Something went wrong. Please try again." 
+      });
     }
   });
 
@@ -375,17 +400,22 @@ export default function HomeScreen() {
     lessonSheet.open();
   };
 
-  const resetForm = () => {
+  const resetState = () => {
     lessonSheet.close();
     subjectSheet.close();
+
     setIsEditing(false);
     setFabVisible(false);
-    setIsDeleting(false);
+    
     setSelectedLessonId(null);
     setSelectedSubjectId(null);
-    setLessonModalVisible(false);
-    setSubjectModalVisible(false);
-    setPositionModalVisible(false);
+
+    setSubjectFormModalVisible(false);
+    setSubjectDeleteModalVisible(false);
+    setLessonPositionModalVisible(false);
+
+    setLessonFormModalVisible(false);
+    setLessonDeleteModalVisible(false);
   }
 
   useEffect(() => {
@@ -408,7 +438,7 @@ export default function HomeScreen() {
   );
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white dark:bg-neutral-900">
       <Header title="Quiz" />
 
       <ScrollView
@@ -438,14 +468,19 @@ export default function HomeScreen() {
         {categories.map((category) => (
           <Pressable
             key={category.id}
-            onPress={() => setSelectedCategoryId(category.id)}
-            className={`rounded-full px-4 py-2 ${
-              selectedCategoryId === category.id ? "bg-gray-600" : "bg-gray-50 active:bg-gray-100"
+            className={`
+              rounded-full px-4 py-2 ${
+              selectedCategoryId === category.id 
+                ? "bg-gray-600 dark:bg-neutral-800" 
+                : "bg-gray-50 active:bg-gray-100 dark:bg-neutral-700 dark:active:bg-neutral-600"
             }`}
+            onPress={() => setSelectedCategoryId(category.id)}
           >
             <Text
               className={`text-gray-600 text-sm ${
-                selectedCategoryId === category.id ? 'text-white font-bold' : 'font-semibold'
+                selectedCategoryId === category.id 
+                  ? 'text-white font-bold dark:text-neutral-200' 
+                  : 'font-semibold dark:text-neutral-300'
               }`}
             >
               {category.name}
@@ -454,12 +489,22 @@ export default function HomeScreen() {
         ))}
 
         <DebouncedPressable
+          className="
+            flex flex-row items-center gap-1 
+            rounded-full px-4 py-2
+            bg-gray-50 active:bg-gray-100 
+            dark:bg-neutral-700 dark:active:bg-neutral-600
+          "
           onPress={() => router.push('/settings/categories')}
-          className="flex flex-row items-center gap-1 bg-gray-50 rounded-full px-4 py-2 active:bg-gray-100"
         >
-          <Plus color="#4b5563" strokeWidth={2} size={16} />
+          <Plus 
+            size={16} 
+            strokeWidth={2} 
+            color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} 
+          />
+
           {showDefaultTab && (
-            <Text className='text-gray-600 text-sm font-semibold'>
+            <Text className='text-gray-600 text-sm font-semibold dark:text-neutral-400'>
               New Category
             </Text>
           )}
@@ -513,426 +558,330 @@ export default function HomeScreen() {
         )}
       </View>
 
-      {fabVisible && (
+      <CollapsibleFab
+        visible={fabVisible}
+        setVisible={setFabVisible}
+      >
         <Pressable
-          className="absolute inset-0"
-          onPress={() => setFabVisible(false)}
-        />
-      )}
-
-      <View className="absolute bottom-6 right-6 items-end">
-        {fabVisible && (
-          <View className="mb-3 items-end gap-3">
-            <Pressable
-              onPress={() => {
-                setFabVisible(false);
-                setSubjectModalVisible(true);
-              }}
-              className="flex-row items-center gap-2 rounded-full bg-white px-4 py-3 active:bg-gray-50"
-              style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
-            >
-              <FolderClosed size={20} color="#4b5563" />
-              <Text className="font-semibold text-gray-700">
-                New Subject
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => {
-                if (subjects.length === 0) {
-                  showSnackbar({ message: "Create a subject first." });
-                  return;
-                }
-                setFabVisible(false);
-                setLessonModalVisible(true);
-              }}
-              className="flex-row items-center gap-2 rounded-full bg-white px-4 py-3 active:bg-gray-50"
-              style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
-            >
-              <Lightbulb size={20} color="#4b5563" />
-              <Text className="font-semibold text-gray-700">
-                New Lesson
-              </Text>
-            </Pressable>
-          </View>
-        )}
-
-        <Pressable
-          onPress={() => setFabVisible((prev) => !prev)}
-          className="h-16 w-16 items-center justify-center rounded-full bg-white active:bg-gray-50"
+          onPress={() => {
+            setFabVisible(false);
+            setSubjectFormModalVisible(true);
+          }}
+          className="
+            flex-row items-center gap-2 
+            rounded-full px-4 py-3 
+            bg-white active:bg-gray-50
+            dark:bg-neutral-800 dark:active:bg-neutral-700
+          "
           style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
         >
-          {fabVisible ? (
-            <X size={24} color="#4b5563" />
-          ) : (
-            <Plus size={24} color="#4b5563" />
-          )}
+          <FolderClosed size={20} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+          <Text className="text-gray-700 font-semibold dark:text-neutral-300">
+            New Subject
+          </Text>
         </Pressable>
-      </View>
 
-      <Modal
-        transparent
-        animationType="none"
-        visible={subjectSheet.visible}
-        onRequestClose={() => subjectSheet.close()}
-      >
-        <View className="flex-1 justify-end">
-          <Animated.View
-            className="absolute inset-0 bg-black/40"
-            style={{ opacity: subjectSheet.backdropOpacity }}
-          >
-            <Pressable
-              className="flex-1"
-              onPress={resetForm}
-            />
-          </Animated.View>
-
-          <Animated.View
-            style={{ transform: [{ translateY: subjectSheet.translateY }] }}
-            className="rounded-t-3xl bg-gray-50 px-4 py-8"
-          >
-            <View className="rounded-3xl bg-white">
-              <Pressable
-                onPress={() => {
-                  subjectSheet.close(() => {
-                    setLessonModalVisible(true);
-                  });
-                }}
-                className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
-              >
-                <Lightbulb size={16} />
-                <Text className="text-xl">Add Lesson</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => {
-                  setIsEditing(true);
-                  subjectSheet.close(() => setSubjectModalVisible(true));
-                }}
-                className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
-              >
-                <PenLine size={16} />
-                <Text className="text-xl">Update</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => {
-                  setIsDeleting(true);
-                  subjectSheet.close(() => setSubjectModalVisible(true));
-                }}
-                className="flex-row items-center gap-2 rounded-b-3xl p-4 active:bg-gray-100"
-              >
-                <Trash2 color="#f87171" size={16} />
-                <Text className="text-xl text-red-400">Delete</Text>
-              </Pressable>
-            </View>
-
-            <View style={{ height: insets.bottom }} />
-          </Animated.View>
-        </View>
-      </Modal>
-
-      <Modal
-        transparent
-        animationType="none"
-        visible={lessonSheet.visible}
-        onRequestClose={() => lessonSheet.close()}
-      >
-        <View className="flex-1 justify-end">
-          <Animated.View
-            className="absolute inset-0 bg-black/40"
-            style={{ opacity: lessonSheet.backdropOpacity }}
-          >
-            <Pressable
-              className="flex-1"
-              onPress={resetForm}
-            />
-          </Animated.View>
-
-          <Animated.View
-            style={{ transform: [{ translateY: lessonSheet.translateY }] }}
-            className="rounded-t-3xl bg-gray-50 px-4 py-8"
-          >
-            <View className="rounded-3xl bg-white">
-              <Pressable
-                onPress={() => {
-                  const lessonId = selectedLessonId;
-                  setSelectedLessonId(null);
-                  lessonSheet.close();
-                  router.push({
-                    pathname: "/questions/create",
-                    params: { lessonId },
-                  });
-                }}
-                className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
-              >
-                <Lightbulb size={16} />
-                <Text className="text-xl">Add Question</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => {
-                  const lessonId = selectedLessonId;
-                  setSelectedLessonId(null);
-                  lessonSheet.close();;
-                  router.push({
-                    pathname: "/questions/browse",
-                    params: { lessonId }
-                  });
-                }}
-                className="flex-row items-center gap-2 p-4 active:bg-gray-100"
-              >
-                <Lightbulb size={16} />
-                <Text className="text-xl">Browse Questions</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => {
-                  lessonSheet.close(() => {
-                    setPositionModalVisible(true);
-                  });
-                }}
-                className="flex-row items-center gap-2 p-4 active:bg-gray-100"
-              >
-                <ListOrdered size={16} />
-                <Text className="text-xl">Change Position</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => {
-                  if (!selectedLesson) return;
-                  lessonSheet.close(() => {
-                    toggleFavoriteMutation.mutate({
-                      id: selectedLesson.id,
-                      favorite: !selectedLesson.favorite,
-                    });
-                  });
-                }}
-                className="flex-row items-center gap-2 p-4 active:bg-gray-100"
-              >
-                {selectedLesson?.favorite ? (
-                  <>
-                    <StarMinus size={16} />
-                    <Text className="text-xl">Remove From Favorites</Text>
-                  </>
-                ) : (
-                  <>
-                    <StarPlus size={16} />
-                    <Text className="text-xl">Add to Favorites</Text>
-                  </>
-                )}
-              </Pressable>
-
-              <Pressable
-                onPress={() => {
-                  setIsEditing(true);
-                  lessonSheet.close(() => setLessonModalVisible(true));
-                }}
-                className="flex-row items-center gap-2 p-4 active:bg-gray-100"
-              >
-                <PenLine size={16} />
-                <Text className="text-xl">Update</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => {
-                  setIsDeleting(true);
-                  lessonSheet.close(() => setLessonModalVisible(true));
-                }}
-                className="flex-row items-center gap-2 rounded-b-3xl p-4 active:bg-gray-100"
-              >
-                <Trash2 color="#f87171" size={16} />
-                <Text className="text-center text-xl text-red-400">Delete</Text>
-              </Pressable>
-            </View>
-
-            <View style={{ height: insets.bottom }} />
-          </Animated.View>
-        </View>
-      </Modal>
-
-      <Modal
-        transparent
-        animationType="fade"
-        visible={subjectModalVisible}
-        onRequestClose={() => setSubjectModalVisible(false)}
-      >
         <Pressable
-          className="flex-1 items-center justify-center bg-black/40"
-          onPress={resetForm}
+          onPress={() => {
+            if (subjects.length === 0) {
+              showSnackbar({ message: "Create a subject first." });
+              return;
+            }
+            setFabVisible(false);
+            setLessonFormModalVisible(true);
+          }}
+          className="
+            flex-row items-center gap-2 
+            rounded-full px-4 py-3 
+            bg-white active:bg-gray-50
+            dark:bg-neutral-800 dark:active:bg-neutral-700
+          "
+          style={{ boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' }}
         >
+          <Lightbulb size={20} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+          <Text className="text-gray-700 font-semibold dark:text-neutral-300">
+            New Lesson
+          </Text>
+        </Pressable>
+      </CollapsibleFab>
+      
+      <BottomSheet sheet={subjectSheet} onRequestClose={resetState} className="px-4 py-8">
+        <View className="bg-white rounded-3xl dark:bg-neutral-700">
           <Pressable
-            className="w-[90%] rounded-2xl bg-white p-6"
-            onPress={(event) => event.stopPropagation()}
+            onPress={() => {
+              subjectSheet.close(() => {
+                setLessonFormModalVisible(true);
+              });
+            }}
+            className="
+              flex-row items-center gap-2 
+              rounded-t-3xl p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
           >
-            {isDeleting ? (
-              <View>
-                <View className="self-center w-32 h-32 items-center justify-center rounded-full bg-gray-100 mb-4">
-                  <Trash2 size={72} color="#ef4444" />
-                </View>
-
-                <Text className="text-center text-xl font-bold">
-                  Delete Subject
-                </Text>
-
-                <Text className="text-center text-gray-500">
-                  Are you sure you want to delete {selectedSubject?.name || "this subject"}?
-                </Text>
-
-                <View className="mt-6 flex-col justify-end gap-2">
-                  <Pressable
-                    onPress={handleDelete}
-                    disabled={deleteSubjectMutation.isPending}
-                    className="rounded-full bg-red-500 px-6 py-4 active:bg-red-400"
-                  >
-                    <Text className="font-semibold text-center text-white">
-                      {deleteSubjectMutation.isPending ? 'Deleting...' : 'Delete'}
-                    </Text>
-                  </Pressable>
-
-                  <Pressable
-                    onPress={resetForm}
-                    className="rounded-full px-6 py-4 active:bg-gray-100"
-                  >
-                    <Text className="font-semibold text-center text-gray-600">
-                      Cancel
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-            ) : (
-              <SubjectForm
-                isEditing={isEditing}
-                onSubmit={handleSubjectSubmit}
-                defaultValues={{
-                  name: selectedSubject?.name ?? "",
-                  categoryId: selectedSubject?.categoryId ?? selectedCategoryId ?? null
-                }}
-              />
-            )}
+            <Lightbulb size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+            <Text className="text-xl dark:text-neutral-300">
+              Add Lesson
+            </Text>
           </Pressable>
-        </Pressable>
-      </Modal>
 
-      <Modal
-        transparent
-        animationType="fade"
-        visible={lessonModalVisible}
-        onRequestClose={() => setLessonModalVisible(false)}
-      >
-        <Pressable
-          className="flex-1 items-center justify-center bg-black/40"
-          onPress={resetForm}
-        >
           <Pressable
-            className="w-[90%] rounded-2xl bg-white p-6"
-            onPress={(event) => event.stopPropagation()}
+            onPress={() => {
+              setIsEditing(true);
+              subjectSheet.close(() => setSubjectFormModalVisible(true));
+            }}
+            className="
+              flex-row items-center gap-2 
+              p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
           >
-            {isDeleting ? (
-              <View>
-                <View className="self-center w-32 h-32 items-center justify-center rounded-full bg-gray-100 mb-4">
-                  <Trash2 size={72} color="#ef4444" />
-                </View>
-                
-                <Text className="text-xl text-center font-bold">
-                  Delete Lesson
-                </Text>
-
-                <Text className="text-center text-gray-500">
-                  Are you sure you want to delete {selectedLesson?.name || "this lesson"}?
-                </Text>
-
-                <View className="mt-6 flex-col justify-end gap-2">
-                  <Pressable
-                    onPress={handleDelete}
-                    disabled={deleteLessonMutation.isPending}
-                    className="rounded-full bg-red-500 px-6 py-4 active:bg-red-400"
-                  >
-                    <Text className="font-semibold text-center text-white">
-                      {deleteLessonMutation.isPending ? 'Deleting...' : 'Delete'}
-                    </Text>
-                  </Pressable>
-
-                  <Pressable
-                    onPress={resetForm}
-                    className="rounded-full px-6 py-4 active:bg-gray-100"
-                  >
-                    <Text className="font-semibold text-center text-gray-600">Cancel</Text>
-                  </Pressable>
-                </View>
-              </View>
-
-            ) : (
-              <LessonForm
-                onSubmit={handleLessonSubmit}
-                isEditing={isEditing}
-                defaultValues={{
-                  name: selectedLesson?.name ?? "",
-                  subjectId: selectedLesson?.subjectId ?? selectedSubjectId ?? "",
-                  favorite: selectedLesson?.favorite ?? false,
-                }}
-              />
-            )}
+            <PenLine size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+            <Text className="text-xl dark:text-neutral-300">
+              Update
+            </Text>
           </Pressable>
-        </Pressable>
-      </Modal>
 
-      <Modal
-        transparent
-        animationType="fade"
-        visible={positionModalVisible}
-        onRequestClose={resetForm}
-      >
-        <Pressable
-          className="flex-1 items-center justify-center bg-black/40"
-          onPress={resetForm}
-        >
           <Pressable
-            className="w-[90%] max-h-[70%] rounded-2xl bg-white p-6"
-            onPress={(event) => event.stopPropagation()}
+            onPress={() => {
+              subjectSheet.close(() => setSubjectDeleteModalVisible(true));
+            }}
+            className="
+              flex-row items-center gap-2 
+              rounded-b-3xl p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
           >
-            <Text className="mb-4 text-xl font-bold">
+            <Trash2 color="#f87171" size={16} />
+            <Text className="text-xl text-red-400">Delete</Text>
+          </Pressable>
+        </View>
+      </BottomSheet>
+
+      <BottomSheet sheet={lessonSheet} onRequestClose={resetState} className="px-4 py-8">
+        <View className="bg-white rounded-3xl dark:bg-neutral-700">
+          <Pressable
+            onPress={() => {
+              const lessonId = selectedLessonId;
+              setSelectedLessonId(null);
+              lessonSheet.close();
+              router.push({
+                pathname: "/questions/create",
+                params: { lessonId },
+              });
+            }}
+            className="
+              flex-row items-center gap-2 
+              rounded-t-3xl p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
+          >
+            <Lightbulb size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+            <Text className="text-xl dark:text-neutral-300">
+              Add Question
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => {
+              const lessonId = selectedLessonId;
+              setSelectedLessonId(null);
+              lessonSheet.close();;
+              router.push({
+                pathname: "/questions/browse",
+                params: { lessonId }
+              });
+            }}
+            className="
+              flex-row items-center gap-2 
+              p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
+          >
+            <Lightbulb size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+            <Text className="text-xl dark:text-neutral-300">
+              Browse Questions
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => {
+              lessonSheet.close(() => {
+                setLessonPositionModalVisible(true);
+              });
+            }}
+            className="
+              flex-row items-center gap-2 
+              p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
+          >
+            <ListOrdered size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+            <Text className="text-xl dark:text-neutral-300">
               Change Position
             </Text>
-
-            <FlatList
-              data={selectedSubjectLessons.filter(
-                (lesson) => lesson.id !== selectedLessonId
-              )}
-              keyExtractor={(lesson) => lesson.id}
-              renderItem={({ item }) => (
-                <Pressable
-                  onPress={() => {
-                    if (!selectedLessonId) return;
-
-                    swapLessonPositionMutation.mutate({
-                      lessonId: selectedLessonId,
-                      targetLessonId: item.id,
-                    });
-
-                    resetForm();
-                  }}
-                  className="rounded-xl p-4 active:bg-gray-100"
-                >
-                  <Text className="text-lg font-medium">
-                    {item.name}
-                  </Text>
-                </Pressable>
-              )}
-              ListEmptyComponent={
-                <View className="flex flex-col gap-4">
-                  <View className='flex-1 justify-center items-center bg-gray-50 rounded-xl py-4'>
-                    <SearchX size={32} color="#9ca3af" />
-                    <Text className='text-gray-400 font-semibold'>
-                      No other lessons yet
-                    </Text>
-                  </View>
-                </View>
-              }
-            />
           </Pressable>
-        </Pressable>
-      </Modal>
+
+          <Pressable
+            onPress={() => {
+              if (!selectedLesson) return;
+              lessonSheet.close(() => {
+                toggleFavoriteMutation.mutate({
+                  id: selectedLesson.id,
+                  favorite: !selectedLesson.favorite,
+                });
+              });
+            }}
+            className="
+              flex-row items-center gap-2 
+              p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
+          >
+            {selectedLesson?.favorite ? (
+              <>
+                <StarMinus size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                <Text className="text-xl dark:text-neutral-300">
+                  Remove From Favorites
+                </Text>
+              </>
+            ) : (
+              <>
+                <StarPlus size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                <Text className="text-xl dark:text-neutral-300">
+                  Add to Favorites
+                </Text>
+              </>
+            )}
+          </Pressable>
+
+          <Pressable
+            onPress={() => {
+              setIsEditing(true);
+              lessonSheet.close(() => setLessonFormModalVisible(true));
+            }}
+            className="
+              flex-row items-center gap-2 
+              p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
+          >
+            <PenLine size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+            <Text className="text-xl dark:text-neutral-300">
+              Update
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => {
+              lessonSheet.close(() => setLessonDeleteModalVisible(true));
+            }}
+            className="
+              flex-row items-center gap-2 
+              rounded-b-3xl p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
+          >
+            <Trash2 color="#f87171" size={16} />
+            <Text className="text-center text-xl text-red-400">Delete</Text>
+          </Pressable>
+        </View>
+      </BottomSheet>
+
+      <CustomModal
+        header={isEditing ? 'Rename Subject' : 'Create Subject'}
+        isVisible={subjectFormModalVisible}
+        onClose={resetState}
+      >
+        <SubjectForm
+          isEditing={isEditing}
+          onSubmit={handleSubjectSubmit}
+          defaultValues={{
+            name: selectedSubject?.name ?? "",
+            categoryId: selectedSubject?.categoryId ?? selectedCategoryId ?? null
+          }}
+        />
+      </CustomModal>
+
+      <CustomModal 
+        header={isEditing ? 'Rename Lesson' : 'Create Lesson'}
+        isVisible={lessonFormModalVisible} 
+        onClose={resetState}
+      >
+        <LessonForm
+          isEditing={isEditing}
+          onSubmit={handleLessonSubmit}
+          defaultValues={{
+            name: selectedLesson?.name ?? "",
+            favorite: selectedLesson?.favorite ?? false,
+            subjectId: selectedLesson?.subjectId ?? selectedSubjectId ?? "",
+          }}
+        />
+      </CustomModal>
+
+      <CustomModal
+        header="Change Position"
+        isVisible={lessonPositionModalVisible}
+        onClose={resetState}
+      >
+        <FlatList
+          keyExtractor={(item) => item.id}
+          contentContainerClassName="gap-2"
+          showsVerticalScrollIndicator={false}
+          data={selectedSubjectLessons.filter(
+            (lesson) => lesson.id !== selectedLessonId
+          )}
+          renderItem={({ item }) => (
+            <Pressable
+              onPress={() => {
+                if (!selectedLessonId) return;
+                swapLessonPositionMutation.mutate({
+                  lessonId: selectedLessonId,
+                  targetLessonId: item.id,
+                });
+                resetState();
+              }}
+              className="rounded-xl p-4 active:bg-gray-100 dark:active:bg-neutral-700"
+            >
+              <Text className="font-semibold dark:text-neutral-300">
+                {item.name}
+              </Text>
+            </Pressable>
+          )}
+          ListEmptyComponent={
+            <EmptyList message="No other lessons yet" />
+          }
+        />
+      </CustomModal>
+
+      <DeleteModal
+        icon={Trash2}
+        onClose={resetState}
+        header="Delete Subject"
+        onConfirm={handleDelete}
+        isVisible={subjectDeleteModalVisible}
+        onConfirmLabel={deleteSubjectMutation.isPending ? 'Deleting...' : 'Delete'}
+        description={`Are you sure you want to delete ${selectedSubject?.name || "this subject"}?`}
+      />
+
+      <DeleteModal
+        icon={Trash2}
+        onClose={resetState}
+        header="Delete Lesson"
+        onConfirm={handleDelete}
+        isVisible={lessonDeleteModalVisible}
+        onConfirmLabel={deleteLessonMutation.isPending ? 'Deleting...' : 'Delete'}
+        description={`Are you sure you want to delete ${selectedLesson?.name || "this lesson"}?`}
+      />
     </View>
   )
 }

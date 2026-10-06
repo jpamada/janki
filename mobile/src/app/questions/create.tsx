@@ -74,7 +74,7 @@ export default function CreateQuestionScreen() {
   }, []);
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white dark:bg-neutral-900">
       <QuestionForm
         onSubmit={handleQuestionSubmit}
         onCreateSuccess={createSuccess}

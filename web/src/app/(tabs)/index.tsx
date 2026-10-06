@@ -114,7 +114,7 @@ export default function HomeScreen() {
         queryKey: ["heatmap"]
       });
       showSnackbar({ message: "Subject successfully created" });
-      resetForm();
+      resetState();
     },
 
     onError: (error) => {
@@ -140,7 +140,7 @@ export default function HomeScreen() {
         queryKey: ["favorites"] 
       });
       showSnackbar({ message: "Subject successfully updated" });
-      resetForm();
+      resetState();
     },
 
     onError: (error) => {
@@ -178,7 +178,7 @@ export default function HomeScreen() {
         queryKey: ["heatmap"]
       });
       showSnackbar({ message: "Subject successfully deleted" });
-      resetForm();
+      resetState();
     },
     onError: (error) => {
       console.error(error.message);
@@ -200,7 +200,7 @@ export default function HomeScreen() {
         queryKey: ["dailyStatistics"]
       });
       showSnackbar({ message: "Lesson successfully created" });
-      resetForm();
+      resetState();
     },
 
     onError: (error) => {
@@ -223,7 +223,7 @@ export default function HomeScreen() {
         queryKey: ["favorites"] 
       });
       showSnackbar({ message: "Lesson successfully updated" });
-      resetForm();
+      resetState();
     },
     
     onError: (error) => {
@@ -249,7 +249,7 @@ export default function HomeScreen() {
       showSnackbar({
         message: "Lesson position changed",
       });
-      resetForm();
+      resetState();
     },
 
     onError: (error) => {
@@ -281,7 +281,7 @@ export default function HomeScreen() {
         showSnackbar({ message: "Removed from favorites" });
       }
 
-      resetForm();
+      resetState();
     },
   });
 
@@ -311,7 +311,7 @@ export default function HomeScreen() {
         queryKey: ["heatmap"]
       });
       showSnackbar({ message: "Lesson successfully deleted" });
-      resetForm();
+      resetState();
     },
 
     onError: (error) => {
@@ -376,7 +376,7 @@ export default function HomeScreen() {
     lessonSheet.open();
   };
 
-  const resetForm = () => {
+  const resetState = () => {
     lessonSheet.close();
     subjectSheet.close();
     setIsEditing(false);
@@ -584,7 +584,7 @@ export default function HomeScreen() {
           >
             <Pressable
               className="flex-1"
-              onPress={resetForm}
+              onPress={resetState}
             />
           </Animated.View>
 
@@ -646,7 +646,7 @@ export default function HomeScreen() {
           >
             <Pressable
               className="flex-1"
-              onPress={resetForm}
+              onPress={resetState}
             />
           </Animated.View>
 
@@ -760,7 +760,7 @@ export default function HomeScreen() {
       >
         <Pressable
           className="flex-1 items-center justify-center bg-black/40"
-          onPress={resetForm}
+          onPress={resetState}
         >
           <Pressable
             className="w-[90%] rounded-2xl bg-white p-6"
@@ -792,7 +792,7 @@ export default function HomeScreen() {
                   </Pressable>
 
                   <Pressable
-                    onPress={resetForm}
+                    onPress={resetState}
                     className="rounded-full px-6 py-4 active:bg-gray-100"
                   >
                     <Text className="font-semibold text-center text-gray-600">
@@ -823,7 +823,7 @@ export default function HomeScreen() {
       >
         <Pressable
           className="flex-1 items-center justify-center bg-black/40"
-          onPress={resetForm}
+          onPress={resetState}
         >
           <Pressable
             className="w-[90%] rounded-2xl bg-white p-6"
@@ -855,7 +855,7 @@ export default function HomeScreen() {
                   </Pressable>
 
                   <Pressable
-                    onPress={resetForm}
+                    onPress={resetState}
                     className="rounded-full px-6 py-4 active:bg-gray-100"
                   >
                     <Text className="font-semibold text-center text-gray-600">Cancel</Text>
@@ -882,11 +882,11 @@ export default function HomeScreen() {
         transparent
         animationType="fade"
         visible={positionModalVisible}
-        onRequestClose={resetForm}
+        onRequestClose={resetState}
       >
         <Pressable
           className="flex-1 items-center justify-center bg-black/40"
-          onPress={resetForm}
+          onPress={resetState}
         >
           <Pressable
             className="w-[90%] max-h-[70%] rounded-2xl bg-white p-6"
@@ -911,7 +911,7 @@ export default function HomeScreen() {
                       targetLessonId: item.id,
                     });
 
-                    resetForm();
+                    resetState();
                   }}
                   className="rounded-xl p-4 active:bg-gray-100"
                 >

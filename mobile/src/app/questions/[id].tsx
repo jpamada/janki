@@ -9,6 +9,8 @@ import { SearchX, Trash2 } from "lucide-react-native";
 import { useState } from "react";
 
 import QuestionForm from "@/components/questions/QuestionForm";
+import EmptyList from "@/components/EmptyList";
+import DeleteModal from "@/components/shared/modals/DeleteModal";
 
 export default function QuestionsScreen() {
   const { id, lessonId } = useLocalSearchParams<{ 
@@ -88,8 +90,12 @@ export default function QuestionsScreen() {
     deleteQuestionMutation.mutateAsync(id)
   };
 
+  const resetState = () => {
+    setModalVisible(false);
+  }
+
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white dark:bg-neutral-900">
       {isLoading ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="small" color="#4b5563" />
@@ -122,68 +128,19 @@ export default function QuestionsScreen() {
             }}
           />
 
-          <Modal
-            transparent
-            animationType="fade"
-            visible={modalVisible}
-            onRequestClose={() => setModalVisible(false)}
-          >
-            <Pressable
-              className="flex-1 items-center justify-center bg-black/40"
-              onPress={() => {
-                setModalVisible(false);
-              }}
-            >
-              <Pressable
-                className="w-[90%] rounded-2xl bg-white p-6"
-                onPress={(event) => event.stopPropagation()}
-              >
-                <View className="self-center w-32 h-32 items-center justify-center rounded-full bg-gray-100 mb-4">
-                  <Trash2 size={72} color="#ef4444" />
-                </View>
-
-                <Text className="text-center text-xl font-bold">
-                  Delete Question
-                </Text>
-
-                <Text className="text-center text-gray-500">
-                  Are you sure you want to delete this this question?
-                </Text>
-
-                <View className="mt-6 flex-col justify-end gap-2">
-                  <Pressable
-                    onPress={handleConfirmDelete}
-                    disabled={deleteQuestionMutation.isPending}
-                    className="rounded-full bg-red-500 px-6 py-4 active:bg-red-400"
-                  >
-                    <Text className="font-semibold text-center text-white">
-                      {deleteQuestionMutation.isPending
-                        ? "Deleting..."
-                        : "Delete"}
-                    </Text>
-                  </Pressable>
-
-                  <Pressable
-                    onPress={() => {
-                      setModalVisible(false);
-                    }}
-                    className="rounded-full px-6 py-4 active:bg-gray-100"
-                  >
-                    <Text className="font-semibold text-center text-gray-600">
-                      Cancel
-                    </Text>
-                  </Pressable>
-                </View>
-              </Pressable>
-            </Pressable>
-          </Modal>
+          <DeleteModal
+            icon={Trash2}
+            onClose={resetState}
+            header="Delete Subject"
+            onConfirm={handleDelete}
+            isVisible={modalVisible}
+            onConfirmLabel={deleteQuestionMutation.isPending ? 'Deleting...' : 'Delete'}
+            description={`Are you sure you want to delete this question?`}
+          />
         </>
 
       ) : (
-        <View className='flex-1 justify-center items-center'>
-          <SearchX size={64} color="#9ca3af" />
-          <Text className='text-gray-400 font-semibold'>No question yet</Text>
-        </View>
+        <EmptyList message="No question yet" />
       )}
     </View>
   )

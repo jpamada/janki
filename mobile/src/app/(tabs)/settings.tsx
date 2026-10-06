@@ -7,8 +7,9 @@ import { exportData, importData } from '@/db/backup';
 import { router } from 'expo-router';
 import { useState } from 'react';
 
-import DebouncedPressable from '@/components/shared/DebouncedPressable';
+import DebouncedPressable from '@/components/shared/pressables/DebouncedPressable';
 import Header from '../../components/shared/Header';
+import DeleteModal from '@/components/shared/modals/DeleteModal';
 
 export default function SettingsScreen() {
   const { showSnackbar } = useSnackbar();
@@ -82,7 +83,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white dark:bg-neutral-900">
       <Header title="Settings" />
 
       <ScrollView
@@ -97,12 +98,19 @@ export default function SettingsScreen() {
 
           <Pressable
             onPress={() => router.push(`/settings/appearance`)}
-            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'
+            className='
+              flex flex-row items-center gap-4 
+              bg-gray-50 active:bg-gray-100 rounded-xl p-4 mb-4 
+              dark:bg-neutral-800 dark:active:bg-zinc-800
+            '
           >
-            <View className='bg-white rounded-xl p-4'>
+            <View className='bg-white rounded-xl p-4 dark:bg-neutral-700'>
               <Palette color="#9ca3af" />
             </View>
-            <Text className='text-gray-600 text-lg font-bold'>User Interface</Text>
+
+            <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
+              User Interface
+            </Text>
           </Pressable>
 
           <Text className="text-gray-400 text-sm font-semibold mb-2">
@@ -111,26 +119,34 @@ export default function SettingsScreen() {
 
           <DebouncedPressable
             onPress={() => router.push(`/settings/categories`)}
-            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'
+            className='
+              flex flex-row items-center gap-4 
+              bg-gray-50 active:bg-gray-100 rounded-xl p-4 mb-4 
+              dark:bg-neutral-800 dark:active:bg-zinc-800
+            '
           >
-            <View className='bg-white rounded-xl p-4'>
+            <View className='bg-white rounded-xl p-4 dark:bg-neutral-700'>
               <LayoutGrid color="#9ca3af" />
             </View>
 
-            <Text className='text-gray-600 text-lg font-bold'>
+            <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
               Categories
             </Text>
           </DebouncedPressable>
 
           <DebouncedPressable
             onPress={() => router.push(`/settings/favorites`)}
-            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg mb-4 active:bg-gray-100'
+            className='
+              flex flex-row items-center gap-4 
+              bg-gray-50 active:bg-gray-100 rounded-xl p-4 mb-4 
+              dark:bg-neutral-800 dark:active:bg-zinc-800
+            '
           >
-            <View className='bg-white rounded-xl p-4'>
+            <View className='bg-white rounded-xl p-4 dark:bg-neutral-700'>
               <Star color="#9ca3af" />
             </View>
 
-            <Text className='text-gray-600 text-lg font-bold'>
+            <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
               Favorites
             </Text>
           </DebouncedPressable>
@@ -141,84 +157,66 @@ export default function SettingsScreen() {
 
           <Pressable
             onPress={handleBackup}
-            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg mb-2 active:bg-gray-100'
+            className='
+              flex flex-row items-center gap-4 
+              bg-gray-50 active:bg-gray-100 rounded-xl p-4 mb-4 
+              dark:bg-neutral-800 dark:active:bg-zinc-800
+            '
           >
-            <View className='bg-white rounded-xl p-4'>
+            <View className='bg-white rounded-xl p-4 dark:bg-neutral-700'>
               <CloudUpload color="#9ca3af" />
             </View>
-            <Text className='text-gray-600 text-lg font-bold'>Backup</Text>
+
+            <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
+              Backup
+            </Text>
           </Pressable>
 
           <Pressable
             onPress={handleRestore}
-            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg mb-2 active:bg-gray-100'
+            className='
+              flex flex-row items-center gap-4 
+              bg-gray-50 active:bg-gray-100 rounded-xl p-4 mb-4 
+              dark:bg-neutral-800 dark:active:bg-zinc-800
+            '
           >
-            <View className='bg-white rounded-xl p-4'>
+            <View className='bg-white rounded-xl p-4 dark:bg-neutral-700'>
               <CloudDownload color="#9ca3af" />
             </View>
-            <Text className='text-gray-600 text-lg font-bold'>Restore</Text>
+
+            <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
+              Restore
+            </Text>
           </Pressable>
 
           <Pressable
             onPress={() => setResetModalVisible(true)}
-            className='flex flex-row items-center gap-4 p-4 bg-gray-50 rounded-lg mb-2 active:bg-gray-100'
+            className='
+              flex flex-row items-center gap-4 
+              bg-gray-50 active:bg-gray-100 rounded-xl p-4 mb-4 
+              dark:bg-neutral-800 dark:active:bg-zinc-800
+            '
           >
-            <View className='bg-white rounded-xl p-4'>
+            <View className='bg-white rounded-xl p-4 dark:bg-neutral-700'>
               <Trash2 color="#9ca3af" />
             </View>
-            <Text className='text-gray-600 text-lg font-bold'>Delete Progress</Text>
+
+            <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
+              Delete Progress
+            </Text>
           </Pressable>
         </View>
       </ScrollView>
 
-      <Modal
-        transparent
-        animationType="fade"
-        visible={resetModalVisible}
-        onRequestClose={() => setResetModalVisible(false)}
-      >
-        <Pressable
-          className="flex-1 items-center justify-center bg-black/40"
-          onPress={() => setResetModalVisible(false)}
-        >
-          <Pressable
-            className="w-[90%] rounded-2xl bg-white p-6"
-            onPress={(event) => event.stopPropagation()}
-          >
-            <View className="self-center w-32 h-32 items-center justify-center rounded-full bg-gray-100 mb-4">
-              <Trash2 size={72} color="#ef4444" />
-            </View>
-
-            <Text className="text-xl font-bold text-center">
-              Reset Progress
-            </Text>
-
-            <Text className="mt-2 text-center text-gray-500">
-              This will permanently delete your quiz progress and review history.
-            </Text>
-
-            <View className="mt-6 gap-2">
-              <Pressable
-                onPress={handleDeleteProgress}
-                className="rounded-full bg-red-500 px-6 py-4 active:bg-red-400"
-              >
-                <Text className="text-center font-semibold text-white">
-                  Confirm Reset
-                </Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => setResetModalVisible(false)}
-                className="rounded-full px-6 py-4 active:bg-gray-100"
-              >
-                <Text className="text-center font-semibold text-gray-600">
-                  Cancel
-                </Text>
-              </Pressable>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+      <DeleteModal
+        icon={Trash2}
+        header='Reset Progress'
+        isVisible={resetModalVisible}
+        onConfirm={handleDeleteProgress}
+        onConfirmLabel='Reset Progress'
+        onClose={() => setResetModalVisible(false)}
+        description='This will permanently delete your quiz progress and review history.'
+      />
     </View>
   );
 }

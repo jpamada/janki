@@ -6,18 +6,25 @@ import { useOptimisticToggle } from "@/hooks/useOptimisticToggle";
 import { useSettings } from "@/contexts/SettingsContext";
 import { ScrollView, Text, View } from "react-native";
 import { Switch } from "react-native-gesture-handler";
+import { useColorScheme } from "nativewind";
 
 import CustomPicker from "@/components/shared/CustomPicker";
 import Header from "@/components/shared/Header";
 
 export default function AppearanceScreen() {
+  
   const { settings } = useSettings();
+  const { setColorScheme } = useColorScheme();
 
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
 
   const updateThemeMutation = useMutation({
     mutationFn: updateTheme,
+
+    onMutate: (theme) => {
+      setColorScheme(theme);
+    },
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -78,7 +85,7 @@ export default function AppearanceScreen() {
 
   return (
     <View 
-      className='flex-1 bg-white' 
+      className='flex-1 bg-white dark:bg-zinc-900' 
       style={{ paddingBottom: insets.bottom }}
     >
       <Header title="Visuals and Sound" back />
@@ -92,14 +99,18 @@ export default function AppearanceScreen() {
           System
         </Text>
 
-        <View className='flex flex-row items-center  justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
+        <View className='
+          flex flex-row items-center justify-between gap-4 
+          bg-gray-50 rounded-lg p-4 mb-4
+          dark:bg-neutral-800
+        '>
           <View className="flex-1 flex-row items-center gap-4 min-w-0">
-            <View className='bg-white rounded-xl p-2'>
+            <View className='bg-white rounded-xl p-2 dark:bg-neutral-700'>
               <Palette color="#9ca3af" />
             </View>
 
             <View className="flex-1 min-w-0 gap-1">
-              <Text className='text-gray-600 font-bold'>
+              <Text className='text-gray-600 font-bold dark:text-neutral-300'>
                 Theme
               </Text>
               <Text className="text-gray-400 text-sm">
@@ -108,9 +119,10 @@ export default function AppearanceScreen() {
             </View>
           </View>
 
-          <View className="bg-gray-100 rounded-xl">
+          <View className="rounded-xl">
             <CustomPicker
               title="Theme"
+              className="dark:bg-neutral-600"
               selectedValue={settings?.theme ?? "light"}
               onValueChange={(value) => updateThemeMutation.mutate(value)}
               options={[
@@ -126,14 +138,18 @@ export default function AppearanceScreen() {
         </Text>
 
         <View className="flex flex-col">
-          <View className='flex-row items-center  justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
+          <View className='
+            flex flex-row items-center justify-between gap-4 
+          bg-gray-50 rounded-lg p-4 mb-4
+          dark:bg-neutral-800
+          '>
             <View className="flex-1 flex-row items-center gap-4 min-w-0">
-              <View className='bg-white rounded-xl p-2'>
+              <View className='bg-white rounded-xl p-2 dark:bg-neutral-700'>
                 <AArrowUp color="#9ca3af" />
               </View>
 
               <View className="flex-1 min-w-0 gap-1">
-                <Text className='text-gray-600 font-bold'>
+                <Text className='text-gray-600 font-bold dark:text-neutral-300'>
                   Font Size
                 </Text>
                 <Text className="text-gray-400 text-sm">
@@ -142,9 +158,10 @@ export default function AppearanceScreen() {
               </View>
             </View>
 
-            <View className="bg-gray-100 rounded-xl">
+            <View className="rounded-xl">
               <CustomPicker
                 title="Font Size"
+                className="dark:bg-neutral-600"
                 selectedValue={settings?.questionFontSize ?? 20}
                 onValueChange={(value) => updateFontSizeMutation.mutate(value)}
                 options={[
@@ -156,14 +173,18 @@ export default function AppearanceScreen() {
             </View>
           </View>
 
-          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
+          <View className='
+            flex flex-row items-center justify-between gap-4 
+            bg-gray-50 rounded-lg p-4 mb-4
+            dark:bg-neutral-800
+          '>
             <View className="flex-1 flex-row items-center gap-4 min-w-0">
-              <View className='bg-white rounded-xl p-2'>
+              <View className='bg-white rounded-xl p-2 dark:bg-neutral-700'>
                 <TextAlignStart color="#9ca3af" />
               </View>
 
               <View className="flex-1 min-w-0 gap-1">
-                <Text className='text-gray-600 font-bold'>
+                <Text className='text-gray-600 font-bold dark:text-neutral-300'>
                   Text Align
                 </Text>
                 <Text className="text-gray-400 text-sm">
@@ -172,9 +193,10 @@ export default function AppearanceScreen() {
               </View>
             </View>
 
-            <View className="bg-gray-100 rounded-xl">
+            <View className="rounded-xl">
               <CustomPicker
                 title='Text Alignment'
+                className="dark:bg-neutral-600"
                 selectedValue={settings?.questionTextAlign ?? "left"}
                 onValueChange={(value) => updateTextAlignMutation.mutate(value)}
                 options={[
@@ -186,14 +208,18 @@ export default function AppearanceScreen() {
             </View>
           </View>
 
-          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
+          <View className='
+            flex flex-row items-center justify-between gap-4 
+            bg-gray-50 rounded-lg p-4 mb-4
+            dark:bg-neutral-800
+          '>
             <View className="flex-1 flex-row items-center gap-4 min-w-0">
-              <View className='bg-white rounded-xl p-2'>
+              <View className='bg-white rounded-xl p-2 dark:bg-neutral-700'>
                 <CaseSensitive color="#9ca3af" />
               </View>
 
               <View className="flex-1 min-w-0 gap-1">
-                <Text className='text-gray-600 font-bold'>
+                <Text className='text-gray-600 font-bold dark:text-neutral-300'>
                   Case Sensitive
                 </Text>
                 <Text className="text-gray-400 text-sm">
@@ -202,7 +228,7 @@ export default function AppearanceScreen() {
               </View>
             </View>
 
-            <View className="bg-gray-100 rounded-xl p-1">
+            <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
               <Switch 
                 value={caseSensitive}
                 onValueChange={toggleCaseSensitive}
@@ -210,14 +236,18 @@ export default function AppearanceScreen() {
             </View>
           </View>
 
-          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
+          <View className='
+            flex flex-row items-center justify-between gap-4 
+            bg-gray-50 rounded-lg p-4 mb-4
+            dark:bg-neutral-800
+          '>
             <View className="flex-1 flex-row items-center gap-4 min-w-0">
-              <View className='bg-white rounded-xl p-2'>
+              <View className='bg-white rounded-xl p-2 dark:bg-neutral-700'>
                 <BookCheck color="#9ca3af" />
               </View>
 
               <View className="flex-1 min-w-0 gap-1">
-                <Text className='text-gray-600 font-bold'>
+                <Text className='text-gray-600 font-bold dark:text-neutral-300'>
                   Show Correct Answer
                 </Text>
                 <Text className="text-gray-400 text-sm">
@@ -226,7 +256,7 @@ export default function AppearanceScreen() {
               </View>
             </View>
 
-            <View className="bg-gray-100 rounded-xl p-1">
+            <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
               <Switch 
                 value={showCorrectAnswer}
                 onValueChange={toggleShowCorrectAnswer}
@@ -234,14 +264,18 @@ export default function AppearanceScreen() {
             </View>
           </View>
 
-          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
+          <View className='
+            flex flex-row items-center justify-between gap-4 
+            bg-gray-50 rounded-lg p-4 mb-4
+            dark:bg-neutral-800
+          '>
             <View className="flex-1 flex-row items-center gap-4 min-w-0">
-              <View className='bg-white rounded-xl p-2'>
+              <View className='bg-white rounded-xl p-2 dark:bg-neutral-700'>
                 <BookCheck color="#9ca3af" />
               </View>
 
               <View className="flex-1 min-w-0 gap-1">
-                <Text className='text-gray-600 font-bold'>
+                <Text className='text-gray-600 font-bold dark:text-neutral-300'>
                   Show Explanation
                 </Text>
                 <Text className="text-gray-400 text-sm">
@@ -250,7 +284,7 @@ export default function AppearanceScreen() {
               </View>
             </View>
 
-            <View className="bg-gray-100 rounded-xl p-1">
+            <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
               <Switch 
                 value={showExplanation}
                 onValueChange={toggleShowExplanation}
@@ -262,14 +296,18 @@ export default function AppearanceScreen() {
             Sounds
           </Text>
 
-          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
+          <View className='
+            flex flex-row items-center justify-between gap-4 
+            bg-gray-50 rounded-lg p-4 mb-4
+            dark:bg-neutral-800
+          '>
             <View className="flex-1 flex-row items-center gap-4 min-w-0">
-              <View className='bg-white rounded-xl p-2'>
+              <View className='bg-white rounded-xl p-2 dark:bg-neutral-700'>
                 <Volume2 color="#9ca3af" />
               </View>
 
               <View className="flex-1 min-w-0 gap-1">
-                <Text className='text-gray-600 font-bold'>
+                <Text className='text-gray-600 font-bold dark:text-neutral-300'>
                   Enable Sounds
                 </Text>
                 <Text className="text-gray-400 text-sm">
@@ -278,7 +316,7 @@ export default function AppearanceScreen() {
               </View>
             </View>
 
-            <View className="bg-gray-100 rounded-xl p-1">
+            <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
               <Switch 
                 value={soundEnabled}
                 onValueChange={toggleSoundEnabled}
@@ -286,14 +324,18 @@ export default function AppearanceScreen() {
             </View>
           </View>
 
-          <View className='flex flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg mb-4'>
+          <View className='
+            flex flex-row items-center justify-between gap-4 
+            bg-gray-50 rounded-lg p-4 mb-4
+            dark:bg-neutral-800
+          '>
             <View className="flex-1 flex-row items-center gap-4 min-w-0">
-              <View className='bg-white rounded-xl p-2'>
+              <View className='bg-white rounded-xl p-2 dark:bg-neutral-700'>
                 <Vibrate color="#9ca3af" />
               </View>
 
               <View className="flex-1 min-w-0 gap-1">
-                <Text className='text-gray-600 font-bold'>
+                <Text className='text-gray-600 font-bold dark:text-neutral-300'>
                   Enable Haptics
                 </Text>
                 <Text className="text-gray-400 text-sm">
@@ -302,7 +344,7 @@ export default function AppearanceScreen() {
               </View>
             </View>
 
-            <View className="bg-gray-100 rounded-xl p-1">
+            <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
               <Switch 
                 value={hapticsEnabled}
                 onValueChange={toggleHapticsEnabled}

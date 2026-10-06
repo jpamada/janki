@@ -16,6 +16,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import CustomPicker from '../shared/CustomPicker';
 import Header from '../shared/Header';
 import AnswerRows from './AnswerRows';
+import { useColorScheme } from 'nativewind';
 
 const CodeEditor = lazy(() => import ('@actualwave/react-native-codeditor'));
 
@@ -45,6 +46,8 @@ export default function QuestionForm({
   },
 }: QuestionFormProps) {
 
+  const { colorScheme } = useColorScheme();
+  
   const insets = useSafeAreaInsets();
   const editorApiRef = useRef<WebViewAPI | null>(null);
 
@@ -173,8 +176,11 @@ export default function QuestionForm({
         title="Questions"
         back={true}
         right={
-          <Pressable onPress={openBottomSheet} className="p-3 rounded-xl active:bg-gray-100">
-            <EllipsisVertical />
+          <Pressable 
+            onPress={openBottomSheet} 
+            className="p-3 rounded-xl active:bg-gray-100 dark:active:bg-neutral-800"
+          >
+            <EllipsisVertical color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
           </Pressable>
         }
       />
@@ -187,16 +193,15 @@ export default function QuestionForm({
         showsVerticalScrollIndicator={false}
         className="flex-1"
       >
-        <View className='gap-4 bg-white rounded-xl shadow-lg p-4 m-4 pb-8'>
-
+        <View className='gap-4 bg-white rounded-xl shadow-lg p-4 m-4 pb-8 dark:bg-neutral-800'>
           <View className="flex-row gap-2">
             {(['multiple_choice', 'identification'] as const).map((type) => (
               <Pressable
                 key={type}
                 onPress={() => handleTypeChange(type)}
-                className={`flex-1 rounded-xl py-3 items-center ${questionType === type ? 'bg-gray-600' : 'bg-gray-100'}`}
+                className={`flex-1 rounded-xl py-3 items-center ${questionType === type ? 'bg-gray-600' : 'bg-gray-100 dark:bg-neutral-700'}`}
               >
-                <Text className={`font-semibold ${questionType === type ? 'text-white' : 'text-gray-600'}`}>
+                <Text className={`font-semibold ${questionType === type ? 'text-white' : 'text-gray-600 dark:text-neutral-300'}`}>
                   {type === 'multiple_choice' ? 'Multiple Choice' : 'Identification'}
                 </Text>
               </Pressable>
@@ -208,7 +213,7 @@ export default function QuestionForm({
             control={control}
             render={({ field: { onChange, onBlur, value } }) => (
               <View>
-                <Text className='text-gray-600 text-sm font-semibold mb-2'>
+                <Text className='text-gray-400 text-sm font-semibold mb-2'>
                   Question
                 </Text>
 
@@ -218,7 +223,12 @@ export default function QuestionForm({
                   onBlur={onBlur}
                   onChangeText={onChange}
                   placeholder="Enter question"
-                  className='bg-gray-100 rounded-xl font-semibold px-2 py-4'
+                  className="
+                    text-gray-600 text-lg
+                    bg-gray-100 rounded-xl px-2 py-4
+                    dark:text-neutral-300
+                    dark:bg-neutral-700 dark:placeholder:text-neutral-300
+                  "
                 />
 
                 {errors.question && (
@@ -230,7 +240,7 @@ export default function QuestionForm({
 
           {imageVisible && image && (
             <View className="gap-2">
-              <Text className="text-gray-600 text-sm font-semibold">
+              <Text className="text-gray-400 text-sm font-semibold">
                 Image
               </Text>
 
@@ -245,7 +255,7 @@ export default function QuestionForm({
           {codeVisible && (
             <View className="gap-2">
               <View className="flex-row items-center justify-between">
-                <Text className="text-gray-600 text-sm font-semibold">Code</Text>
+                <Text className="text-gray-400 text-sm font-semibold">Code</Text>
 
                 <Controller
                   control={control}
@@ -282,17 +292,17 @@ export default function QuestionForm({
                     <Suspense
                       fallback={
                         <View className="flex-1 bg-gray-100 p-4">
-                          <View className="mb-3 h-3 w-24 rounded-full bg-gray-200" />
-                          <View className="mb-3 h-3 w-40 rounded-full bg-gray-200" />
-                          <View className="mb-3 h-3 w-32 rounded-full bg-gray-200" />
-                          <View className="h-3 w-48 rounded-full bg-gray-200" />
+                          <View className="mb-3 h-3 w-24 rounded-full bg-gray-200 dark:bg-neutral-800" />
+                          <View className="mb-3 h-3 w-40 rounded-full bg-gray-200 dark:bg-neutral-800" />
+                          <View className="mb-3 h-3 w-32 rounded-full bg-gray-200 dark:bg-neutral-800" />
+                          <View className="h-3 w-48 rounded-full bg-gray-200 dark:bg-neutral-800" />
                         </View>
                       }
                     >
                       <CodeEditor
                         content={value ?? ''}
                         language="javascript"
-                        theme="basic"
+                        theme={colorScheme === "dark" ? "darcula" : "basic"}
                         onInitialized={async (api) => {
                           editorApiRef.current = api;
                           if (defaultValues.language) {
@@ -317,7 +327,7 @@ export default function QuestionForm({
             control={control}
             render={({ field: { onChange, onBlur, value } }) => (
               <View>
-                <Text className="mb-2 text-sm font-semibold text-gray-600">
+                <Text className="mb-2 text-sm font-semibold text-gray-400">
                   Explanation
                 </Text>
 
@@ -328,7 +338,12 @@ export default function QuestionForm({
                   onChangeText={onChange}
                   textAlignVertical="top"
                   placeholder="Enter explanation"
-                  className="rounded-xl bg-gray-100 px-2 py-4 font-semibold min-h-24"
+                  className="
+                    text-gray-600 text-lg
+                    bg-gray-100 rounded-xl px-2 py-4
+                    dark:text-neutral-300
+                    dark:bg-neutral-700 dark:placeholder:text-neutral-300
+                  "
                 />
 
                 {errors.explanation && (
@@ -347,7 +362,7 @@ export default function QuestionForm({
 
           {questionType === 'multiple_choice' ? (
             <View>
-              <Text className='text-gray-600 text-sm font-semibold mb-2'>
+              <Text className='text-gray-400 text-sm font-semibold mb-2'>
                 Answers
               </Text>
 
@@ -367,7 +382,12 @@ export default function QuestionForm({
 
               <Pressable
                 onPress={() => append({ answer: '', isCorrect: false })}
-                className='border-2 border-gray-200 border-dashed mx-1 py-2 active:bg-gray-50 mt-2'
+                className='
+                  mx-1 py-2
+                  border-2 border-gray-200 border-dashed  
+                  active:bg-gray-50 mt-2 
+                  dark:border-neutral-600 dark:active:bg-neutral-700
+                '
               >
                 <Text className="text-gray-300 text-sm text-center font-semibold">Add answer</Text>
               </Pressable>
@@ -386,7 +406,12 @@ export default function QuestionForm({
                     onBlur={onBlur}
                     onChangeText={onChange}
                     placeholder="Enter the correct answer"
-                    className='bg-gray-100 rounded-xl font-semibold px-2 py-4'
+                    className="
+                      text-gray-600 text-lg
+                      bg-gray-100 rounded-xl px-2 py-4
+                      dark:text-neutral-300
+                      dark:bg-neutral-700 dark:placeholder:text-neutral-300
+                    "
                   />
 
                   {errors.answers?.[0]?.answer && (
@@ -407,13 +432,13 @@ export default function QuestionForm({
         )}
 
         <View 
-          className="flex-row items-center border-t border-gray-200 bg-white px-4 py-6" 
+          className="flex-row items-center border-t border-gray-200 bg-white px-4 py-6 dark:bg-neutral-900 dark:border-neutral-800" 
           style={{ paddingBottom: insets.bottom }}
         >
           <Pressable
             disabled={isSubmitting}
             onPress={handleSubmit(handleFormSubmit)}
-            className="bg-gray-600 rounded-full px-4 py-4 w-full active:bg-gray-500"
+            className="bg-gray-600 rounded-full px-4 py-4 w-full active:bg-gray-500 dark:bg-neutral-700 dark:active:bg-neutral-600"
           >
             <Text className="text-white text-center text-lg font-semibold">Save Changes</Text>
           </Pressable>

@@ -12,9 +12,13 @@ export type HeatmapDay = {
   dayNumber: number;
 };
 
-export function bucketColor(count: number, inMonth: boolean) {
+export function bucketColor(count: number, inMonth: boolean, isLight: boolean) {
   if (!inMonth) return 'transparent';
-  if (count === 0) return '#f3f4f6';
+  
+  if (count === 0) {
+    return isLight ? "#f3f4f6" : "#262626";
+  }
+
   if (count >= 51) return '#196127';
   if (count >= 26) return '#239a3b';
   if (count >= 11) return '#7bc96f';

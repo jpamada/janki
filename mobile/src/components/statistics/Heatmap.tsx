@@ -6,6 +6,7 @@ import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { CELL_GAP, COLUMNS } from '@/constants/heatmapConsts';
 import { addMonths, subMonths, format } from 'date-fns';
 import { useMemo, Fragment } from 'react';
+import { useColorScheme } from 'nativewind';
 
 const SKELETON_ROWS = 5;
 
@@ -24,6 +25,9 @@ function HeatmapGrid({
   cellSize,
   onLayout,
 }: HeatmapGridProps) {
+  const { colorScheme } = useColorScheme();
+  const isLight = colorScheme === "light";
+
   return (
     <View onLayout={onLayout}>
       {cellSize > 0 && (
@@ -37,7 +41,7 @@ function HeatmapGrid({
                   width={cellSize}
                   height={cellSize}
                   rx={6}
-                  fill={bucketColor(day.count, day.inMonth)}
+                  fill={bucketColor(day.count, day.inMonth, isLight)}
                 />
 
                 {day.inMonth && (
@@ -67,6 +71,8 @@ type HeatmapSkeletonProps = {
 };
 
 function HeatmapSkeleton({ width, cellSize, onLayout }: HeatmapSkeletonProps) {
+  const { colorScheme } = useColorScheme();
+
   return (
     <View onLayout={onLayout}>
       {cellSize > 0 ? (
@@ -80,14 +86,14 @@ function HeatmapSkeleton({ width, cellSize, onLayout }: HeatmapSkeletonProps) {
                 width={cellSize}
                 height={cellSize}
                 rx={6}
-                fill="#f3f4f6"
+                fill={colorScheme === "light" ? "#f3f4f6" : "#262626"}
               />
             ))
           )}
         </Svg>
       ) : (
 
-        <View style={{ height: 160 }} className="bg-gray-50 rounded-xl" />
+        <View style={{ height: 160 }} className="bg-gray-50 rounded-xl dark:bg-neutral-800" />
       )}
     </View>
   );
@@ -138,23 +144,33 @@ export default function Heatmap({
   return (
     <View className="gap-3 rounded-xl">
       <View className='flex flex-row items-center justify-between'>
-        <Text className='text-gray-600 text-lg font-bold'>Summary</Text>
+        <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
+          Summary
+        </Text>
 
         <View className="flex-row items-center justify-end gap-2">
           <Pressable
             onPress={() => onViewDateChange((d) => subMonths(d, 1))}
-            className="p-2 bg-gray-50 rounded-full active:bg-gray-100"
+            className="
+              rounded-full p-2 
+              bg-gray-50 active:bg-gray-100 
+              dark:bg-neutral-800 dark:active:bg-neutral-700
+            "
           >
             <ChevronLeft size={20} color="#4b5563" />
           </Pressable>
 
-          <Text className="text-base font-semibold text-gray-700">
+          <Text className="text-gray-700 text-base font-semibold dark:text-neutral-300">
             {format(viewDate, 'MMMM yyyy')}
           </Text>
 
           <Pressable
             onPress={() => onViewDateChange((d) => addMonths(d, 1))}
-            className="p-2 bg-gray-50 rounded-full active:bg-gray-100"
+            className="
+              rounded-full p-2 
+              bg-gray-50 active:bg-gray-100 
+              dark:bg-neutral-800 dark:active:bg-neutral-700
+            "
           >
             <ChevronRight size={20} color="#4b5563" />
           </Pressable>

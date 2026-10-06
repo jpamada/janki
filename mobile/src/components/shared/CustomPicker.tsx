@@ -3,6 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Check, ChevronDown } from 'lucide-react-native';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { useState } from 'react';
+import { useColorScheme } from 'nativewind';
 
 type PickerOption<T> = {
   label: string;
@@ -32,11 +33,14 @@ export default function CustomPicker<T extends string | number | null>({
   variant = 'sheet',
   contentContainerClassName,
 }: CustomPickerProps<T>) {
-  const selectedOption = options.find((option) => option.value === selectedValue);
+  
+  const selectedOption = options.find(
+    (option) => option.value === selectedValue
+  );
 
   const trigger = (
     <Text className={`
-      ${selectedOption ? 'text-gray-700' : 'text-gray-400'}
+      ${selectedOption ? 'text-gray-700 dark:text-neutral-400' : 'text-gray-400 dark:text-neutral-300'}
       ${contentContainerClassName}
     `}>
       {triggerLabel ?? selectedOption?.label ?? placeholder ?? '—'}
@@ -86,6 +90,7 @@ function SheetPicker<T extends string | number | null>({
   selectedValue,
   onValueChange,
 }: VariantProps<T>) {
+  const { colorScheme } = useColorScheme();
   const insets = useSafeAreaInsets();
   const sheet = useBottomSheet();
 
@@ -95,13 +100,14 @@ function SheetPicker<T extends string | number | null>({
         onPress={() => sheet.open()}
         className={`
           flex-row items-center gap-1 
-          rounded-xl bg-gray-100 active:bg-gray-200
-          px-3 py-2
+          rounded-xl px-3 py-2
+          bg-gray-100 active:bg-gray-200
+          dark:bg-neutral-600 dark:active:bg-neutral-700
           ${className}
         `}
       >
         {trigger}
-        <ChevronDown size={16} color="#6b7280" />
+        <ChevronDown size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
       </Pressable>
 
       <Modal
@@ -119,16 +125,24 @@ function SheetPicker<T extends string | number | null>({
           </Animated.View>
 
           <Animated.View
+            className="
+              rounded-t-3xl px-4 py-8
+              bg-gray-50 
+              dark:bg-neutral-900
+            "
             style={{ transform: [{ translateY: sheet.translateY }] }}
-            className="rounded-t-3xl bg-gray-50 px-4 py-8"
           >
             {title && (
-              <Text className="mb-2 px-2 text-lg font-bold text-gray-700">
+              <Text className="
+                mb-4 px-2
+                text-gray-700 font-bold text-lg
+                dark:text-neutral-300
+              ">
                 {title}
               </Text>
             )}
 
-            <View className="rounded-3xl bg-white">
+            <View>
               {options.map((option, index) => {
                 const isSelected = option.value === selectedValue;
                 const isFirst = index === 0;
@@ -142,16 +156,28 @@ function SheetPicker<T extends string | number | null>({
                       sheet.close();
                     }}
                     className={`
-                      flex-row items-center justify-between p-4 active:bg-gray-100
-                      ${isFirst ? 'rounded-t-3xl' : ''}
-                      ${isLast ? 'rounded-b-3xl' : ''}
+                      flex-row items-center justify-between p-4 
+                      bg-white active:bg-gray-100 
+                      dark:bg-neutral-800 dark:active:bg-neutral-700
+                      ${isFirst ? 'rounded-t-xl' : ''}
+                      ${isLast ? 'rounded-b-xl' : ''}
                     `}
                   >
-                    <Text className={`text-xl ${isSelected ? 'font-semibold text-gray-800' : 'text-gray-600'}`}>
+                    <Text className={`
+                      ${isSelected 
+                        ? 'text-gray-900 font-semibold dark:text-neutral-200' 
+                        : 'text-gray-600 dark:text-neutral-400'
+                      }
+                    `}>
                       {option.label}
                     </Text>
 
-                    {isSelected && <Check size={20} color="#4b5563" />}
+                    {isSelected && 
+                      <Check 
+                        size={20} 
+                        color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} 
+                      />
+                    }
                   </Pressable>
                 );
               })}

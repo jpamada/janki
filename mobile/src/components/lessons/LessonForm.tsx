@@ -45,11 +45,6 @@ export default function LessonForm({
 
   return (
     <View className="flex gap-6">
-      <Text className="text-xl font-bold">
-        {isEditing ? 'Rename Lesson' : 'Create Lesson'}
-      </Text>
-
-      
       <Controller
         name="name"
         control={control}
@@ -62,7 +57,12 @@ export default function LessonForm({
               onBlur={onBlur}
               onChangeText={onChange}
               placeholder="Enter lesson title"
-              className='bg-gray-100 rounded-xl text-lg text-gray-600 px-2 py-4'
+              className='
+                text-gray-600 text-lg
+                bg-gray-100 rounded-xl px-2 py-4
+                dark:text-neutral-300
+                dark:bg-neutral-800
+              '
             />
 
             {errors.name && (
@@ -85,8 +85,8 @@ export default function LessonForm({
               <CustomPicker
                 title="Subjects"
                 placeholder='Select Subject'
-                className='py-4 justify-between font-normal'
-                contentContainerClassName='text-lg'
+                className='py-4 justify-between font-normal dark:bg-neutral-800'
+                contentContainerClassName='text-lg dark:text-neutral-400'
                 selectedValue={value}
                 onValueChange={onChange}
                 options={subjects.map((subject) => ({
@@ -106,7 +106,11 @@ export default function LessonForm({
       <Pressable
         disabled={isSubmitting}
         onPress={handleSubmit(handleLessonSubmit)}
-        className="bg-gray-600 rounded-full px-4 py-4 mt-2 active:bg-gray-700 disabled:bg-gray-400"
+        className="
+          bg-gray-600 rounded-full px-4 py-4 mt-2 
+          dark:bg-neutral-700 dark:active:bg-neutral-600
+          active:bg-gray-700 disabled:bg-gray-400
+        "
       >
         <Text className="text-white text-center font-semibold">
           {isEditing ? 'Rename' : 'Create Lesson'}

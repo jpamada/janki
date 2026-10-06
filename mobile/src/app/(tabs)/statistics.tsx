@@ -13,6 +13,7 @@ import Header from '@/components/shared/Header';
 import { useTodayKey } from '@/hooks/useTodayKey';
 import { useCallback, useMemo, useState } from 'react';
 import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from 'date-fns';
+import EmptyList from '@/components/EmptyList';
 
 export default function StatisticsScreen() {
   const insets = useSafeAreaInsets();
@@ -49,9 +50,7 @@ export default function StatisticsScreen() {
   
 
   return (
-    <View 
-      className='flex-1 bg-white'
-    >
+    <View className='flex-1 bg-white dark:bg-neutral-900'>
       <Header title="Stats" />
 
       <View className="flex-1">
@@ -75,27 +74,32 @@ export default function StatisticsScreen() {
                 />
                 
                 <Heatmap
-                    rows={heatmapData}
-                    isPending={isPending}
-                    viewDate={viewDate}
-                    gridStart={gridStart}
-                    gridEnd={gridEnd}
-                    monthStart={monthStart}
-                    onLayout={handleLayout}
-                    onViewDateChange={setViewDate}
-                    containerWidth={containerWidth}
-                  />
+                  rows={heatmapData}
+                  isPending={isPending}
+                  viewDate={viewDate}
+                  gridStart={gridStart}
+                  gridEnd={gridEnd}
+                  monthStart={monthStart}
+                  onLayout={handleLayout}
+                  onViewDateChange={setViewDate}
+                  containerWidth={containerWidth}
+                />
               </View>
 
               <View className='flex flex-row items-center justify-between mt-8'>
-                <Text className='text-gray-600 text-lg font-bold'>History</Text>
+                <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
+                  History
+                </Text>
                 <Pressable
                   onPress={() => {
                     router.push("/history")
                   }}
-                  className='flex flex-row items-center gap-1 py-2 px-2 rounded-xl active:bg-gray-50'
+                  className='
+                    flex flex-row items-center gap-1 
+                    py-2 px-2 rounded-xl active:bg-gray-50 dark:active:bg-neutral-800
+                  '
                 >
-                  <Text className='text-gray-400 font-semibold'>
+                  <Text className='text-gray-400 font-semibold dark:text-neutral-300'>
                     Show More
                   </Text>
                   <ChevronRight size={16} color="#9ca3af" />
@@ -114,12 +118,7 @@ export default function StatisticsScreen() {
             />
           )}
           ListEmptyComponent={
-            <View className='flex-1 justify-center items-center bg-gray-50 rounded-xl py-6'>
-              <RotateCcwClock size={32} color="#d1d5db" />
-              <Text className='text-gray-300 font-semibold'>
-                No history yet
-              </Text>
-            </View>
+            <EmptyList message='No history yet' />
           }
         />
       </View>

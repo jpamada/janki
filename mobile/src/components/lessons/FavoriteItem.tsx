@@ -2,7 +2,7 @@ import { Pressable, View, Text } from "react-native";
 import { Star } from "lucide-react-native";
 import { router } from "expo-router";
 
-import DebouncedPressable from "../shared/DebouncedPressable";
+import DebouncedPressable from "../shared/pressables/DebouncedPressable";
 import { useSfx } from "@/contexts/SfxContext";
 
 type Subject = {
@@ -38,14 +38,18 @@ export default function FavoriteItem({
         pathname: `/quiz/start`,
         params: { lessonId: id }
       })}
-      className="flex flex-row items-center gap-2 bg-gray-50 rounded-lg px-2 py-2 active:bg-gray-100"
+      className="
+        flex-row items-center gap-2
+        bg-gray-100 rounded-lg p-4
+        active:bg-gray-100 dark:bg-neutral-800 dark:active:bg-neutral-700
+      "
     >
       <Pressable 
         onPress={(event) => {
           event.stopPropagation();
           onRemoveFavorite(id);
         }}
-        className="p-2 rounded-xl active:bg-gray-100"
+        className="rounded-xl p-2 active:bg-gray-100 dark:active:bg-neutral-600"
       >
         {favorite === true ? (
           <Star size={20} color="#9ca3af" fill="#9ca3af"/>
@@ -56,7 +60,11 @@ export default function FavoriteItem({
 
       <View className="flex-1 min-w-0 pe-2">
         <Text
-          className="text-gray-400 text-sm font-semibold"
+          className="
+            flex-1 
+            text-gray-700 text-lg font-semibold 
+            dark:text-neutral-300
+          "
           numberOfLines={1}
         >
           {subject?.name}

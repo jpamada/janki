@@ -2,7 +2,7 @@ import { CheckCircle2, CircleX } from "lucide-react-native";
 import { View, Text } from "react-native";
 import { format } from "date-fns";
 
-import DebouncedPressable from "../shared/DebouncedPressable";
+import DebouncedPressable from "../shared/pressables/DebouncedPressable";
 import { router } from "expo-router";
 
 type HistoryItemProps = {
@@ -28,7 +28,11 @@ export default function HistoryItem({
         pathname: `/history/[id]`,
         params: { id: id }
       })}
-      className="flex-row items-center gap-3 rounded-xl bg-gray-50 px-4 py-4 active:bg-gray-100"
+      className="
+        flex-row items-center gap-2
+        bg-gray-100 rounded-lg p-4
+        active:bg-gray-100 dark:bg-neutral-800 dark:active:bg-neutral-700
+      "
     >
       <View
         className=""
@@ -52,7 +56,7 @@ export default function HistoryItem({
             </Text>
           </View> 
 
-          <Text className="text-gray-400 line-clamp-2">
+          <Text className="text-gray-400 line-clamp-2 dark:text-neutral-300">
             {question}
           </Text>
         </View>

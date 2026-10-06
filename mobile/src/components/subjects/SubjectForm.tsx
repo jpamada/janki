@@ -43,10 +43,6 @@ export default function SubjectForm({
 
   return (
     <View className="flex gap-6">
-      <Text className="text-xl font-bold">
-        {isEditing ? 'Rename Subject' : 'Create Subject'}
-      </Text>
-
       <Controller
         name="name"
         control={control}
@@ -61,7 +57,12 @@ export default function SubjectForm({
               onBlur={onBlur}
               onChangeText={onChange}
               placeholder="Enter subject title"
-              className='bg-gray-100 rounded-xl text-lg text-gray-600 px-2 py-4'
+              className='
+                text-gray-600 text-lg
+                bg-gray-100 rounded-xl px-2 py-4
+                dark:text-neutral-300
+                dark:bg-neutral-800
+              '
             />
 
             {errors.name && (
@@ -80,11 +81,11 @@ export default function SubjectForm({
               Category
             </Text>
 
-            <View className="bg-gray-100 rounded-xl">
+            <View className="bg-gray-100 rounded-xl dark:bg-neutral-800">
               <CustomPicker
                 title="Categories"
                 placeholder='Select Category'
-                className='py-4 justify-between font-normal'
+                className='py-4 justify-between font-normal dark:bg-neutral-800'
                 contentContainerClassName='text-lg'
                 selectedValue={value}
                 onValueChange={onChange}
@@ -111,7 +112,11 @@ export default function SubjectForm({
       <Pressable
         disabled={isSubmitting}
         onPress={handleSubmit(handleSubjectSubmit)}
-        className="bg-gray-600 rounded-full px-4 py-4 mt-2 active:bg-gray-700 disabled:bg-gray-400"
+        className="
+          bg-gray-600 rounded-full px-4 py-4 mt-2 
+          dark:bg-neutral-700 dark:active:bg-neutral-600
+          active:bg-gray-700 disabled:bg-gray-400
+        "
       >
         <Text className="text-white text-center font-semibold">
           {isEditing ? 'Rename' : 'Create Subject'}

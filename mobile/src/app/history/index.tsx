@@ -36,7 +36,7 @@ export default function HistoryScreen() {
 
   return (
     <View
-      className="flex-1 bg-white"
+      className="flex-1 bg-white dark:bg-neutral-900"
       style={{ paddingBottom: insets.bottom }}
     >
       <Header title="Quiz History" back={true} />

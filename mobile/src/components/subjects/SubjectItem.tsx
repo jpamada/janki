@@ -4,7 +4,8 @@ import { useSfx } from "@/contexts/SfxContext";
 import { router } from "expo-router";
 import { useState } from "react";
 
-import DebouncedPressable from "../shared/DebouncedPressable";
+import DebouncedPressable from "../shared/pressables/DebouncedPressable";
+import { useColorScheme } from "nativewind";
 
 type SubjectItemProps = {
   subject: {
@@ -32,30 +33,35 @@ export default function SubjectItem({
   onToggleFavorite,
 }: SubjectItemProps) {
   const { hapticVibration } = useSfx();
+  const { colorScheme } = useColorScheme();
 
   const [subjectIsOpen, setSubjectIsOpen] = useState(false);
 
   return (
-    <View className="rounded-xl bg-gray-50">
+    <View className="rounded-xl bg-gray-50 dark:bg-neutral-800">
       <Pressable
-        delayLongPress={500}
+        onPress={() => {
+          setSubjectIsOpen((prev) => !prev);
+        }}
         onLongPress={() => {
           hapticVibration();
           onSubjectLongPress(subject.id);
         }}
-        onPress={() => {
-          setSubjectIsOpen((prev) => !prev);
-        }}
-        className="flex-row items-center gap-2 rounded-lg px-2 py-2 bg-gray-100 active:bg-gray-100"
+        delayLongPress={500}
+        className="
+          flex-row items-center gap-2
+          bg-gray-100 rounded-lg px-2 py-2
+          active:bg-gray-100 dark:bg-neutral-800 dark:active:bg-neutral-700
+        "
       >
         <View className="p-2">
           {subjectIsOpen 
-            ? <FolderOpen size={18} /> 
-            : <FolderClosed size={18} />
+            ? <FolderOpen size={18} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} /> 
+            : <FolderClosed size={18} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
           }
         </View>
 
-        <Text className="flex-1 font-semibold text-gray-700 text-lg">
+        <Text className="flex-1 text-gray-700 text-lg font-semibold dark:text-neutral-300">
           {subject.name}
         </Text>
       </Pressable>
@@ -77,7 +83,11 @@ export default function SubjectItem({
                   hapticVibration();
                   onLessonLongPress(lesson.id);
                 }}
-                className="flex-row items-center justify-between gap-2 px-2 py-2 active:bg-gray-100"
+                className="
+                  flex-row items-center justify-between gap-2 
+                  bg-white active:bg-gray-100 px-2 py-2 
+                  dark:bg-neutral-700 dark:active:bg-neutral-600
+                "
               >
                 <View className="flex flex-col gap-1">
                   <View className="flex flex-row items-center gap-2">
@@ -86,15 +96,25 @@ export default function SubjectItem({
                         event.stopPropagation();
                         onToggleFavorite(lesson.id, !lesson.favorite);
                       }}
-                      className="rounded-xl p-2 active:bg-gray-100"
+                      className="rounded-xl p-2 active:bg-gray-100 dark:active:bg-neutral-600"
                     >
                       {lesson.favorite ? (
-                        <Star size={20} color="#9ca3af" fill="#9ca3af" />
+                        <Star 
+                          size={20} 
+                          color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} 
+                          fill={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
                       ) : (
-                        <Star size={20} color="#9ca3af" />
+                        <Star 
+                          size={20} 
+                          color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} 
+                        />
                       )}
                     </Pressable>
-                    <Text className="font-medium text-gray-600 text-lg">
+
+                    <Text className="
+                      text-gray-600 text-lg font-medium 
+                      dark:text-neutral-300
+                    ">
                       {lesson.name}
                     </Text>
                   </View>

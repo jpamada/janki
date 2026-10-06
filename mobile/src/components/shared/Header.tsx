@@ -3,7 +3,8 @@ import { ArrowLeft } from "lucide-react-native";
 import { Text, View } from "react-native";
 import { router } from "expo-router";
 
-import DebouncedPressable from "./DebouncedPressable";
+import DebouncedPressable from "./pressables/DebouncedPressable";
+import { useColorScheme } from "nativewind";
 
 type HeaderProps = {
   title?: string;
@@ -16,33 +17,32 @@ export default function Header({
   back,
   right
 }: HeaderProps) {
-
+  const { colorScheme } = useColorScheme();
   const insets = useSafeAreaInsets();
 
   return (
     <View 
-      className={`
+      className="
         flex flex-row justify-between items-center
         px-2 py-2 mt-2
-      `}
-      style={{
-        paddingTop: insets.top
-      }}  
+      "
+      style={{ paddingTop: insets.top }}  
     >
-      <View className={`
-        flex flex-row items-center
-      `}>
+      <View className="flex flex-row items-center">
         {back && (
           <DebouncedPressable
             onPress={() => router.back()}
-            className="p-3 rounded-xl active:bg-gray-100"
+            className="p-3 rounded-xl active:bg-gray-100 dark:active:bg-neutral-800"
           >
-            <ArrowLeft />
+            <ArrowLeft color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
           </DebouncedPressable>
         )}
 
         {title && (
-          <Text className={`text-xl font-semibold ${back ? "px-1" : "px-4"}`}>
+          <Text className={`
+            text-xl font-semibold dark:text-neutral-300
+            ${back ? "px-1" : "px-4"}
+          `}>
             {title}
           </Text>
         )}

@@ -28,10 +28,6 @@ export default function CategoryForm({
 
   return (
     <View className="flex gap-6">
-      <Text className="text-xl font-bold">
-        {isEditing ? "Rename Category" : "Create Category"}
-      </Text>
-
       <Controller
         name="name"
         control={control}
@@ -45,7 +41,12 @@ export default function CategoryForm({
               onBlur={onBlur}
               onChangeText={onChange}
               placeholder="Enter name"
-              className='bg-gray-100 rounded-xl text-lg text-gray-600 px-2 py-4'
+              className='
+                text-gray-600 text-lg
+                bg-gray-100 rounded-xl px-2 py-4
+                dark:text-neutral-300
+                dark:bg-neutral-800
+              '
             />
 
             {errors.name && (
@@ -58,7 +59,11 @@ export default function CategoryForm({
       <Pressable
         disabled={isSubmitting}
         onPress={handleSubmit(handleFormSubmit)}
-        className="bg-gray-600 rounded-full px-4 py-4 active:bg-gray-700 disabled:bg-gray-400"
+        className="
+          bg-gray-600 rounded-full px-4 py-4 mt-2 
+          dark:bg-neutral-700 dark:active:bg-neutral-600
+          active:bg-gray-700 disabled:bg-gray-400
+        "
       >
         <Text className="text-white text-center font-semibold">
           {isEditing ? 'Rename' : 'Create Category'}

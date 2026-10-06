@@ -1,13 +1,15 @@
 import { useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, Image, Text, View } from "react-native";
 import { useQuery } from "@tanstack/react-query";
-import { atomOneLight } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { atomOneDark, atomOneLight } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { lazy, Suspense } from "react";
 import { SearchX } from "lucide-react-native";
 
 import { getHistoryById } from "@/repositories/history.repository";
 import Header from "@/components/shared/Header";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import EmptyList from "@/components/EmptyList";
+import { useColorScheme } from "nativewind";
 
 const CodeHighlighter = lazy(
   () => import("react-native-code-highlighter"),
@@ -15,6 +17,7 @@ const CodeHighlighter = lazy(
 
 export default function HistoryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { colorScheme } = useColorScheme();
 
   const insets = useSafeAreaInsets();
 
@@ -25,7 +28,7 @@ export default function HistoryScreen() {
   });
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white dark:bg-neutral-900">
       <Header title="History" back />
 
       {isLoading ? (
@@ -46,12 +49,12 @@ export default function HistoryScreen() {
           }}
         >
           <View className="flex-1">
-            <View className="rounded-lg bg-white">
+            <View>
               <Text className="px-4 text-lg font-semibold text-gray-400">
                 Question
               </Text>
 
-              <Text className="px-4 py-2 text-xl font-semibold">
+              <Text className="px-4 py-2 text-xl font-semibold dark:text-neutral-300">
                 {history.question.question}
               </Text>
             </View>
@@ -65,21 +68,24 @@ export default function HistoryScreen() {
             )}
 
             {history.question.code && (
-              <View className="bg-white">
-                <Suspense
+              <View className="flex-1 bg-white w-auto dark:bg-neutral-900">
+                <Suspense 
                   fallback={
-                    <View className="rounded-xl bg-white" />
+                    <View 
+                      className="rounded-xl bg-white dark:bg-neutral-900" 
+                    />
                   }
                 >
                   <CodeHighlighter
-                    hljsStyle={atomOneLight}
+                    hljsStyle={colorScheme === "light" ? atomOneLight : atomOneDark }
                     language={history.question.language ?? "text"}
                     scrollViewProps={{
                       style: {
-                        backgroundColor: "transparent",
+                        flex: 1,
+                        minHeight: 420,
                       },
                       contentContainerStyle: {
-                        backgroundColor: "transparent",
+                        flexGrow: 1,
                         padding: 16,
                       },
                     }}
@@ -99,7 +105,7 @@ export default function HistoryScreen() {
                 Your Answer
               </Text>
 
-              <Text className="text-lg font-semibold text-gray-800">
+              <Text className="text-lg font-semibold text-gray-800 dark:text-neutral-300">
                 {history.answer || "No answer"}
               </Text>
             </View>
@@ -107,13 +113,7 @@ export default function HistoryScreen() {
         </View>
 
       ) : (
-        <View className="flex-1 items-center justify-center">
-          <SearchX size={64} color="#9ca3af" />
-
-          <Text className="font-semibold text-gray-400">
-            No history found
-          </Text>
-        </View>
+        <EmptyList message="No history found" />
       )}
     </View>
   );

@@ -1,7 +1,7 @@
 import { ActivityIndicator, Animated, FlatList, Modal, Pressable, Text, View } from "react-native";
 import { getFavoriteLessons, toggleLessonFavorite } from "@/repositories/lesson.repository";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Lightbulb, Star, StarMinus, StarPlus } from "lucide-react-native";
+import { Lightbulb, Star, StarMinus, StarPlus, Trash2 } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSnackbar } from "@/contexts/SnackbarContext";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
@@ -10,9 +10,15 @@ import { router } from "expo-router";
 
 import FavoriteItem from "@/components/lessons/FavoriteItem";
 import Header from "@/components/shared/Header";
+import EmptyList from "@/components/EmptyList";
+import BottomSheet from "@/components/shared/BottomSheet";
+import { useColorScheme } from "nativewind";
+import CustomModal from "@/components/shared/modals/CustomModal";
+import DeleteModal from "@/components/shared/modals/DeleteModal";
 
 export default function FavoritesScreen() {
   const { showSnackbar } = useSnackbar();
+  const { colorScheme } = useColorScheme();
 
   const lessonSheet = useBottomSheet();
   const queryClient = useQueryClient();
@@ -80,9 +86,16 @@ export default function FavoritesScreen() {
     setModalVisible(true);
   };
 
+  const resetState = () => {
+    lessonSheet.close();
+    setModalVisible(false);
+    setSelectedLessonId(null);
+  }
+
   return (
     <View 
-      className='flex-1 bg-white'
+      className="flex-1 bg-white dark:bg-neutral-900"
+      style={{ paddingBottom: insets.bottom }}
     >
       <Header title="Favorites" back />
 
@@ -114,175 +127,105 @@ export default function FavoritesScreen() {
               />
             )}
             ListEmptyComponent={
-              <View className='flex-1 justify-center items-center'>
-                <Star size={64} color="#d1d5db" />
-                <Text className='text-gray-300 font-semibold'>
-                  No Favorites yet
-                </Text>
-              </View>
+              <EmptyList message="No favorites yet" />
             }
           />
         </View>
       )}
 
-    <Modal
-      transparent
-      animationType="none"
-      visible={lessonSheet.visible}
-      onRequestClose={() => lessonSheet.close()}
-    >
-      <View className="flex-1 justify-end">
-        <Animated.View
-          className="absolute inset-0 bg-black/40"
-          style={{ opacity: lessonSheet.backdropOpacity }}
-        >
+      <BottomSheet
+        sheet={lessonSheet}
+        onRequestClose={resetState}
+        className="px-4 py-8"
+      >
+        <View className="bg-white rounded-3xl dark:bg-neutral-700">
           <Pressable
-            className="flex-1"
             onPress={() => {
-              lessonSheet.close(() => {
-                setSelectedLessonId(null);
+              setSelectedLessonId(null);
+              lessonSheet.close();
+              router.push({
+                pathname: "/questions/create",
+                params: { lessonId: selectedLessonId }
               });
             }}
-          />
-        </Animated.View>
-
-        <Animated.View
-          style={{
-            transform: [{
-              translateY: lessonSheet.translateY,
-            }],
-          }}
-          className="rounded-t-3xl bg-gray-50 px-4 py-8"
-        >
-          <View className="rounded-3xl bg-white">
-            <Pressable
-              onPress={() => {
-                setSelectedLessonId(null);
-                lessonSheet.close(() => {
-                  router.push({
-                    pathname: "/questions/create",
-                    params: { lessonId: selectedLessonId }
-                  });
-                });
-              }}
-              className="flex-row items-center gap-2 rounded-t-3xl p-4 active:bg-gray-100"
-            >
-              <Lightbulb size={16} />
-              <Text className="text-xl">
-                Add Question
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => {
-                setSelectedLessonId(null);
-                lessonSheet.close(() => {
-                  router.push({
-                    pathname: "/questions/browse",
-                    params: { lessonId: selectedLessonId }
-                  });
-                });
-              }}
-              className="flex-row items-center gap-2 p-4 active:bg-gray-100"
-            >
-              <Lightbulb size={16} />
-              <Text className="text-xl">
-                Browse Questions
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => {
-                lessonSheet.close(() => {
-                  if (!selectedLessonId) return;
-                  setModalVisible(true);
-                });
-              }}
-              className="flex-row items-center gap-2 p-4 active:bg-gray-100"
-            >
-              {selectedLesson?.favorite ? 
-                <>
-                  <StarMinus size={16} />
-                  <Text className="text-xl">
-                    Remove From Favorites
-                  </Text>
-                </>
-              : <>
-                  <StarPlus size={16} />
-                  <Text className="text-xl">
-                    Add to Favorites
-                  </Text>
-                </>
-              }  
-            </Pressable>
-            </View>
-
-            <View style={{ height: insets.bottom }} />
-          </Animated.View>
-        </View>
-      </Modal>
-
-      <Modal
-        transparent
-        animationType="fade"
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <Pressable
-          className="flex-1 items-center justify-center bg-black/40"
-          onPress={() => {
-            setSelectedLessonId(null);
-            setModalVisible(false);
-          }}
-        >
-          <Pressable
-            className="w-[90%] rounded-2xl bg-white p-6"
-            onPress={(event) => event.stopPropagation()}
+            className="
+              flex-row items-center gap-2 
+              rounded-t-3xl p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
           >
-            <View>
-              <Text className="text-xl font-bold">
-                Confirm Action
-              </Text>
-
-              <Text className="mt-2 text-gray-500">
-                Are you sure you want to remove this lesson from your favorites?
-              </Text>
-
-              <View className="mt-6 flex-row justify-end gap-2">
-                <Pressable
-                  onPress={() => {
-                    setSelectedLessonId(null);
-                    setModalVisible(false);
-                  }}
-                  className="rounded-full px-6 py-3 active:bg-gray-100"
-                >
-                  <Text className="font-semibold text-gray-600">
-                    Cancel
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => {
-                    if (!selectedLesson) return;
-                    handleToggleFavorite(
-                      selectedLesson.id,
-                      false
-                    );
-                  }}
-                  disabled={toggleFavoriteMutation.isPending}
-                  className="rounded-full bg-red-500 px-6 py-3 active:bg-red-400"
-                >
-                  <Text className="font-semibold text-white">
-                    {toggleFavoriteMutation.isPending
-                      ? "Removing..."
-                      : "Remove"}
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
+            <Lightbulb size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+            <Text className="text-xl dark:text-neutral-300">
+              Add Question
+            </Text>
           </Pressable>
-        </Pressable>
-      </Modal>
+
+          <Pressable
+            onPress={() => {
+              setSelectedLessonId(null);
+              lessonSheet.close();
+              router.push({
+                pathname: "/questions/browse",
+                params: { lessonId: selectedLessonId }
+              });
+            }}
+            className="
+              flex-row items-center gap-2 p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
+          >
+            <Lightbulb size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+            <Text className="text-xl dark:text-neutral-300">
+              Browse Questions
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => {
+              lessonSheet.close(() => {
+                if (!selectedLessonId) return;
+                setModalVisible(true);
+              });
+            }}
+            className="
+              flex-row items-center gap-2 
+              rounded-b-3xl p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
+          >
+            {selectedLesson?.favorite ? 
+              <>
+                <StarMinus size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                <Text className="text-xl dark:text-neutral-300">
+                  Remove From Favorites
+                </Text>
+              </>
+            : <>
+                <StarPlus size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                <Text className="text-xl dark:text-neutral-300">
+                  Add to Favorites
+                </Text>
+              </>
+            }  
+          </Pressable>
+        </View>
+      </BottomSheet>
+
+      <DeleteModal
+        icon={StarMinus}
+        onClose={resetState}
+        header="Remove Favorite"
+        onConfirm={() => {
+          if (!selectedLesson) return;
+          handleToggleFavorite(selectedLesson.id, false);
+        }}
+        isVisible={modalVisible}
+        onConfirmLabel={toggleFavoriteMutation.isPending ? 'Removing...' : 'Confirm'}
+        description={`Are you sure you want to remove ${selectedLesson?.name || "this lesson"} from favorites?`}
+      />
     </View>
   )
 }
