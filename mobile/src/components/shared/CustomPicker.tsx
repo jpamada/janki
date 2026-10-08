@@ -40,7 +40,7 @@ export default function CustomPicker<T extends string | number | null>({
 
   const trigger = (
     <Text className={`
-      ${selectedOption ? 'text-gray-700 dark:text-neutral-400' : 'text-gray-400 dark:text-neutral-300'}
+      ${selectedOption ? 'text-gray-700 dark:text-neutral-300' : 'text-gray-400 dark:text-neutral-400'}
       ${contentContainerClassName}
     `}>
       {triggerLabel ?? selectedOption?.label ?? placeholder ?? '—'}
@@ -107,7 +107,11 @@ function SheetPicker<T extends string | number | null>({
         `}
       >
         {trigger}
-        <ChevronDown size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+        
+        <ChevronDown 
+          size={16} 
+          color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} 
+        />
       </Pressable>
 
       <Modal
@@ -223,15 +227,18 @@ function CenteredModalPicker<T extends string | number | null>({
         onRequestClose={() => setVisible(false)}
       >
         <Pressable
-          className="flex-1 items-center justify-center bg-black/40"
+          className="flex-1 items-center justify-center bg-black/40 dark:bg-black/60"
           onPress={() => setVisible(false)}
         >
           <Pressable
-            className="w-[85%] rounded-2xl bg-white p-6"
+            className="w-[90%] max-h-[70%] min-h-[30%] bg-white rounded-2xl p-6 dark:bg-neutral-900"
             onPress={(event) => event.stopPropagation()}
           >
             {title && (
-              <Text className="mb-4 text-xl font-bold text-gray-800">
+              <Text className="
+                text-gray-900 text-xl font-bold mb-4
+                dark:text-neutral-300 
+              ">
                 {title}
               </Text>
             )}
@@ -247,9 +254,13 @@ function CenteredModalPicker<T extends string | number | null>({
                       onValueChange(option.value);
                       setVisible(false);
                     }}
-                    className="flex-row items-center justify-between rounded-xl px-4 py-3 active:bg-gray-100"
+                    className="
+                      flex flex-row justify-between items-center rounded-xl p-3
+                      bg-gray-50 active:bg-gray-100 
+                      dark:bg-neutral-800 dark:active:bg-neutral-700
+                    "
                   >
-                    <Text className={`text-lg ${isSelected ? 'font-semibold text-gray-800' : 'text-gray-600'}`}>
+                    <Text className={`text-lg ${isSelected ? 'font-semibold text-gray-800 dark:text-neutral-300' : 'text-gray-600 dark:text-neutral-400'}`}>
                       {option.label}
                     </Text>
 

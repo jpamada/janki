@@ -45,63 +45,61 @@ export default function HistoryScreen() {
           className="flex-1"
           style={{ paddingBottom: insets.bottom }}
         >
-          <View className="flex-1">
-            <View>
-              <Text className="px-4 text-lg font-semibold text-gray-400">
-                Question
-              </Text>
+          <View>
+            <Text className="px-4 text-lg font-semibold text-gray-400">
+              Question
+            </Text>
 
-              <Text className="px-4 py-2 text-xl font-semibold dark:text-neutral-300">
-                {history.question.question}
-              </Text>
+            <Text className="px-4 py-2 text-xl font-semibold dark:text-neutral-300">
+              {history.question.question}
+            </Text>
+          </View>
+
+          {history.question.image && (
+            <Image
+              source={{ uri: history.question.image }}
+              className="mt-4 h-72 w-full rounded-xl px-4"
+              resizeMode="contain"
+            />
+          )}
+
+          {history.question.code && (
+            <View className="bg-white w-auto dark:bg-neutral-900">
+              <Suspense fallback={
+                <View className="rounded-xl bg-white dark:bg-neutral-800" />
+              }>
+                <CodeHighlighter
+                  hljsStyle={colorScheme === "light" ? atomOneLight : atomOneDark }
+                  language={history.question.language ?? "text"}
+                  scrollViewProps={{
+                    style: {
+                      flex: 1,
+                      minHeight: 420,
+                    },
+                    contentContainerStyle: {
+                      flexGrow: 1,
+                      padding: 16,
+                    },
+                  }}
+                  textStyle={{
+                    fontSize: 14,
+                    fontFamily: "monospace",
+                  }}
+                >
+                  {history.question.code}
+                </CodeHighlighter>
+              </Suspense>
             </View>
+          )}
 
-            {history.question.image && (
-              <Image
-                source={{ uri: history.question.image }}
-                className="mt-4 h-72 w-full rounded-xl px-4"
-                resizeMode="contain"
-              />
-            )}
+          <View className="gap-2 p-4">
+            <Text className="text-lg font-semibold text-gray-400">
+              Your Answer
+            </Text>
 
-            {history.question.code && (
-              <View className="flex-1 bg-white w-auto dark:bg-neutral-900">
-                <Suspense fallback={
-                  <View className="rounded-xl bg-white dark:bg-neutral-900" />
-                }>
-                  <CodeHighlighter
-                    hljsStyle={colorScheme === "light" ? atomOneLight : atomOneDark }
-                    language={history.question.language ?? "text"}
-                    scrollViewProps={{
-                      style: {
-                        flex: 1,
-                        minHeight: 420,
-                      },
-                      contentContainerStyle: {
-                        flexGrow: 1,
-                        padding: 16,
-                      },
-                    }}
-                    textStyle={{
-                      fontSize: 14,
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    {history.question.code}
-                  </CodeHighlighter>
-                </Suspense>
-              </View>
-            )}
-
-            <View className="gap-2 p-4">
-              <Text className="text-lg font-semibold text-gray-400">
-                Your Answer
-              </Text>
-
-              <Text className="text-lg font-semibold text-gray-800 dark:text-neutral-300">
-                {history.answer || "No answer"}
-              </Text>
-            </View>
+            <Text className="text-lg font-semibold text-gray-800 dark:text-neutral-300">
+              {history.answer || "No answer"}
+            </Text>
           </View>
         </View>
 

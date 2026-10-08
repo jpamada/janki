@@ -137,6 +137,7 @@ export default function FavoritesScreen() {
       <BottomSheet
         sheet={lessonSheet}
         onRequestClose={resetState}
+        onBackdropPress={resetState}
         className="px-4 py-8"
       >
         <View className="bg-white rounded-3xl dark:bg-neutral-700">

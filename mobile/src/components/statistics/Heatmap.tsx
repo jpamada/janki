@@ -93,7 +93,7 @@ function HeatmapSkeleton({ width, cellSize, onLayout }: HeatmapSkeletonProps) {
         </Svg>
       ) : (
 
-        <View style={{ height: 160 }} className="bg-gray-50 rounded-xl dark:bg-neutral-800" />
+        <View style={{ height: 240 }} className="bg-gray-50 rounded-xl dark:bg-neutral-800" />
       )}
     </View>
   );

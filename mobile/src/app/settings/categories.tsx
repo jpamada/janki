@@ -224,6 +224,7 @@ export default function CategoryScreen() {
         <BottomSheet 
           sheet={categorySheet} 
           onRequestClose={resetState}
+          onBackdropPress={resetState}
           className="px-4 py-8"
         >
           <View className="rounded-3xl bg-white dark:bg-neutral-700">

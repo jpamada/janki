@@ -1,87 +1,16 @@
-import { updateCaseSensitivity, updateFontSize, updateHapticsEnabled, updateShowCorrectAnswer, updateShowExplanation, updateSoundEnabled, updateTextAlign, updateTheme } from "@/repositories/settings.repository";
 import { AArrowUp, BookCheck, CaseSensitive, Palette, TextAlignStart, Vibrate, Volume2 } from "lucide-react-native";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useOptimisticToggle } from "@/hooks/useOptimisticToggle";
 import { useSettings } from "@/contexts/SettingsContext";
 import { ScrollView, Text, View } from "react-native";
 import { Switch } from "react-native-gesture-handler";
-import { useColorScheme } from "nativewind";
 
 import CustomPicker from "@/components/shared/CustomPicker";
 import Header from "@/components/shared/Header";
 
 export default function AppearanceScreen() {
-  
-  const { settings } = useSettings();
-  const { setColorScheme } = useColorScheme();
+  const { settings, updateSettings } = useSettings();
 
   const insets = useSafeAreaInsets();
-  const queryClient = useQueryClient();
-
-  const updateThemeMutation = useMutation({
-    mutationFn: updateTheme,
-
-    onMutate: (theme) => {
-      setColorScheme(theme);
-    },
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["settings"],
-      });
-    },
-  });
-
-  const updateTextAlignMutation = useMutation({
-    mutationFn: updateTextAlign,
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["settings"],
-      });
-    },
-  });
-
-  const updateFontSizeMutation = useMutation({
-    mutationFn: updateFontSize,
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["settings"],
-      });
-    },
-  });
-
-  const [caseSensitive, toggleCaseSensitive] = useOptimisticToggle(
-    settings?.caseSensitive,
-    updateCaseSensitivity,
-    ["settings"],
-  );
-
-  const [showCorrectAnswer, toggleShowCorrectAnswer] = useOptimisticToggle(
-    settings?.showCorrectAnswer,
-    updateShowCorrectAnswer,
-    ["settings"],
-  );
-
-  const [showExplanation, toggleShowExplanation] = useOptimisticToggle(
-    settings?.showExplanation,
-    updateShowExplanation,
-    ["settings"],
-  );
-
-  const [soundEnabled, toggleSoundEnabled] = useOptimisticToggle(
-    settings?.soundEnabled,
-    updateSoundEnabled,
-    ["settings"],
-  );
-
-  const [hapticsEnabled, toggleHapticsEnabled] = useOptimisticToggle(
-    settings?.hapticsEnabled,
-    updateHapticsEnabled,
-    ["settings"],
-  );
 
   return (
     <View 
@@ -123,8 +52,8 @@ export default function AppearanceScreen() {
             <CustomPicker
               title="Theme"
               className="dark:bg-neutral-600"
-              selectedValue={settings?.theme ?? "light"}
-              onValueChange={(value) => updateThemeMutation.mutate(value)}
+              selectedValue={settings.theme}
+              onValueChange={(value) => updateSettings({ theme: value })}
               options={[
                 { label: 'Light', value: "light" },
                 { label: 'Dark', value: "dark" },
@@ -162,8 +91,8 @@ export default function AppearanceScreen() {
               <CustomPicker
                 title="Font Size"
                 className="dark:bg-neutral-600"
-                selectedValue={settings?.questionFontSize ?? 20}
-                onValueChange={(value) => updateFontSizeMutation.mutate(value)}
+                selectedValue={settings.questionFontSize}
+                onValueChange={(value) => updateSettings({ questionFontSize: value })}
                 options={[
                   { label: 'Small', value: 14 },
                   { label: 'Default', value: 20 },
@@ -197,8 +126,8 @@ export default function AppearanceScreen() {
               <CustomPicker
                 title='Text Alignment'
                 className="dark:bg-neutral-600"
-                selectedValue={settings?.questionTextAlign ?? "left"}
-                onValueChange={(value) => updateTextAlignMutation.mutate(value)}
+                selectedValue={settings.questionTextAlign}
+                onValueChange={(value) => updateSettings({ questionTextAlign: value })}
                 options={[
                   { label: "Left", value:"left" },
                   { label: "Center", value:"center" },
@@ -230,8 +159,8 @@ export default function AppearanceScreen() {
 
             <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
               <Switch 
-                value={caseSensitive}
-                onValueChange={toggleCaseSensitive}
+                value={settings.caseSensitive}
+                onValueChange={(value) => updateSettings({ caseSensitive: value })}
               />
             </View>
           </View>
@@ -258,8 +187,8 @@ export default function AppearanceScreen() {
 
             <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
               <Switch 
-                value={showCorrectAnswer}
-                onValueChange={toggleShowCorrectAnswer}
+                value={settings.showCorrectAnswer}
+                onValueChange={(value) => updateSettings({ showCorrectAnswer: value })}
               />
             </View>
           </View>
@@ -286,8 +215,8 @@ export default function AppearanceScreen() {
 
             <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
               <Switch 
-                value={showExplanation}
-                onValueChange={toggleShowExplanation}
+                value={settings.showExplanation}
+                onValueChange={(value) => updateSettings({ showExplanation: value })}
               />
             </View>
           </View>
@@ -318,8 +247,8 @@ export default function AppearanceScreen() {
 
             <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
               <Switch 
-                value={soundEnabled}
-                onValueChange={toggleSoundEnabled}
+                value={settings.soundEnabled}
+                onValueChange={(value) => updateSettings({ soundEnabled: value })}
               />
             </View>
           </View>
@@ -346,8 +275,8 @@ export default function AppearanceScreen() {
 
             <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
               <Switch 
-                value={hapticsEnabled}
-                onValueChange={toggleHapticsEnabled}
+                value={settings.hapticsEnabled}
+                onValueChange={(value) => updateSettings({ hapticsEnabled: value })}
               />
             </View>
           </View>

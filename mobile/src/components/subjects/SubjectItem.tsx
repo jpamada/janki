@@ -50,8 +50,9 @@ export default function SubjectItem({
         delayLongPress={500}
         className="
           flex-row items-center gap-2
-          bg-gray-100 rounded-lg px-2 py-2
-          active:bg-gray-100 dark:bg-neutral-800 dark:active:bg-neutral-700
+          rounded-lg px-2 py-2
+          bg-gray-100 active:bg-gray-200 active:rounded-b-none
+          dark:bg-neutral-800 dark:active:bg-neutral-700
         "
       >
         <View className="p-2">
@@ -85,7 +86,7 @@ export default function SubjectItem({
                 }}
                 className="
                   flex-row items-center justify-between gap-2 
-                  bg-white active:bg-gray-100 px-2 py-2 
+                  bg-gray-50 active:bg-gray-100 px-2 py-2 
                   dark:bg-neutral-700 dark:active:bg-neutral-600
                 "
               >

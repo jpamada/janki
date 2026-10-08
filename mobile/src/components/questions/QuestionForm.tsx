@@ -1,12 +1,12 @@
 import { EllipsisVertical, ImageOff, ImagePlus, CodeXml, Code, Trash2, ListMinus, ListPlus } from 'lucide-react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
-import { useCallback, useRef, useState, lazy, Suspense, useEffect } from 'react';
+import { Image, Pressable, Text, TextInput, View, InteractionManager  } from 'react-native';
+import { type WebViewAPI, CodeEditor } from '@actualwave/react-native-codeditor';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { QuestionFormData, questionSchema } from '@/schemas/question.schema';
-import { Image, Pressable, Text, TextInput, View, InteractionManager  } from 'react-native';
-import { type WebViewAPI } from '@actualwave/react-native-codeditor';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { setEditorLanguage } from '@/providers/setEditorLanguage';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { getEditorHeight } from '@/helpers/codeditor.helper';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,8 +18,6 @@ import CustomPicker from '../shared/CustomPicker';
 import BottomSheet from '../shared/BottomSheet';
 import Header from '../shared/Header';
 import AnswerRows from './AnswerRows';
-
-const CodeEditor = lazy(() => import ('@actualwave/react-native-codeditor'));
 
 type QuestionFormProps = {
   onCreateSuccess?: boolean;
@@ -164,8 +162,7 @@ export default function QuestionForm({
   useEffect(() => {
     if (!codeVisible) return;
 
-    const task = InteractionManager.runAfterInteractions(async () => {
-      await import("@actualwave/react-native-codeditor");
+    const task = InteractionManager.runAfterInteractions(() => {
       setEditorReady(true);
     });
 
@@ -236,7 +233,9 @@ export default function QuestionForm({
                 />
 
                 {errors.question && (
-                  <Text className="text-red-400">{errors.question.message}</Text>
+                  <Text className="text-red-400">
+                    {errors.question.message}
+                  </Text>
                 )}
               </View>
             )}
@@ -259,7 +258,9 @@ export default function QuestionForm({
           {codeVisible && (
             <View className="gap-2">
               <View className="flex-row items-center justify-between">
-                <Text className="text-gray-400 text-sm font-semibold">Code</Text>
+                <Text className="text-gray-400 text-sm font-semibold">
+                  Code
+                </Text>
 
                 <Controller
                   control={control}
@@ -288,39 +289,30 @@ export default function QuestionForm({
                 name="code"
                 control={control}
                 render={({ field: { onChange, value } }) => (
-                  <View style={{ 
-                    height: getEditorHeight(value ?? ''), 
-                    borderRadius: 12,
-                    overflow: 'hidden' 
-                  }}>
+                  <View 
+                    style={{ 
+                      height: getEditorHeight(value ?? ''), 
+                      borderRadius: 12,
+                      overflow: 'hidden' 
+                    }}
+                    className='bg-white dark:bg-neutral-800'
+                  >
                     {editorReady ? (
-                      <Suspense
-                        fallback={
-                          <View className="flex-1 bg-gray-100 dark:bg-neutral-800 p-4">
-                            <View className="mb-3 h-3 w-24 rounded-full bg-gray-200 dark:bg-neutral-700" />
-                            <View className="mb-3 h-3 w-40 rounded-full bg-gray-200 dark:bg-neutral-700" />
-                            <View className="mb-3 h-3 w-32 rounded-full bg-gray-200 dark:bg-neutral-700" />
-                            <View className="h-3 w-48 rounded-full bg-gray-200 dark:bg-neutral-700" />
-                          </View>
-                        }
-                      >
-                        <CodeEditor
-                          content={value ?? ""}
-                          language="javascript"
-                          theme={colorScheme === "dark" ? "darcula" : "basic"}
-                          onInitialized={async (api) => {
-                            editorApiRef.current = api;
-
-                            if (defaultValues.language) {
-                              await setEditorLanguage(api, defaultValues.language);
-                            }
-                          }}
-                          onContentUpdate={onChange}
-                          onHistorySizeUpdate={() => {}}
-                          onLog={(...args) => console.log("[editor]", ...args)}
-                          onError={(err) => console.error("[editor]", err)}
-                        />
-                      </Suspense>
+                      <CodeEditor
+                        content={value ?? ""}
+                        language="javascript"
+                        theme={colorScheme === "dark" ? "darcula" : "basic"}
+                        onInitialized={async (api) => {
+                          editorApiRef.current = api;
+                          if (defaultValues.language) {
+                            await setEditorLanguage(api, defaultValues.language);
+                          }
+                        }}
+                        onContentUpdate={onChange}
+                        onHistorySizeUpdate={() => {}}
+                        onError={(err) => console.error("[editor]", err)}
+                        onLog={(...args) => console.log("[editor]", ...args)}
+                      />
                     ) : (
                       <View className="flex-1 bg-gray-100 dark:bg-neutral-800 p-4">
                         <View className="mb-3 h-3 w-24 rounded-full bg-gray-200 dark:bg-neutral-700" />
@@ -381,21 +373,26 @@ export default function QuestionForm({
               </Text>
 
               {errors.answers?.root?.message && (
-                <Text className="text-red-400">{errors.answers.root.message}</Text>
+                <Text className="text-red-400">
+                  {errors.answers.root.message}
+                </Text>
               )}
 
               {fields.map((field, index) => (
                 <AnswerRows
+                  index={index}
                   key={field.id}
                   control={control}
-                  index={index}
-                  errorMessage={errors.answers?.[index]?.answer?.message}
                   onRemove={remove}
+                  errorMessage={errors.answers?.[index]?.answer?.message}
                 />
               ))}
 
               <Pressable
-                onPress={() => append({ answer: '', isCorrect: false })}
+                onPress={() => append({ 
+                  answer: '', 
+                  isCorrect: false 
+                })}
                 className='
                   mx-1 py-2
                   border-2 border-gray-200 border-dashed  
@@ -403,7 +400,9 @@ export default function QuestionForm({
                   dark:border-neutral-600 dark:active:bg-neutral-700
                 '
               >
-                <Text className="text-gray-300 text-sm text-center font-semibold">Add answer</Text>
+                <Text className="text-gray-400 text-sm text-center font-semibold">
+                  Add answer
+                </Text>
               </Pressable>
             </View>
 
@@ -413,7 +412,9 @@ export default function QuestionForm({
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <View>
-                  <Text className='text-gray-600 text-sm font-semibold mb-2'>Correct Answer</Text>
+                  <Text className='text-gray-400 text-sm font-semibold mb-2'>
+                    Correct Answer
+                  </Text>
 
                   <TextInput
                     multiline
@@ -430,7 +431,9 @@ export default function QuestionForm({
                   />
 
                   {errors.answers?.[0]?.answer && (
-                    <Text className="text-red-400">{errors.answers[0].answer.message}</Text>
+                    <Text className="text-red-400">
+                      {errors.answers[0].answer.message}
+                    </Text>
                   )}
                 </View>
               )}
@@ -442,12 +445,18 @@ export default function QuestionForm({
       <KeyboardStickyView offset={{ closed: 0, opened: 0 }}>
         {onCreateSuccess && (
           <View className="h-12 flex-row items-center bg-gray-600 rounded-xl px-4 mx-2 my-2">
-            <Text className="flex-1 text-white font-medium">1 question added</Text>
+            <Text className="flex-1 text-white font-medium">
+              1 question added
+            </Text>
           </View>
         )}
 
         <View 
-          className="flex-row items-center border-t border-gray-200 bg-white px-4 py-6 dark:bg-neutral-900 dark:border-neutral-800" 
+          className="
+            flex-row items-center 
+            border-gray-200 border-t
+            bg-white px-4 py-6
+            dark:bg-neutral-800 dark:border-neutral-800" 
           style={{ paddingBottom: insets.bottom }}
         >
           <Pressable
@@ -523,7 +532,7 @@ export default function QuestionForm({
             {imageVisible ? (
               <View className='flex-row items-center gap-2'>
                 <ImageOff size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
-                <Text className="text-xl">
+                <Text className="text-xl dark:text-neutral-300">
                   Remove image
                 </Text>
               </View>
@@ -578,8 +587,7 @@ export default function QuestionForm({
               }}
               className="
                 flex-row items-center gap-2 
-                rounded-t-3xl p-4 
-                rounded-b-3xl
+                rounded-b-3xl p-4 
                 bg-white active:bg-gray-100
                 dark:bg-neutral-700 dark:active:bg-neutral-600
               "

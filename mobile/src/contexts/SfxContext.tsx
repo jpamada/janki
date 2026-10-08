@@ -14,6 +14,7 @@ const SfxContext = createContext<SfxContextValue | null>(null);
 
 export function SfxProvider({ children }: { children: React.ReactNode }) {
   const { settings } = useSettings();
+  const { soundEnabled, hapticsEnabled } = settings;
 
   const correctPlayer = useAudioPlayer(require('@/assets/sounds/CorrectSfx.mp3'));
   const incorrectPlayer = useAudioPlayer(require('@/assets/sounds/WrongSfx.mp3'));
@@ -22,7 +23,7 @@ export function SfxProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(
     () => ({
       playAnswerSfx: (correct: boolean) => {
-        if (settings?.soundEnabled) {
+        if (soundEnabled) {
           const player = correct
             ? correctPlayer
             : incorrectPlayer;
@@ -32,19 +33,19 @@ export function SfxProvider({ children }: { children: React.ReactNode }) {
         }
       },
       playCompletedSfx: () => {
-        if (settings?.soundEnabled) {
+        if (soundEnabled) {
           completedPlayer.seekTo(0);
           completedPlayer.play();
         }
       },
       hapticVibration: () => {
-        if (settings?.hapticsEnabled) {
+        if (hapticsEnabled) {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
       }
     }),
     
-    [correctPlayer, incorrectPlayer, completedPlayer, settings],
+    [correctPlayer, incorrectPlayer, completedPlayer, soundEnabled, hapticsEnabled],
   );
 
   return (

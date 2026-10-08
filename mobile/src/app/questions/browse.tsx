@@ -110,8 +110,9 @@ export default function BrowseQuestionScreen() {
             }}
             renderItem={({ item }) => (
               <QuestionItem
-                key={item.id}
                 id={item.id}
+                key={item.id}
+                type={item.type}
                 lessonId={item.lessonId}
                 question={item.question}
                 onLongPress={handleQuestionLongPress}
@@ -129,6 +130,7 @@ export default function BrowseQuestionScreen() {
         <BottomSheet
           sheet={questionSheet}
           className="px-4 py-8"
+          onBackdropPress={resetState}
           onRequestClose={resetState}
         >
           <View className="rounded-3xl">

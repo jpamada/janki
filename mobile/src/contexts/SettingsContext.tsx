@@ -1,21 +1,21 @@
-import { createContext, useContext, useEffect, type ReactNode } from "react";
-import { getSettings } from "@/repositories/settings.repository";
-import { useQuery } from "@tanstack/react-query";
-import { colorScheme } from 'nativewind';
-
-type Settings = {
-  soundEnabled: boolean;
-  caseSensitive: boolean;
-  hapticsEnabled: boolean;
-  showExplanation: boolean;
-  questionFontSize: number;
-  showCorrectAnswer: boolean;
-  theme: "system" | "light" | "dark";
-  questionTextAlign: "left" | "center" | "justify";
-};
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import {
+  getSettings,
+  updateSettings as saveSettings,
+  type Settings,
+} from "@/repositories/settings.repository";
+import { colorScheme } from "nativewind";
 
 type SettingsContextValue = {
-  settings: Settings | null;
+  settings: Settings;
+  updateSettings: (updates: Partial<Settings>) => Promise<void>;
 };
 
 const SettingsContext = createContext<
@@ -24,25 +24,42 @@ const SettingsContext = createContext<
 
 type SettingsProviderProps = {
   children: ReactNode;
+  initialSettings: Settings;
 };
 
 export function SettingsProvider({
   children,
+  initialSettings,
 }: SettingsProviderProps) {
+  const [settings, setSettings] = useState(initialSettings);
 
-  const { data: settings = null } = useQuery({
-    queryKey: ["settings"],
-    queryFn: getSettings,
-  });
+  const updateSettings = useCallback(
+    async (updates: Partial<Settings>) => {
+      setSettings((current) => ({ ...current, ...updates }));
 
-    useEffect(() => {
-    if (settings?.theme) {
-      colorScheme.set(settings.theme);
-    }
-  }, [settings?.theme]);
+      if (updates.theme) {
+        colorScheme.set(updates.theme);
+      }
+
+      try {
+        await saveSettings(updates);
+      } catch {
+        const saved = await getSettings();
+
+        setSettings(saved);
+        colorScheme.set(saved.theme);
+      }
+    },
+    [],
+  );
+
+  const value = useMemo(
+    () => ({ settings, updateSettings }),
+    [settings, updateSettings],
+  );
 
   return (
-    <SettingsContext.Provider value={{ settings }}>
+    <SettingsContext.Provider value={value}>
       {children}
     </SettingsContext.Provider>
   );

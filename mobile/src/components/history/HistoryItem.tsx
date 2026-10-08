@@ -29,7 +29,7 @@ export default function HistoryItem({
         params: { id: id }
       })}
       className="
-        flex-row items-center gap-2
+        flex-row items-center gap-3
         bg-gray-100 rounded-lg p-4
         active:bg-gray-100 dark:bg-neutral-800 dark:active:bg-neutral-700
       "
@@ -54,7 +54,7 @@ export default function HistoryItem({
             </Text>
           </View> 
 
-          <Text className="text-gray-400 line-clamp-2 dark:text-neutral-300">
+          <Text className="text-gray-900 line-clamp-2 dark:text-neutral-300">
             {question}
           </Text>
         </View>

@@ -88,7 +88,7 @@ export default function LessonForm({
                 title="Subjects"
                 placeholder='Select Subject'
                 className='py-4 justify-between font-normal dark:bg-neutral-800'
-                contentContainerClassName='text-lg dark:text-neutral-400'
+                contentContainerClassName='text-lg dark:text-neutral-200'
                 selectedValue={value}
                 onValueChange={onChange}
                 options={subjects.map((subject) => ({

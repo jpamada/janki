@@ -48,8 +48,8 @@ export default function BrowseStatistics() {
               Daily Progress
             </Text>
 
-            <View className="flex-row border-2 border-gray-300 rounded-lg">
-              <View className="justify-center items-center border-r-2 border-gray-300 w-[60%]">
+            <View className="flex-row gap-2">
+              <View className="justify-center items-center bg-gray-100 dark:bg-neutral-800 rounded-xl w-[60%]">
                 <Text className="text-gray-500 text-xl dark:text-neutral-300">
                   Accuracy
                 </Text>
@@ -59,8 +59,8 @@ export default function BrowseStatistics() {
                 </Text>
               </View>
 
-              <View className="flex-1 flex-col w-[40%]">
-                <View className="px-4 py-2 rounded-xl border-b-2 border-gray-300">
+              <View className="flex-1 flex-col gap-2 w-[40%]">
+                <View className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 rounded-xl">
                   <Text className="text-gray-500 text-lg dark:text-neutral-300">
                     Correct
                   </Text>
@@ -70,7 +70,7 @@ export default function BrowseStatistics() {
                   </Text>
                 </View>
 
-                <View className="px-4 py-2 rounded-xl">
+                <View className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 rounded-xl">
                   <Text className="text-gray-500 text-lg dark:text-neutral-300">
                     Reviews
                   </Text>
@@ -87,12 +87,12 @@ export default function BrowseStatistics() {
             </Text>
 
             <View className="flex-col gap-4">
-              <View className="flex-row border-2 border-gray-300 rounded-xl">
-                <View className="justify-center items-center border-r-2 border-gray-300 p-6">
+              <View className="flex-row gap-2 bg-gray-100 dark:bg-neutral-800 rounded-xl">
+                <View className="justify-center items-center p-6">
                   <BookCheck size={32} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"}  />
                 </View>
 
-                <View className="flex-1 justify-center gap-1 px-4 py-2 rounded-xl">
+                <View className="flex-1 justify-center gap-1 py-2 rounded-xl">
                   <Text className="text-lg text-gray-500 dark:text-neutral-300">
                     Overall Correct
                   </Text>
@@ -103,12 +103,12 @@ export default function BrowseStatistics() {
                 </View>
               </View>
 
-              <View className="flex-row border-2 border-gray-300 rounded-xl">
-                <View className="justify-center items-center border-r-2 border-gray-300 p-6">
+              <View className="flex-row gap-2 bg-gray-100 dark:bg-neutral-800 rounded-xl">
+                <View className="justify-center items-center p-6">
                   <BookX size={32} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"}  />
                 </View>
 
-                <View className="flex-1 justify-center gap-1 px-4 py-2 rounded-xl">
+                <View className="flex-1 justify-center gap-1 py-2 rounded-xl">
                   <Text className="text-lg text-gray-500 dark:text-neutral-300">
                     Overall Incorrect
                   </Text>
@@ -119,12 +119,12 @@ export default function BrowseStatistics() {
                 </View>
               </View>
 
-              <View className="flex-row border-2 border-gray-300 rounded-xl">
-                <View className="justify-center items-center border-r-2 border-gray-300 p-6">
+              <View className="flex-row gap-2 bg-gray-100 dark:bg-neutral-800 rounded-xl">
+                <View className="justify-center items-center p-6">
                   <BookText size={32} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
                 </View>
 
-                <View className="flex-1 justify-center gap-1 px-4 py-2 rounded-xl">
+                <View className="flex-1 justify-center gap-1 py-2 rounded-xl">
                   <Text className="text-lg text-gray-500 dark:text-neutral-300">
                     Overall Reviews
                   </Text>
@@ -140,8 +140,8 @@ export default function BrowseStatistics() {
               Total Creation
             </Text>
 
-            <View className="flex-row gap-2 border-2 border-gray-300 rounded-xl">
-              <View className="flex-1 items-center gap-1 p-4 rounded-xl border-r-2 border-gray-300">
+            <View className="flex-row gap-2 rounded-xl">
+              <View className="flex-1 items-center gap-1 p-4 rounded-xl bg-gray-100 dark:bg-neutral-800">
                 <Text className="text-xl font-bold text-gray-800 dark:text-neutral-300">
                   {statistic?.subjectCount}
                 </Text>
@@ -151,7 +151,7 @@ export default function BrowseStatistics() {
                 </Text>
               </View>
 
-              <View className="flex-1 items-center gap-1 p-4 rounded-xl border-r-2 border-gray-300">
+              <View className="flex-1 items-center gap-1 p-4 rounded-xl bg-gray-100 dark:bg-neutral-800">
                 <Text className="text-xl font-bold text-gray-800 dark:text-neutral-300">
                   {statistic?.lessonCount}
                 </Text>
@@ -161,7 +161,7 @@ export default function BrowseStatistics() {
                 </Text>
               </View>
 
-              <View className="flex-1 items-center gap-1 p-4 rounded-xl">
+              <View className="flex-1 items-center gap-1 p-4 rounded-xl bg-gray-100 dark:bg-neutral-800">
                 <Text className="text-xl font-bold text-gray-800 dark:text-neutral-300">
                   {statistic?.questionCount}
                 </Text>
@@ -176,7 +176,7 @@ export default function BrowseStatistics() {
               Accuracy
             </Text>
 
-            <View className="flex-col gap-6 border-2 border-gray-300 rounded-xl p-4">
+            <View className="flex-col gap-6 bg-gray-100 dark:bg-neutral-800 rounded-xl p-4">
               {((statistic?.subjectsAccuracy?.length ?? 0) > 0) ? (
                 <>
                   {statistic?.subjectsAccuracy?.map((subject) => (
@@ -190,7 +190,7 @@ export default function BrowseStatistics() {
                     </View>
                   ))}
 
-                  <View className="flex-row items-center justify-between border-t-2 pt-2 border-gray-100">
+                  <View className="flex-row items-center justify-between border-t pt-4 border-gray-200">
                     <Text className="text-gray-600 font-semibold dark:text-neutral-300">
                       Overall
                     </Text>

@@ -269,39 +269,3 @@ export const questionAnswers = sqliteTable("question_answers", {
         name: "question_answers_answer_id_fk",
     }).onDelete("cascade"),
 ]);
-
-export const settings = sqliteTable("settings", {
-  id: text("id").primaryKey(),
-
-  theme: text("theme", {
-    enum: ["system", "light", "dark"],
-  }).notNull().default("light"),
-
-  questionFontSize: integer("question_font_size")
-    .notNull()
-    .default(20),
-
-  questionTextAlign: text("question_text_align", {
-    enum: ["left", "center", "justify"],
-  }).notNull().default("left"),
-
-  soundEnabled: integer("sound_enabled", {
-    mode: "boolean",
-  }).notNull().default(true),
-
-  hapticsEnabled: integer("haptics_enabled", {
-    mode: "boolean",
-  }).notNull().default(true),
-
-  caseSensitive: integer("case_sensitive", {
-    mode: "boolean",
-  }).notNull().default(false),
-
-  showCorrectAnswer: integer("show_correct_answer", {
-    mode: "boolean",
-  }).notNull().default(true),
-
-  showExplanation: integer("show_explanation", {
-    mode: "boolean",
-  }).notNull().default(true),
-});

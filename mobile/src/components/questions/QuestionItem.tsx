@@ -8,16 +8,23 @@ type QuestionItemProps = {
   id: string;
   lessonId: string;
   question: string;
+  type: "multiple_choice" | "identification";
   onLongPress: (id: string) => void;
 };
 
 export default function QuestionItem({
   id,
+  type,
   lessonId,
   question,
   onLongPress
 }: QuestionItemProps) {
   const { hapticVibration } = useSfx();
+  
+  const formattedType = type
+    .split("_")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 
   return (
     <DebouncedPressable
@@ -32,15 +39,16 @@ export default function QuestionItem({
         });
       }}
       className="
-        rounded-lg p-4
-        bg-gray-50 active:bg-gray-100
-        dark:bg-neutral-800 dark:active:bg-neutral-700
+        flex-col gap-1
+        bg-gray-100 rounded-lg p-4
+        active:bg-gray-100 dark:bg-neutral-800 dark:active:bg-neutral-700
       "
     >
-      <Text className="
-        text-gray-600 text-xl font-semibold line-clamp-2 
-        dark:text-neutral-300
-      ">
+      <Text className="text-xs text-gray-400">
+        {formattedType}
+      </Text>
+
+      <Text className="text-gray-900 line-clamp-2 dark:text-neutral-300">
         {question}
       </Text>
     </DebouncedPressable>

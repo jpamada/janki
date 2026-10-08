@@ -1,4 +1,3 @@
-import { updateCaseSensitivity, updateFontSize, updateShowCorrectAnswer, updateShowExplanation, updateSoundEnabled, updateTextAlign } from '@/repositories/settings.repository';
 import { AArrowUp, BookCheck, CaseSensitive, FileQuestionMark, Lightbulb, LogOut, Settings, TextAlignStart, Trophy, Volume2 } from 'lucide-react-native';
 import { getDueQuestionIds, recordCorrectAnswer, recordIncorrectAnswer, resetProgressForQuestions } from '@/repositories/progress.repository';
 import { ActivityIndicator, Pressable, Text, TextInput, View, Image, Switch } from 'react-native';
@@ -24,7 +23,6 @@ import EmptyStateScreen from '@/components/shared/EmptyState';
 import CustomPicker from '@/components/shared/CustomPicker';
 import BottomSheet from '@/components/shared/BottomSheet';
 import QuizContinueScreen from './continue';
-import { useOptimisticToggle } from '@/hooks/useOptimisticToggle';
 
 const CodeHighlighter = lazy(
   () => import("react-native-code-highlighter"),
@@ -32,7 +30,7 @@ const CodeHighlighter = lazy(
 
 export default function QuizStartScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
-  const { settings } = useSettings();
+  const { settings, updateSettings } = useSettings();
 
   const { playAnswerSfx, playCompletedSfx } = useSfx();
   const { colorScheme } = useColorScheme();
@@ -91,20 +89,20 @@ export default function QuizStartScreen() {
   const createHistoryMutation = useMutation({
     mutationFn: createHistory,
 
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ 
+    onSuccess: () => {
+      queryClient.invalidateQueries({ 
         queryKey: ['heatmap'] 
       });
-      await queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({ 
         queryKey: ['statistics'] 
       });
-      await queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({ 
         queryKey: ['dailyStatistics'] 
       });
-      await queryClient.invalidateQueries({ 
+       queryClient.invalidateQueries({ 
         queryKey: ['history'] 
       });
-      await queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({ 
         queryKey: ['latestHistory'] 
       });
     },
@@ -122,14 +120,14 @@ export default function QuizStartScreen() {
       interval: ReviewInterval 
     }) => recordCorrectAnswer(questionId, interval),
 
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ 
+    onSuccess: () => {
+      queryClient.invalidateQueries({ 
         queryKey: ['subjects'] 
       });
-      await queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({ 
         queryKey: ['statistics'] 
       });
-      await queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({ 
         queryKey: ['dailyStatistics'] 
       });
     },
@@ -145,14 +143,14 @@ export default function QuizStartScreen() {
     mutationFn: (questionId: string) => 
       recordIncorrectAnswer(questionId),
 
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ 
+    onSuccess: () => {
+      queryClient.invalidateQueries({ 
         queryKey: ['subjects'] 
       });
-      await queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({ 
         queryKey: ['statistics'] 
       });
-      await queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({ 
         queryKey: ['dailyStatistics'] 
       });
     },
@@ -163,50 +161,6 @@ export default function QuizStartScreen() {
       });
     },
   });
-
-  const updateTextAlignMutation = useMutation({
-    mutationFn: updateTextAlign,
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["settings"],
-      });
-    },
-  });
-
-  const updateFontSizeMutation = useMutation({
-    mutationFn: updateFontSize,
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["settings"],
-      });
-    },
-  });
-
-  const [caseSensitive, toggleCaseSensitive] = useOptimisticToggle(
-    settings?.caseSensitive,
-    updateCaseSensitivity,
-    ["settings"],
-  );
-
-  const [showCorrectAnswer, toggleShowCorrectAnswer] = useOptimisticToggle(
-    settings?.showCorrectAnswer,
-    updateShowCorrectAnswer,
-    ["settings"],
-  );
-
-  const [showExplanation, toggleShowExplanation] = useOptimisticToggle(
-    settings?.showExplanation,
-    updateShowExplanation,
-    ["settings"],
-  );
-
-  const [soundEnabled, toggleSoundEnabled] = useOptimisticToggle(
-    settings?.soundEnabled,
-    updateSoundEnabled,
-    ["settings"],
-  );
 
   const handleQuizProgress = (completeCurrentQuestion: boolean) => {
     const updatedCompletedQuestionIds = new Set(
@@ -286,14 +240,14 @@ export default function QuizStartScreen() {
       correctAnswer: correctAnswer.answer,
     });
 
-    await createHistoryMutation.mutateAsync({ 
+    createHistoryMutation.mutateAsync({ 
       questionId: currentQuestion.id, 
       answer: selectedAnswer.answer.answer,
       isCorrect: correct,
     });
 
     if (!correct) {
-      await recordIncorrectMutation.mutateAsync(currentQuestion.id);
+      recordIncorrectMutation.mutateAsync(currentQuestion.id);
     }
 
     resultSheet.open();
@@ -326,14 +280,14 @@ export default function QuizStartScreen() {
       correctAnswer: correctAnswer.answer,
     });
 
-    await createHistoryMutation.mutateAsync({ 
+    createHistoryMutation.mutateAsync({ 
       questionId: currentQuestion.id, 
       answer: trimmedInput,
       isCorrect: correct,
     });
 
     if (!correct) {
-      await recordIncorrectMutation.mutateAsync(
+        recordIncorrectMutation.mutateAsync(
         currentQuestion.id
       );
     }
@@ -347,7 +301,7 @@ export default function QuizStartScreen() {
     }
 
     try {
-      await recordCorrectMutation.mutateAsync({
+      recordCorrectMutation.mutateAsync({
         questionId: currentQuestion.id,
         interval: interval,
       });
@@ -384,7 +338,7 @@ export default function QuizStartScreen() {
       setIsCorrect(null);
       setIdentificationInput('');
 
-      await queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({ 
         queryKey: ['subjects'] 
       });
 
@@ -516,7 +470,7 @@ export default function QuizStartScreen() {
   }
 
   return (
-    <View className={`flex-1 ${currentQuestion?.code ? "bg-gray-50" : "bg-white"} dark:bg-neutral-900`}>
+    <View className={`flex-1 ${currentQuestion?.code ? "bg-gray-100" : "bg-white"} dark:bg-neutral-900`}>
       {isLoading || !quizSessionInitialized ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="small" color="#4b5563" />
@@ -537,7 +491,7 @@ export default function QuizStartScreen() {
               <Settings strokeWidth={2} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"}  />
             </Pressable>
 
-            <View className="me-3 h-3 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white">
+            <View className="me-3 h-3 flex-1 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-400">
               <View className="h-full bg-gray-600" style={{ width: `${progress}%` }} />
             </View>
           </View>
@@ -552,7 +506,7 @@ export default function QuizStartScreen() {
             }}
           >
             <View className={`
-              ${currentQuestion?.code ? "bg-gray-50" : "bg-white"} dark:bg-neutral-900
+              ${currentQuestion?.code ? "bg-gray-100" : "bg-white"} dark:bg-neutral-900
             `}>
               <Text
                 className="font-semibold px-4 pt-2 pb-4 dark:text-neutral-300"
@@ -608,12 +562,8 @@ export default function QuizStartScreen() {
 
             <BottomSheet
               sheet={resultSheet}
-              onBackdropPress={
-                isCorrect ? undefined : handleContinueIncorrect
-              }
-              onRequestClose={
-                isCorrect ? undefined : handleContinueIncorrect
-              }
+              onRequestClose={isCorrect ? undefined : handleContinueIncorrect}
+              onBackdropPress={isCorrect ? undefined : handleContinueIncorrect}
             >
               <View className="p-6">
                 <Text className="text-3xl font-bold text-gray-800 dark:text-white">
@@ -701,8 +651,8 @@ export default function QuizStartScreen() {
             
             <BottomSheet
               sheet={settingSheet}
-              onRequestClose={() => settingSheet.close()}
               className="px-4 py-8"
+              onRequestClose={() => settingSheet.close()}
             >
               <View className="
                 flex-row items-center justify-between 
@@ -721,8 +671,8 @@ export default function QuizStartScreen() {
                     title="Font Size"
                     variant='modal'
                     className="dark:bg-neutral-600"
-                    selectedValue={settings?.questionFontSize ?? 20}
-                    onValueChange={(value) => updateFontSizeMutation.mutate(value)}
+                    selectedValue={settings.questionFontSize}
+                    onValueChange={(value) => updateSettings({ questionFontSize: value })}
                     options={[
                       { label: 'Small', value: 14 },
                       { label: 'Default', value: 20 },
@@ -749,8 +699,8 @@ export default function QuizStartScreen() {
                     title='Text Alignment'
                     variant='modal'
                     className="dark:bg-neutral-600"
-                    selectedValue={settings?.questionTextAlign ?? "left"}
-                    onValueChange={(value) => updateTextAlignMutation.mutate(value)}
+                    selectedValue={settings.questionTextAlign}
+                    onValueChange={(value) => updateSettings({ questionTextAlign: value })}
                     options={[
                       { label: "Left", value:"left" },
                       { label: "Center", value:"center" },
@@ -774,8 +724,8 @@ export default function QuizStartScreen() {
 
                 <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
                   <Switch
-                    value={caseSensitive}
-                    onValueChange={toggleCaseSensitive}
+                    value={settings.caseSensitive}
+                    onValueChange={(value) => updateSettings({ caseSensitive: value })}
                   />
                 </View>
               </View> 
@@ -794,8 +744,8 @@ export default function QuizStartScreen() {
 
                 <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
                   <Switch
-                    value={showCorrectAnswer}
-                    onValueChange={toggleShowCorrectAnswer}
+                    value={settings.showCorrectAnswer}
+                    onValueChange={(value) => updateSettings({ showCorrectAnswer: value })}
                   />
                 </View>
               </View> 
@@ -814,8 +764,8 @@ export default function QuizStartScreen() {
 
                 <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
                   <Switch
-                    value={showExplanation}
-                    onValueChange={toggleShowExplanation}
+                    value={settings.showExplanation}
+                    onValueChange={(value) => updateSettings({ showExplanation: value })}
                   />
                 </View>
               </View> 
@@ -834,8 +784,8 @@ export default function QuizStartScreen() {
 
                 <View className="bg-gray-100 rounded-xl p-1 dark:bg-neutral-600">
                   <Switch
-                    value={soundEnabled}
-                    onValueChange={toggleSoundEnabled}
+                    value={settings.soundEnabled}
+                    onValueChange={(value) => updateSettings({ soundEnabled: value })}
                   />
                 </View>
               </View> 
@@ -923,7 +873,7 @@ export default function QuizStartScreen() {
 
       {currentQuestion && (
         <KeyboardStickyView offset={{ closed: 0, opened: insets.top }}>
-          <View className="gap-4 bg-white p-4 dark:bg-neutral-900" style={{ paddingBottom: insets.bottom }}>
+          <View className="gap-4 bg-gray-100 p-4 dark:bg-neutral-900" style={{ paddingBottom: insets.bottom }}>
             {currentQuestion.type === 'multiple_choice' ? (
               currentQuestion.questionAnswers.map((item) => (
                 <Pressable
@@ -951,7 +901,7 @@ export default function QuizStartScreen() {
                   autoCapitalize="none"
                   className="
                     rounded-xl px-4 py-4
-                    bg-gray-100 text-lg font-semibold 
+                    bg-gray-200 text-lg font-semibold 
                     dark:bg-neutral-700 dark:text-neutral-300
                   "
                 />
@@ -961,8 +911,8 @@ export default function QuizStartScreen() {
                   onPress={handleSubmitIdentification}
                   className="
                     rounded-xl p-4
-                    bg-gray-600 active:bg-neutral-700 disabled:bg-neutral-200 
-                    dark:bg-neutral-700 dark:active:bg-neutral-600 dark:disabled:bg-neutral-400
+                    bg-gray-600 active:bg-gray-500 disabled:bg-gray-400 
+                    dark:disabled:bg-gray-500
                   "
                 >
                   <Text className="text-center text-lg font-semibold text-white">

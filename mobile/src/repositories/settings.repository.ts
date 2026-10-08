@@ -1,131 +1,60 @@
-import { db } from "@/db/client";
-import { settings } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
+export type Settings = {
+  soundEnabled: boolean;
+  caseSensitive: boolean;
+  hapticsEnabled: boolean;
+  showExplanation: boolean;
+  questionFontSize: number;
+  showCorrectAnswer: boolean;
+  theme: "system" | "light" | "dark";
+  questionTextAlign: "left" | "center" | "justify";
+};
 
-export async function initializeSettings() {
-  await db
-  .insert(settings)
-  .values({
-    id: "default",
-  })
-  .onConflictDoNothing();
-} 
+const SETTINGS_KEY = "settings";
 
+export const defaultSettings: Settings = {
+  soundEnabled: true,
+  caseSensitive: false,
+  hapticsEnabled: true,
+  showExplanation: true,
+  questionFontSize: 20,
+  showCorrectAnswer: true,
+  theme: "light",
+  questionTextAlign: "left",
+};
 
-export async function getSettings() {
-  const [query] = await db
-  .select()
-  .from(settings)
-  .where(
-    eq(settings.id, "default")
-  );
+export async function getSettings(): Promise<Settings> {
+  const value = await AsyncStorage.getItem(SETTINGS_KEY);
 
-  return query ?? null;
+  if (!value) {
+    return defaultSettings;
+  }
+
+  try {
+    return { ...defaultSettings, ...JSON.parse(value) };
+  } catch {
+    return defaultSettings;
+  }
 }
 
-export async function updateTheme(
-  theme: "light" | "dark" | "system",
-) {
-  await db
-  .update(settings)
-  .set({
-    theme: theme
-  })
-  .where(
-    eq(settings.id, "default")
-  );
-}
+let writeQueue: Promise<unknown> = Promise.resolve();
 
+export function updateSettings(
+  updates: Partial<Settings>,
+): Promise<Settings> {
+  const result = writeQueue.then(async () => {
+    const newSettings = { ...(await getSettings()), ...updates };
 
-export async function updateTextAlign(
-  questionTextAlign: "left" | "center" | "justify",
-) {
-  await db
-  .update(settings)
-  .set({
-    questionTextAlign: questionTextAlign
-  })
-  .where(
-    eq(settings.id, "default")
-  );
-}
+    await AsyncStorage.setItem(
+      SETTINGS_KEY,
+      JSON.stringify(newSettings),
+    );
 
+    return newSettings;
+  });
 
-export async function updateFontSize(
-  questionFontSize: number,
-) {
-  await db
-  .update(settings)
-  .set({
-    questionFontSize: questionFontSize
-  })
-  .where(
-    eq(settings.id, "default")
-  );
-}
+  writeQueue = result.catch(() => undefined);
 
-export async function updateCaseSensitivity(
-  isTrue: boolean,
-) {
-   await db
-  .update(settings)
-  .set({
-    caseSensitive: isTrue
-  })
-  .where(
-    eq(settings.id, "default")
-  );
-}
-
-export async function updateShowCorrectAnswer(
-  isTrue: boolean,
-) {
-   await db
-  .update(settings)
-  .set({
-    showCorrectAnswer: isTrue
-  })
-  .where(
-    eq(settings.id, "default")
-  );
-}
-
-export async function updateShowExplanation(
-  isTrue: boolean,
-) {
-   await db
-  .update(settings)
-  .set({
-    showExplanation: isTrue
-  })
-  .where(
-    eq(settings.id, "default")
-  );
-}
-
-export async function updateHapticsEnabled(
-  isTrue: boolean,
-) {
-   await db
-  .update(settings)
-  .set({
-    hapticsEnabled: isTrue
-  })
-  .where(
-    eq(settings.id, "default")
-  );
-}
-
-export async function updateSoundEnabled(
-  isTrue: boolean,
-) {
-   await db
-  .update(settings)
-  .set({
-    soundEnabled: isTrue
-  })
-  .where(
-    eq(settings.id, "default")
-  );
+  return result;
 }

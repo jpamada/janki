@@ -83,18 +83,6 @@ CREATE TABLE `questions` (
 );
 --> statement-breakpoint
 CREATE INDEX `questions_lesson_id_idx` ON `questions` (`lesson_id`);--> statement-breakpoint
-CREATE TABLE `settings` (
-	`id` text PRIMARY KEY NOT NULL,
-	`theme` text DEFAULT 'light' NOT NULL,
-	`question_font_size` integer DEFAULT 20 NOT NULL,
-	`question_text_align` text DEFAULT 'left' NOT NULL,
-	`sound_enabled` integer DEFAULT true NOT NULL,
-	`haptics_enabled` integer DEFAULT true NOT NULL,
-	`case_sensitive` integer DEFAULT false NOT NULL,
-	`show_correct_answer` integer DEFAULT true NOT NULL,
-	`show_explanation` integer DEFAULT true NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE `subjects` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,

@@ -586,7 +586,12 @@ export default function HomeScreen() {
         </Pressable>
       </CollapsibleFab>
       
-      <BottomSheet sheet={subjectSheet} onRequestClose={resetState} className="px-4 py-8">
+      <BottomSheet 
+        sheet={subjectSheet} 
+        className="px-4 py-8"
+        onRequestClose={resetState} 
+        onBackdropPress={resetState}
+      >
         <View className="bg-white rounded-3xl dark:bg-neutral-700">
           <Pressable
             onPress={() => {
@@ -642,7 +647,12 @@ export default function HomeScreen() {
         </View>
       </BottomSheet>
 
-      <BottomSheet sheet={lessonSheet} onRequestClose={resetState} className="px-4 py-8">
+      <BottomSheet 
+        sheet={lessonSheet} 
+        className="px-4 py-8"
+        onRequestClose={resetState} 
+        onBackdropPress={resetState} 
+      >
         <View className="bg-white rounded-3xl dark:bg-neutral-700">
           <Pressable
             onPress={() => {
@@ -821,6 +831,9 @@ export default function HomeScreen() {
           data={selectedSubjectLessons.filter(
             (lesson) => lesson.id !== selectedLessonId
           )}
+          contentContainerStyle={{
+            flexGrow: 1
+          }}
           renderItem={({ item }) => (
             <Pressable
               onPress={() => {
@@ -831,9 +844,13 @@ export default function HomeScreen() {
                 });
                 resetState();
               }}
-              className="rounded-xl p-4 active:bg-gray-100 dark:active:bg-neutral-700"
+              className="
+                rounded-xl p-4 
+                bg-gray-50 active:bg-gray-100 
+                dark:bg-neutral-800 dark:active:bg-neutral-700
+              "
             >
-              <Text className="font-semibold dark:text-neutral-300">
+              <Text className="font-medium dark:text-neutral-300">
                 {item.name}
               </Text>
             </Pressable>

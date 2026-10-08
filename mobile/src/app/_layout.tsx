@@ -1,4 +1,5 @@
-import { useInitializeSettings } from '@/providers/useInitializeSettings';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { useInitializeSettings } from '@/hooks/useInitializeSettings';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -10,7 +11,6 @@ import { queryClient } from '@/providers/query-provider';
 import { SfxProvider } from '@/contexts/SfxContext';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
-import { Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { db } from '@/db/client';
 
@@ -28,31 +28,31 @@ import '../../global.css';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { success, error } = useMigrations(db, migrations);
-  const { settingsReady, initError } = useInitializeSettings(success);
+  const { success, error: databaseError } = useMigrations(db, migrations);
+  const { settings, error: settingsError } = useInitializeSettings();
   const { colorScheme } = useColorScheme();
 
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(
-      colorScheme === 'dark' ? '#111827' : '#ffffff',
+      colorScheme === 'light' ? '#ffffff' : '#171717',
     );
   }, [colorScheme]);
 
   useEffect(() => {
-    if (success && settingsReady) {
+    if (success && settings) {
       SplashScreen.hide();
     }
-  }, [success, settingsReady]);
+  }, [success, settings]);
 
-  if (error) {
-    return <AppErrorScreen errorMessage={error.message} />;
+  if (databaseError) {
+    return <AppErrorScreen errorMessage={databaseError.message} />;
   }
 
-  if (initError) {
-    return <AppErrorScreen errorMessage={initError.message} />;
+  if (settingsError) {
+    return <AppErrorScreen errorMessage={settingsError.message} />;
   }
 
-  if (!success || !settingsReady) {
+  if (!success || !settings) {
     return <AppLoadingScreen />;
   }
 
@@ -67,8 +67,14 @@ export default function RootLayout() {
             <SnackbarProvider>
               <QueryClientProvider 
                 client={queryClient}>
-                <SettingsProvider>
+                <SettingsProvider 
+                  initialSettings={settings}>
                   <SfxProvider>
+                    <ThemeProvider
+                      value={colorScheme === "dark" 
+                      ? DarkTheme
+                      : DefaultTheme
+                    }>
                     <Stack>
                       <Stack.Screen
                         name="(tabs)"
@@ -118,6 +124,7 @@ export default function RootLayout() {
                         }}
                       />
                     </Stack>
+                    </ThemeProvider>
                   </SfxProvider>
                 </SettingsProvider>
               </QueryClientProvider>
