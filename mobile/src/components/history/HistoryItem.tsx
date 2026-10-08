@@ -1,9 +1,9 @@
 import { CheckCircle2, CircleX } from "lucide-react-native";
 import { View, Text } from "react-native";
+import { router } from "expo-router";
 import { format } from "date-fns";
 
 import DebouncedPressable from "../shared/pressables/DebouncedPressable";
-import { router } from "expo-router";
 
 type HistoryItemProps = {
   id: string;
@@ -16,8 +16,8 @@ type HistoryItemProps = {
 
 export default function HistoryItem({
   id,
-  questionId,
   question,
+  questionId,
   responseTime,
   attemptedAt,
   status,
@@ -34,9 +34,7 @@ export default function HistoryItem({
         active:bg-gray-100 dark:bg-neutral-800 dark:active:bg-neutral-700
       "
     >
-      <View
-        className=""
-      >
+      <View>
         {status === "correct" ? (
           <CheckCircle2 size={20} color="#9ca3af" />
         ) : (

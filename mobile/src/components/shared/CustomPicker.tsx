@@ -2,8 +2,8 @@ import { Animated, Modal, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Check, ChevronDown } from 'lucide-react-native';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
-import { useState } from 'react';
 import { useColorScheme } from 'nativewind';
+import { useState } from 'react';
 
 type PickerOption<T> = {
   label: string;

@@ -2,11 +2,11 @@ import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getHistory } from "@/repositories/history.repository";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { RotateCcwClock } from "lucide-react-native";
 import { useMemo } from "react";
 
 import HistoryItem from "@/components/history/HistoryItem";
 import Header from "@/components/shared/Header";
-import { RotateCcwClock } from "lucide-react-native";
 
 const PAGE_SIZE = 20;
 
@@ -20,6 +20,7 @@ export default function HistoryScreen() {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
+    
   } = useInfiniteQuery({
     queryKey: ["history"],
     initialPageParam: 0,
@@ -53,9 +54,10 @@ export default function HistoryScreen() {
 
       ) : (
         <FlatList
-          data={historyItems}
-          keyExtractor={(item) => item.id}
           className='p-4'
+          data={historyItems}
+          onEndReachedThreshold={0.5}
+          keyExtractor={(item) => item.id}
           contentContainerClassName="gap-4"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
@@ -65,11 +67,11 @@ export default function HistoryScreen() {
           renderItem={({ item }) => (
             <HistoryItem
               id={item.id}
-              question={item.question.question}
-              questionId={item.questionId}
-              responseTime={item.responseTime}
-              attemptedAt={item.attemptedAt}
               status={item.status}
+              questionId={item.questionId}
+              attemptedAt={item.attemptedAt}
+              responseTime={item.responseTime}
+              question={item.question.question}
             />
           )}
           onEndReached={() => {
@@ -77,7 +79,6 @@ export default function HistoryScreen() {
               fetchNextPage();
             }
           }}
-          onEndReachedThreshold={0.5}
           ListEmptyComponent={
             <View className="flex-1 justify-center items-center py-16">
               <RotateCcwClock size={32} color="#d1d5db" />

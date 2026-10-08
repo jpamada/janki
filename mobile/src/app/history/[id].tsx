@@ -1,15 +1,14 @@
-import { useLocalSearchParams } from "expo-router";
-import { ActivityIndicator, Image, Text, View } from "react-native";
-import { useQuery } from "@tanstack/react-query";
 import { atomOneDark, atomOneLight } from "react-syntax-highlighter/dist/esm/styles/hljs";
-import { lazy, Suspense } from "react";
-import { SearchX } from "lucide-react-native";
-
-import { getHistoryById } from "@/repositories/history.repository";
-import Header from "@/components/shared/Header";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import EmptyList from "@/components/EmptyList";
+import { ActivityIndicator, Image, Text, View } from "react-native";
+import { getHistoryById } from "@/repositories/history.repository";
+import { useLocalSearchParams } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
 import { useColorScheme } from "nativewind";
+import { lazy, Suspense } from "react";
+
+import Header from "@/components/shared/Header";
+import EmptyList from "@/components/shared/EmptyList";
 
 const CodeHighlighter = lazy(
   () => import("react-native-code-highlighter"),
@@ -44,9 +43,7 @@ export default function HistoryScreen() {
       ) : history ? (
         <View 
           className="flex-1"
-          style={{
-            paddingBottom: insets.bottom
-          }}
+          style={{ paddingBottom: insets.bottom }}
         >
           <View className="flex-1">
             <View>
@@ -69,13 +66,9 @@ export default function HistoryScreen() {
 
             {history.question.code && (
               <View className="flex-1 bg-white w-auto dark:bg-neutral-900">
-                <Suspense 
-                  fallback={
-                    <View 
-                      className="rounded-xl bg-white dark:bg-neutral-900" 
-                    />
-                  }
-                >
+                <Suspense fallback={
+                  <View className="rounded-xl bg-white dark:bg-neutral-900" />
+                }>
                   <CodeHighlighter
                     hljsStyle={colorScheme === "light" ? atomOneLight : atomOneDark }
                     language={history.question.language ?? "text"}
@@ -112,9 +105,7 @@ export default function HistoryScreen() {
           </View>
         </View>
 
-      ) : (
-        <EmptyList message="No history found" />
-      )}
+      ) : (<EmptyList message="No history found" />)}
     </View>
   );
 }

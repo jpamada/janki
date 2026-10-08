@@ -8,23 +8,22 @@ import { SettingsProvider } from '@/contexts/SettingsContext';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/providers/query-provider';
 import { SfxProvider } from '@/contexts/SfxContext';
+import { StatusBar } from 'expo-status-bar';
+import { useColorScheme } from 'nativewind';
 import { Stack } from 'expo-router';
+import { useEffect } from 'react';
 import { db } from '@/db/client';
 
 import AppLoadingScreen from '@/components/shared/screens/AppLoadingScreen';
 import AppErrorScreen from '@/components/shared/screens/AppErrorScreen';
 import migrations from '@/db/migrations/migrations';
 import * as SplashScreen from 'expo-splash-screen';
+import * as SystemUI from 'expo-system-ui';
 
 import '@/providers/registerCodeLanguages';
 import 'react-native-code-highlighter';
 import 'react-syntax-highlighter';
 import '../../global.css';
-
-import { StatusBar } from 'expo-status-bar';
-import * as SystemUI from 'expo-system-ui';
-import { useColorScheme } from 'nativewind';
-import { useEffect } from 'react';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -59,15 +58,15 @@ export default function RootLayout() {
 
   return (
     <>
-      <StatusBar
-        style={colorScheme === 'dark' ? 'light' : 'dark'}
-      />
+      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'}/>
 
       <SafeAreaProvider>
         <KeyboardProvider>
-          <GestureHandlerRootView style={{ flex: 1 }}>
+          <GestureHandlerRootView 
+            style={{ flex: 1 }}>
             <SnackbarProvider>
-              <QueryClientProvider client={queryClient}>
+              <QueryClientProvider 
+                client={queryClient}>
                 <SettingsProvider>
                   <SfxProvider>
                     <Stack>

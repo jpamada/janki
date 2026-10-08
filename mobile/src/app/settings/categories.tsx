@@ -1,22 +1,22 @@
 import { createCategory, deleteCategory, getCategories, swapCategoryPosition, updateCategory } from '@/repositories/category.repository';
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ListOrdered, PenLine, SearchX, Trash2 } from 'lucide-react-native';
+import { ListOrdered, PenLine, Trash2 } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CategoryFormData } from '@/schemas/category.schema';
 import { useSnackbar } from '@/contexts/SnackbarContext';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
+import { useColorScheme } from 'nativewind';
 import { useState } from 'react';
 
+import CustomModal from '@/components/shared/modals/CustomModal';
+import DeleteModal from '@/components/shared/modals/DeleteModal';
 import CategoryForm from '@/components/categories/CategoryForm';
 import CategoryItem from '@/components/categories/CategoryItem';
 import BottomSheet from "@/components/shared/BottomSheet";
 import Header from '@/components/shared/Header';
 import Fab from '@/components/shared/fabs/Fab';
-import { useColorScheme } from 'nativewind';
-import CustomModal from '@/components/shared/modals/CustomModal';
-import DeleteModal from '@/components/shared/modals/DeleteModal';
-import EmptyList from '@/components/EmptyList';
+import EmptyList from '@/components/shared/EmptyList';
 
 export default function CategoryScreen() {
   const { showSnackbar } = useSnackbar();
@@ -50,13 +50,16 @@ export default function CategoryScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['categories'],
       });
-      showSnackbar({ message: "Category successfully created" });
-      setCategoryFormModalVisible(false);
+      showSnackbar({ 
+        message: "Category successfully created" 
+      });
+      resetState();
     },
 
     onError: (error) => {
-      console.error(error.message);
-      showSnackbar({ message: "Something went wrong. Please try again." });
+      showSnackbar({ 
+        message: "Something went wrong. Please try again." 
+      });
     },
   });
 
@@ -68,15 +71,16 @@ export default function CategoryScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['categories'],
       });
-      showSnackbar({ message: "Category successfully updated" })
-      setIsEditing(false);
-      setCategoryFormModalVisible(false);
-      setSelectedCategoryId(null);
+      showSnackbar({
+        message: "Category successfully updated" 
+      })
+      resetState();
     },
 
     onError: (error) => {
-      console.error(error.message);
-      showSnackbar({ message: "Something went wrong. Please try again." });
+      showSnackbar({ 
+        message: "Something went wrong. Please try again." 
+      });
     },
   });
 
@@ -96,12 +100,10 @@ export default function CategoryScreen() {
       showSnackbar({
         message: 'Category position changed',
       });
-      setCategoryPositionModalVisible(false);
-      setSelectedCategoryId(null);
+      resetState();
     },
 
     onError: (error) => {
-      console.error(error.message);
       showSnackbar({
         message: 'Something went wrong. Please try again.',
       });
@@ -124,14 +126,16 @@ export default function CategoryScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["hasDefaultSubjects"]
       });
-      showSnackbar({ message: "Category successfully deleted" });
-      setCategoryFormModalVisible(false);
-      setSelectedCategoryId(null);
+      showSnackbar({ 
+        message: "Category successfully deleted" 
+      });
+      resetState();
     },
 
     onError: (error) => {
-      console.error(error.message);
-      showSnackbar({ message: "Something went wrong. Please try again." });
+      showSnackbar({ 
+        message: "Something went wrong. Please try again." 
+      });
     },
   });
 
@@ -198,6 +202,8 @@ export default function CategoryScreen() {
           <FlatList
             data={categories}
             keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerClassName="gap-2 p-4"
             contentContainerStyle={{
               paddingBottom: insets.bottom,
             }}
@@ -209,16 +215,9 @@ export default function CategoryScreen() {
                 onLongPress={handleCategoryLongPress}
               />
             )}
-            contentContainerClassName="gap-2 p-4"
-            showsVerticalScrollIndicator={false}
           />
 
-        ) : (
-          <View className="flex-1 items-center justify-center">
-            <SearchX size={64} color="#9ca3af" />
-            <Text className="text-gray-400">No category yet</Text>
-          </View>
-        )}
+        ) : (<EmptyList message='No categories yet' />)}
 
         <Fab setVisible={setCategoryFormModalVisible} />
 
@@ -253,8 +252,7 @@ export default function CategoryScreen() {
                 categorySheet.close(() => setCategoryFormModalVisible(true));
               }}
               className="
-                flex-row items-center gap-2 
-                p-4 
+                flex-row items-center gap-2 p-4 
                 bg-white active:bg-gray-100
                 dark:bg-neutral-700 dark:active:bg-neutral-600
               "
@@ -315,13 +313,16 @@ export default function CategoryScreen() {
                 disabled={swapCategoryPositionMutation.isPending}
                 onPress={() => {
                   if (!selectedCategoryId) return;
-
                   swapCategoryPositionMutation.mutate({
                     categoryId: selectedCategoryId,
                     targetCategoryId: item.id,
                   });
                 }}
-                className="rounded-xl p-4 bg-gray-50 active:bg-gray-100 dark:bg-neutral-800 dark:active:bg-neutral-700"
+                className="
+                  rounded-xl p-4 
+                  bg-gray-50 active:bg-gray-100 
+                  dark:bg-neutral-800 dark:active:bg-neutral-700
+                "
               >
                 <Text className="font-semibold dark:text-neutral-300">
                   {item.name}

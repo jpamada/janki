@@ -1,20 +1,20 @@
-import { ActivityIndicator, Animated, FlatList, Modal, Pressable, Text, View } from "react-native";
 import { deleteQuestion, getQuestionsByLessonId } from "@/repositories/question.repository";
+import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PenLine, Plus, SearchX, Trash2 } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSnackbar } from "@/contexts/SnackbarContext";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
+import { PenLine, Trash2 } from "lucide-react-native";
+import { useColorScheme } from "nativewind";
 import { useMemo, useState } from "react";
 
-import QuestionItem from "@/components/questions/QuestionItem";
-import Header from "@/components/shared/Header";
-import BottomSheet from "@/components/shared/BottomSheet";
 import DeleteModal from "@/components/shared/modals/DeleteModal";
-import EmptyList from "@/components/EmptyList";
+import QuestionItem from "@/components/questions/QuestionItem";
+import BottomSheet from "@/components/shared/BottomSheet";
+import Header from "@/components/shared/Header";
+import EmptyList from "@/components/shared/EmptyList";
 import Fab from "@/components/shared/fabs/Fab";
-import { useColorScheme } from "nativewind";
 
 export default function BrowseQuestionScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
@@ -52,12 +52,15 @@ export default function BrowseQuestionScreen() {
       });
       setModalVisible(false);
       setSelectedQuestionId(null);
-      showSnackbar({ message: "Question deleted successfully" });
+      showSnackbar({ 
+        message: "Question deleted successfully" 
+      });
     },
 
     onError: (error) => {
-      console.error(error);
-      showSnackbar({ message: "Something went wrong. Please try again." });
+      showSnackbar({ 
+        message: "Something went wrong. Please try again." 
+      });
     }
   })
   
@@ -102,6 +105,9 @@ export default function BrowseQuestionScreen() {
             keyExtractor={(item) => item.id}
             contentContainerClassName="gap-2 pb-6"
             showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingBottom: 120
+            }}
             renderItem={({ item }) => (
               <QuestionItem
                 key={item.id}
@@ -113,9 +119,7 @@ export default function BrowseQuestionScreen() {
             )}
           />
 
-        ): (
-          <EmptyList message="No questions yet" />
-        )}
+        ): (<EmptyList message="No questions yet" />)}
 
         <Fab setVisible={() => router.push({
           pathname: `/questions/create`,
@@ -124,10 +128,10 @@ export default function BrowseQuestionScreen() {
 
         <BottomSheet
           sheet={questionSheet}
-          onRequestClose={resetState}
           className="px-4 py-8"
+          onRequestClose={resetState}
         >
-          <View className="rounded-3xl bg-white">
+          <View className="rounded-3xl">
             <Pressable
               onPress={() => {
                 if (!selectedQuestionId) return;
@@ -142,11 +146,11 @@ export default function BrowseQuestionScreen() {
                 });
               }}
               className="
-              flex-row items-center gap-2 
-              rounded-t-3xl p-4 
-              bg-white active:bg-gray-100
-              dark:bg-neutral-700 dark:active:bg-neutral-600
-            "
+                flex-row items-center gap-2 
+                rounded-t-3xl p-4 
+                bg-white active:bg-gray-100
+                dark:bg-neutral-700 dark:active:bg-neutral-600
+              "
             >
               <PenLine size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
               <Text className="text-xl dark:text-neutral-300">
@@ -166,7 +170,9 @@ export default function BrowseQuestionScreen() {
             "
             >
               <Trash2 color="#f87171" size={16} />
-              <Text className="text-xl text-red-400">Delete</Text>
+              <Text className="text-xl text-red-400">
+                Delete
+              </Text>
             </Pressable>
           </View>
         </BottomSheet>
@@ -177,8 +183,8 @@ export default function BrowseQuestionScreen() {
           header="Delete Question"
           onConfirm={handleDelete}
           isVisible={modalVisible}
-          onConfirmLabel={deleteQuestionMutation.isPending ? 'Deleting...' : 'Delete'}
           description={`Are you sure you want to this question?`}
+          onConfirmLabel={deleteQuestionMutation.isPending ? 'Deleting...' : 'Delete'}
         />
       </View>
     </View>

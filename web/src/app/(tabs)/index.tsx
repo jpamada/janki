@@ -90,12 +90,6 @@ export default function HomeScreen() {
         queryKey: ["subjects"] 
       });
       await queryClient.invalidateQueries({ 
-        queryKey: ["subjects", selectedCategoryId] 
-      });
-      await queryClient.invalidateQueries({ 
-        queryKey: ["hasDefaultSubjects"] 
-      });
-      await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });
       await queryClient.invalidateQueries({
@@ -133,9 +127,7 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
       });
-      await queryClient.invalidateQueries({ 
-        queryKey: ["hasDefaultSubjects"] 
-      });
+      
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });
@@ -156,9 +148,7 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ 
         queryKey: ["subjects", selectedCategoryId] 
       });
-      await queryClient.invalidateQueries({ 
-        queryKey: ["hasDefaultSubjects"] 
-      });
+      
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });

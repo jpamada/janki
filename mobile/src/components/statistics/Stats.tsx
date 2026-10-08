@@ -31,24 +31,43 @@ export default function Stats({
           <Text className='text-gray-400 font-semibold dark:text-neutral-300'>
             Show More
           </Text>
-          <ChevronRight size={16} color="#9ca3af" />
+          
+          <ChevronRight 
+            size={16} 
+            color="#9ca3af" 
+          />
         </Pressable>
       </View>
 
       <View className="flex-row gap-2">
         <View className="flex-1 items-center gap-1 p-4 bg-gray-50 rounded-xl dark:bg-neutral-800">
-          <Text className="text-gray-800 text-xl font-bold dark:text-neutral-300">{correctReviews}</Text>
-          <Text className="text-xs text-center text-gray-500 dark:text-neutral-400">Correct{"\n"} Reviews</Text>
+          <Text className="text-gray-800 text-xl font-bold dark:text-neutral-300">
+            {correctReviews}
+          </Text>
+
+          <Text className="text-xs text-center text-gray-500 dark:text-neutral-400">
+            Correct{"\n"} Reviews
+          </Text>
         </View>
 
         <View className="flex-1 items-center gap-1 p-4 bg-gray-50 rounded-xl dark:bg-neutral-800">
-          <Text className="text-gray-800 text-xl font-bold dark:text-neutral-300">{totalReviews}</Text>
-          <Text className="text-gray-500 text-xs text-center dark:text-neutral-400">Total{"\n"} Reviews</Text>
+          <Text className="text-gray-800 text-xl font-bold dark:text-neutral-300">
+            {totalReviews}
+          </Text>
+
+          <Text className="text-gray-500 text-xs text-center dark:text-neutral-400">
+            Total{"\n"} Reviews
+          </Text>
         </View>
 
         <View className="flex-1 items-center gap-1 p-4 bg-gray-50 rounded-xl dark:bg-neutral-800">
-          <Text className="text-gray-800 text-xl font-bold dark:text-neutral-300">{accuracy}%</Text>
-          <Text className="text-gray-500 text-xs text-center dark:text-neutral-400">Review{"\n"} Accuracy</Text>
+          <Text className="text-gray-800 text-xl font-bold dark:text-neutral-300">
+            {accuracy}%
+          </Text>
+
+          <Text className="text-gray-500 text-xs text-center dark:text-neutral-400">
+            Review{"\n"} Accuracy
+          </Text>
         </View>
       </View>
     </View>

@@ -1,4 +1,3 @@
-// providers/useInitializeSettings.ts
 import { initializeSettings, getSettings } from "@/repositories/settings.repository";
 import { useEffect, useState } from "react";
 import { colorScheme } from 'nativewind';
@@ -14,12 +13,12 @@ export function useInitializeSettings(success: boolean) {
 
     initializeSettings()
       .then(async () => {
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
-        // Apply the theme BEFORE marking ready, so colorScheme is already
-        // correct by the time the splash screen hides and the real tree
-        // (including SettingsProvider) mounts for the first time.
         const settings = await getSettings();
+
         if (!cancelled && settings?.theme) {
           colorScheme.set(settings.theme);
         }
@@ -42,7 +41,7 @@ export function useInitializeSettings(success: boolean) {
   }, [success]);
 
   return {
-    settingsReady,
-    initError,
+    initError: initError,
+    settingsReady: settingsReady,
   };
 }

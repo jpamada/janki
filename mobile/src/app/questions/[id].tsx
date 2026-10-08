@@ -1,16 +1,16 @@
 import { deleteQuestion, getQuestionById } from "@/repositories/question.repository";
-import { ActivityIndicator, Modal, Pressable, Text, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { updateQuizData } from "@/repositories/quiz.repository";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { ActivityIndicator, Text, View } from "react-native";
 import { QuestionFormData } from "@/schemas/question.schema";
 import { useSnackbar } from "@/contexts/SnackbarContext";
-import { SearchX, Trash2 } from "lucide-react-native";
+import { Trash2 } from "lucide-react-native";
 import { useState } from "react";
 
-import QuestionForm from "@/components/questions/QuestionForm";
-import EmptyList from "@/components/EmptyList";
 import DeleteModal from "@/components/shared/modals/DeleteModal";
+import QuestionForm from "@/components/questions/QuestionForm";
+import EmptyList from "@/components/shared/EmptyList";
 
 export default function QuestionsScreen() {
   const { id, lessonId } = useLocalSearchParams<{ 
@@ -45,13 +45,16 @@ export default function QuestionsScreen() {
         await queryClient.invalidateQueries({
           queryKey: ["quizData", lessonId],
         });
-        showSnackbar({ message: "Question updated successfully" })
+        showSnackbar({ 
+          message: "Question updated successfully" 
+        })
         router.back();
       },
 
     onError: (error) => {
-      console.error(error.message);
-      showSnackbar({ message: "Something went wrong. Please try again." });
+      showSnackbar({ 
+        message: "Something went wrong. Please try again." 
+      });
     },
   });
 
@@ -68,13 +71,16 @@ export default function QuestionsScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["quizData", lessonId],
       });
-      showSnackbar({ message: "Question successfully deleted" })
+      showSnackbar({ 
+        message: "Question successfully deleted" 
+      })
       router.back();
     },
 
     onError: (error) => {
-      console.error(error.message);
-      showSnackbar({ message: "Something went wrong. Please try again." });
+      showSnackbar({ 
+        message: "Something went wrong. Please try again." 
+      });
     },
   })
 
@@ -132,16 +138,14 @@ export default function QuestionsScreen() {
             icon={Trash2}
             onClose={resetState}
             header="Delete Subject"
-            onConfirm={handleDelete}
             isVisible={modalVisible}
-            onConfirmLabel={deleteQuestionMutation.isPending ? 'Deleting...' : 'Delete'}
+            onConfirm={handleConfirmDelete}
             description={`Are you sure you want to delete this question?`}
+            onConfirmLabel={deleteQuestionMutation.isPending ? 'Deleting...' : 'Delete'}
           />
         </>
 
-      ) : (
-        <EmptyList message="No question yet" />
-      )}
+      ) : (<EmptyList message="No question yet" />)}
     </View>
   )
 }

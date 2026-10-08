@@ -1,7 +1,7 @@
 import { Pressable, View } from "react-native";
 import { Plus, X } from "lucide-react-native";
-import { type ReactNode } from "react";
 import { useColorScheme } from "nativewind";
+import { type ReactNode } from "react";
 
 type CollapsibleFabProps = {
   visible: boolean;
@@ -44,9 +44,16 @@ export default function CollapsibleFab({
           "
         >
           {visible ? (
-            <X size={24} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+            <X 
+              size={24} 
+              color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} 
+            />
+
           ) : (
-            <Plus size={24} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+            <Plus 
+              size={24} 
+              color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} 
+            />
           )}
         </Pressable>
       </View>

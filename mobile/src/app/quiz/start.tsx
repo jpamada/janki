@@ -1,29 +1,30 @@
 import { updateCaseSensitivity, updateFontSize, updateShowCorrectAnswer, updateShowExplanation, updateSoundEnabled, updateTextAlign } from '@/repositories/settings.repository';
 import { AArrowUp, BookCheck, CaseSensitive, FileQuestionMark, Lightbulb, LogOut, Settings, TextAlignStart, Trophy, Volume2 } from 'lucide-react-native';
 import { getDueQuestionIds, recordCorrectAnswer, recordIncorrectAnswer, resetProgressForQuestions } from '@/repositories/progress.repository';
-import { Animated, ActivityIndicator, Modal, Pressable, Text, TextInput, View, Image, Switch } from 'react-native';
+import { ActivityIndicator, Pressable, Text, TextInput, View, Image, Switch } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { atomOneLight, atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createHistory } from '@/repositories/history.repository';
-import { getResponseTime, shuffle } from '@/helpers/quiz.helper';
 import { type ReviewInterval } from '@/helpers/progress.helper';
 import { getQuizData } from '@/repositories/quiz.repository';
 import { router, useLocalSearchParams } from 'expo-router';
+import QuizResultsScreen, { QuizResults } from './results';
 import { useSnackbar } from '@/contexts/SnackbarContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
-import { useColorScheme } from 'nativewind';
+import { shuffle } from '@/helpers/quiz.helper';
 import { useSfx } from '@/contexts/SfxContext';
+import { useColorScheme } from 'nativewind';
 
 import DebouncedPressable from '@/components/shared/pressables/DebouncedPressable';
 import EmptyStateScreen from '@/components/shared/EmptyState';
-import BottomSheet from '@/components/shared/BottomSheet';
-import QuizResultsScreen, { QuizResults } from './results';
 import CustomPicker from '@/components/shared/CustomPicker';
+import BottomSheet from '@/components/shared/BottomSheet';
 import QuizContinueScreen from './continue';
+import { useOptimisticToggle } from '@/hooks/useOptimisticToggle';
 
 const CodeHighlighter = lazy(
   () => import("react-native-code-highlighter"),
@@ -42,7 +43,6 @@ export default function QuizStartScreen() {
   const resultSheet = useBottomSheet();
   const settingSheet = useBottomSheet();
 
-  const questionStartTime = useRef<number | null>(null);
   const syncedQuestionIdsRef = useRef<Set<string>>(new Set());
 
   const [quizSessionInitialized, setQuizSessionInitialized] = useState(false);
@@ -113,7 +113,6 @@ export default function QuizStartScreen() {
       showSnackbar({ 
         message: 'Something went wrong. Please try again.' 
       });
-      console.error(err.message);
     },
   });
 
@@ -139,12 +138,12 @@ export default function QuizStartScreen() {
       showSnackbar({ 
         message: 'Something went wrong. Please try again.' 
       });
-      console.error(err.message);
     },
   });
 
   const recordIncorrectMutation = useMutation({
-    mutationFn: (questionId: string) => recordIncorrectAnswer(questionId),
+    mutationFn: (questionId: string) => 
+      recordIncorrectAnswer(questionId),
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ 
@@ -162,7 +161,6 @@ export default function QuizStartScreen() {
       showSnackbar({ 
         message: 'Something went wrong. Please try again.' 
       });
-      console.error(err.message);
     },
   });
 
@@ -185,34 +183,6 @@ export default function QuizStartScreen() {
       });
     },
   });
-
-  function useOptimisticToggle<T extends boolean>(
-    serverValue: T | undefined,
-    mutate: (value: T) => Promise<void>,
-    queryKey: readonly unknown[],
-  ) {
-    const queryClient = useQueryClient();
-    const [localValue, setLocalValue] = useState(serverValue ?? (false as T));
-
-    const mutation = useMutation({
-      mutationFn: mutate,
-      onError: (_err, newValue) => setLocalValue((!newValue) as T),
-      onSettled: () => queryClient.invalidateQueries({ queryKey }),
-    });
-
-    useEffect(() => {
-      if (serverValue !== undefined && !mutation.isPending) {
-        setLocalValue(serverValue);
-      }
-    }, [serverValue, mutation.isPending]);
-
-    const toggle = (value: T) => {
-      setLocalValue(value);
-      mutation.mutate(value);
-    };
-
-    return [localValue, toggle] as const;
-  }
 
   const [caseSensitive, toggleCaseSensitive] = useOptimisticToggle(
     settings?.caseSensitive,
@@ -256,11 +226,8 @@ export default function QuizStartScreen() {
     }
 
     const remainingQuestions = questions
-      .map(
-        (question) => question.id
-      ).filter(
-        (id) => !updatedCompletedQuestionIds.has(id),
-      );
+      .map((question) => question.id)
+      .filter((id) => !updatedCompletedQuestionIds.has(id));
 
     if (remainingQuestions.length === 0) {
       playCompletedSfx();
@@ -310,8 +277,6 @@ export default function QuizStartScreen() {
       return;
     }
 
-    const responseTime = getResponseTime(questionStartTime);
-
     const correct = selectedAnswer.answer.id === correctAnswer.answer.id;
 
     handleAnswerResult({
@@ -323,7 +288,6 @@ export default function QuizStartScreen() {
 
     await createHistoryMutation.mutateAsync({ 
       questionId: currentQuestion.id, 
-      responseTime: responseTime,
       answer: selectedAnswer.answer.answer,
       isCorrect: correct,
     });
@@ -348,8 +312,6 @@ export default function QuizStartScreen() {
       return;
     }
 
-    const responseTime = getResponseTime(questionStartTime);
-
     const trimmedInput = identificationInput.trim();
     const correctAnswerText = correctAnswer.answer.answer.trim();
 
@@ -366,7 +328,6 @@ export default function QuizStartScreen() {
 
     await createHistoryMutation.mutateAsync({ 
       questionId: currentQuestion.id, 
-      responseTime: responseTime,
       answer: trimmedInput,
       isCorrect: correct,
     });
@@ -395,8 +356,10 @@ export default function QuizStartScreen() {
         handleQuizProgress(true);
       });
 
-    } catch (err) {
-      console.error(err);
+    } catch {
+      showSnackbar({ 
+        message: 'Something went wrong. Please try again.' 
+      });
     }
   };
 
@@ -425,21 +388,17 @@ export default function QuizStartScreen() {
         queryKey: ['subjects'] 
       });
 
-    } catch (err) {
+    } catch {
       showSnackbar({ 
         message: 'Something went wrong. Please try again.' 
       });
-      console.error(err);
     }
   };
 
   const handleTryAgain = () => {
     const remainingQuestions = questions
-    .map(
-      (question) => question.id
-    ).filter(
-      (id) => !completedQuestionIds.has(id)
-    );
+      .map((question) => question.id)
+      .filter((id) => !completedQuestionIds.has(id));
 
     setQueuedQuestions(shuffle(remainingQuestions));
     setQueuedQuestionIndex(0);
@@ -448,16 +407,16 @@ export default function QuizStartScreen() {
   };
 
   const handleExitQuiz = () => {
+    setIsCorrect(null);
+    setQuizResults([]);
     setQueuedQuestions([]);
+    setIsQuizComplete(false);
     setSessionQuestionIds([]);
     setQueuedQuestionIndex(0);
-    setCompletedQuestionIds(new Set());
-    setQuizResults([]);
     setIsQuizIncomplete(false);
-    setIsQuizComplete(false);
-    setIsCorrect(null);
     setIdentificationInput('');
     setQuizSessionInitialized(false);
+    setCompletedQuestionIds(new Set());
     syncedQuestionIdsRef.current = new Set();
     router.push("/(tabs)");
   };
@@ -485,11 +444,8 @@ export default function QuizStartScreen() {
     );
     
     const newQuestionIds = quizData
-    .map(
-      (question) => question.id
-    ).filter(
-      (id) => !syncedQuestionIdsRef.current.has(id)
-    );
+    .map((question) => question.id)
+    .filter((id) => !syncedQuestionIdsRef.current.has(id));
 
     if (!quizSessionInitialized) {
       const initializeSession = async () => {
@@ -504,11 +460,10 @@ export default function QuizStartScreen() {
           setSessionQuestionIds(dueIds);
           syncedQuestionIdsRef.current = currentQuestionIds;
 
-        } catch (error) {
+        } catch {
           showSnackbar({ 
             message: 'Something went wrong. Please try again.' 
           });
-          console.error(error);
 
         } finally {
           setQuizSessionInitialized(true);
@@ -538,10 +493,6 @@ export default function QuizStartScreen() {
       syncNewQuestions();
     }
   }, [lessonId, isLoading, quizSessionInitialized, quizData , showSnackbar]);
-
-  useEffect(() => {
-    questionStartTime.current = Date.now();
-  }, [currentQuestion?.id]);
 
   if (isQuizComplete) {
     return (
@@ -1014,7 +965,9 @@ export default function QuizStartScreen() {
                     dark:bg-neutral-700 dark:active:bg-neutral-600 dark:disabled:bg-neutral-400
                   "
                 >
-                  <Text className="text-center text-lg font-semibold text-white">Submit</Text>
+                  <Text className="text-center text-lg font-semibold text-white">
+                    Submit
+                  </Text>
                 </Pressable>
               </>
             )}

@@ -1,9 +1,9 @@
 import { Pressable, View, Text } from "react-native";
+import { useSfx } from "@/contexts/SfxContext";
 import { Star } from "lucide-react-native";
 import { router } from "expo-router";
 
 import DebouncedPressable from "../shared/pressables/DebouncedPressable";
-import { useSfx } from "@/contexts/SfxContext";
 
 type Subject = {
   id: string;

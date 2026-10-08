@@ -1,6 +1,6 @@
-import { type ReactNode } from "react";
-import { Animated, Modal, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Animated, Modal, Pressable, View } from "react-native";
+import { type ReactNode } from "react";
 
 type BottomSheetType = {
   sheet: {

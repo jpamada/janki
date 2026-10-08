@@ -1,16 +1,17 @@
 import { asc, eq, max } from "drizzle-orm";
-import { categories } from "@/db/schema";
+import { categories, subjects } from "@/db/schema";
 import { db } from "@/db/client";
 
 import * as Crypto from "expo-crypto";
 
 export async function getCategories() {
-  const query = await db
-  .select()
-  .from(categories)
-  .orderBy(
-    asc(categories.position)
-  );
+  const query = await db.query.categories
+  .findMany({
+    with: {
+      subjects: true
+    },
+    orderBy: asc(categories.position)
+  })
 
   return query;
 }
@@ -100,9 +101,19 @@ export async function swapCategoryPosition(
 }
 
 export async function deleteCategory(id: string) {
-  await db
-  .delete(categories)
-  .where(
-    eq(categories.id, id)
-  );
+  await db.transaction(async (tx) => {
+    await tx
+    .update(subjects)
+    .set({ 
+      categoryId: null, 
+      updatedAt: new Date() 
+    })
+    .where(
+      eq(subjects.categoryId, id)
+    );
+
+    await tx
+    .delete(categories)
+    .where(eq(categories.id, id));
+  });
 }

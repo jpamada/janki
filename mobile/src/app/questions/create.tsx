@@ -31,12 +31,16 @@ export default function CreateQuestionScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["subjects"],
       });
+      await queryClient.invalidateQueries({ 
+        queryKey: ["defaultSubjects"] 
+      });
       await handleSuccessMessage();
     },
 
     onError: (error) => {
-      console.error(error.message);
-      showSnackbar({ message: "Something went wrong. Please try again." });
+      showSnackbar({ 
+        message: "Something went wrong. Please try again." 
+      });
     },
   });
 
@@ -87,14 +91,8 @@ export default function CreateQuestionScreen() {
           type: "multiple_choice",
           explanation: "",
           answers: [
-            {
-              answer: "",
-              isCorrect: false,
-            },
-            {
-              answer: "",
-              isCorrect: false,
-            },
+            { answer: "", isCorrect: false },
+            { answer: "", isCorrect: false },
           ],
         }}
       />

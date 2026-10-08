@@ -37,7 +37,10 @@ export default function QuestionItem({
         dark:bg-neutral-800 dark:active:bg-neutral-700
       "
     >
-      <Text className="text-gray-600 text-xl font-semibold line-clamp-2 dark:text-neutral-300">
+      <Text className="
+        text-gray-600 text-xl font-semibold line-clamp-2 
+        dark:text-neutral-300
+      ">
         {question}
       </Text>
     </DebouncedPressable>

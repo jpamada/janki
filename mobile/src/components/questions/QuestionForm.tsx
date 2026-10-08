@@ -1,9 +1,9 @@
 import { EllipsisVertical, ImageOff, ImagePlus, CodeXml, Code, Trash2, ListMinus, ListPlus } from 'lucide-react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
-import { Animated, Image, Modal, Pressable, Text, TextInput, View } from 'react-native';
 import { useCallback, useRef, useState, lazy, Suspense, useEffect } from 'react';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { QuestionFormData, questionSchema } from '@/schemas/question.schema';
+import { Image, Pressable, Text, TextInput, View, InteractionManager  } from 'react-native';
 import { type WebViewAPI } from '@actualwave/react-native-codeditor';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { setEditorLanguage } from '@/providers/setEditorLanguage';
@@ -11,12 +11,13 @@ import { getEditorHeight } from '@/helpers/codeditor.helper';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LANGUAGES } from '@/constants/languages';
+import { useColorScheme } from 'nativewind';
 
 import * as DocumentPicker from 'expo-document-picker';
 import CustomPicker from '../shared/CustomPicker';
+import BottomSheet from '../shared/BottomSheet';
 import Header from '../shared/Header';
 import AnswerRows from './AnswerRows';
-import { useColorScheme } from 'nativewind';
 
 const CodeEditor = lazy(() => import ('@actualwave/react-native-codeditor'));
 
@@ -45,19 +46,13 @@ export default function QuestionForm({
     ],
   },
 }: QuestionFormProps) {
-
-  const { colorScheme } = useColorScheme();
-  
-  const insets = useSafeAreaInsets();
   const editorApiRef = useRef<WebViewAPI | null>(null);
+  const { colorScheme } = useColorScheme();
 
-  const {
-    backdropOpacity,
-    open: openBottomSheet,
-    close: closeBottomSheet,
-    visible: bottomSheetVisible,
-    translateY: bottomSheetTranslateY,
-  } = useBottomSheet();
+  const [editorReady, setEditorReady] = useState(false);
+
+  const questionSheet = useBottomSheet();
+  const insets = useSafeAreaInsets();
 
   const [codeVisible, setCodeVisible] = useState(!!defaultValues?.code?.trim());
   const [imageVisible, setImageVisible] = useState(!!defaultValues?.image?.trim());
@@ -153,8 +148,8 @@ export default function QuestionForm({
       question: "",
       type: data.type,
       explanation: null,
-      language: data.language ??  null,
       lessonId: data.lessonId,
+      language: data.language ??  null,
       answers: data.type === "identification"
       ? [
           { answer: "", isCorrect: true },
@@ -167,9 +162,18 @@ export default function QuestionForm({
   };
 
   useEffect(() => {
-    void import("@actualwave/react-native-codeditor");
-  }, []);
+    if (!codeVisible) return;
 
+    const task = InteractionManager.runAfterInteractions(async () => {
+      await import("@actualwave/react-native-codeditor");
+      setEditorReady(true);
+    });
+
+    return () => {
+      task.cancel();
+    };
+  }, [codeVisible]);
+  
   return (
     <View className="flex-1">
       <Header
@@ -177,7 +181,7 @@ export default function QuestionForm({
         back={true}
         right={
           <Pressable 
-            onPress={openBottomSheet} 
+            onPress={() => questionSheet.open()} 
             className="p-3 rounded-xl active:bg-gray-100 dark:active:bg-neutral-800"
           >
             <EllipsisVertical color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
@@ -227,7 +231,7 @@ export default function QuestionForm({
                     text-gray-600 text-lg
                     bg-gray-100 rounded-xl px-2 py-4
                     dark:text-neutral-300
-                    dark:bg-neutral-700 dark:placeholder:text-neutral-300
+                    dark:bg-neutral-700
                   "
                 />
 
@@ -289,32 +293,42 @@ export default function QuestionForm({
                     borderRadius: 12,
                     overflow: 'hidden' 
                   }}>
-                    <Suspense
-                      fallback={
-                        <View className="flex-1 bg-gray-100 p-4">
-                          <View className="mb-3 h-3 w-24 rounded-full bg-gray-200 dark:bg-neutral-800" />
-                          <View className="mb-3 h-3 w-40 rounded-full bg-gray-200 dark:bg-neutral-800" />
-                          <View className="mb-3 h-3 w-32 rounded-full bg-gray-200 dark:bg-neutral-800" />
-                          <View className="h-3 w-48 rounded-full bg-gray-200 dark:bg-neutral-800" />
-                        </View>
-                      }
-                    >
-                      <CodeEditor
-                        content={value ?? ''}
-                        language="javascript"
-                        theme={colorScheme === "dark" ? "darcula" : "basic"}
-                        onInitialized={async (api) => {
-                          editorApiRef.current = api;
-                          if (defaultValues.language) {
-                            await setEditorLanguage(api, defaultValues.language);
-                          }
-                        }}
-                        onContentUpdate={onChange}
-                        onHistorySizeUpdate={() => {}}
-                        onLog={(...args) => console.log('[editor]', ...args)}
-                        onError={(err) => console.error('[editor]', err)}
-                      />
-                    </Suspense>
+                    {editorReady ? (
+                      <Suspense
+                        fallback={
+                          <View className="flex-1 bg-gray-100 dark:bg-neutral-800 p-4">
+                            <View className="mb-3 h-3 w-24 rounded-full bg-gray-200 dark:bg-neutral-700" />
+                            <View className="mb-3 h-3 w-40 rounded-full bg-gray-200 dark:bg-neutral-700" />
+                            <View className="mb-3 h-3 w-32 rounded-full bg-gray-200 dark:bg-neutral-700" />
+                            <View className="h-3 w-48 rounded-full bg-gray-200 dark:bg-neutral-700" />
+                          </View>
+                        }
+                      >
+                        <CodeEditor
+                          content={value ?? ""}
+                          language="javascript"
+                          theme={colorScheme === "dark" ? "darcula" : "basic"}
+                          onInitialized={async (api) => {
+                            editorApiRef.current = api;
+
+                            if (defaultValues.language) {
+                              await setEditorLanguage(api, defaultValues.language);
+                            }
+                          }}
+                          onContentUpdate={onChange}
+                          onHistorySizeUpdate={() => {}}
+                          onLog={(...args) => console.log("[editor]", ...args)}
+                          onError={(err) => console.error("[editor]", err)}
+                        />
+                      </Suspense>
+                    ) : (
+                      <View className="flex-1 bg-gray-100 dark:bg-neutral-800 p-4">
+                        <View className="mb-3 h-3 w-24 rounded-full bg-gray-200 dark:bg-neutral-700" />
+                        <View className="mb-3 h-3 w-40 rounded-full bg-gray-200 dark:bg-neutral-700" />
+                        <View className="mb-3 h-3 w-32 rounded-full bg-gray-200 dark:bg-neutral-700" />
+                        <View className="h-3 w-48 rounded-full bg-gray-200 dark:bg-neutral-700" />
+                      </View>
+                    )}
                   </View>
                 )}
               />
@@ -322,39 +336,39 @@ export default function QuestionForm({
           )}
 
           {explanationVisible && (
-          <Controller
-            name="explanation"
-            control={control}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <View>
-                <Text className="mb-2 text-sm font-semibold text-gray-400">
-                  Explanation
-                </Text>
-
-                <TextInput
-                  multiline
-                  value={value ?? ""}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  textAlignVertical="top"
-                  placeholder="Enter explanation"
-                  className="
-                    text-gray-600 text-lg
-                    bg-gray-100 rounded-xl px-2 py-4
-                    dark:text-neutral-300
-                    dark:bg-neutral-700 dark:placeholder:text-neutral-300
-                  "
-                />
-
-                {errors.explanation && (
-                  <Text className="text-red-400">
-                    {errors.explanation.message}
+            <Controller
+              name="explanation"
+              control={control}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View>
+                  <Text className="mb-2 text-sm font-semibold text-gray-400">
+                    Explanation
                   </Text>
-                )}
-              </View>
-            )}
-          />
-        )}
+
+                  <TextInput
+                    multiline
+                    value={value ?? ""}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    textAlignVertical="top"
+                    placeholder="Enter explanation"
+                    className="
+                      text-gray-600 text-lg
+                      bg-gray-100 rounded-xl px-2 py-4
+                      dark:text-neutral-300
+                      dark:bg-neutral-700
+                    "
+                  />
+
+                  {errors.explanation && (
+                    <Text className="text-red-400">
+                      {errors.explanation.message}
+                    </Text>
+                  )}
+                </View>
+              )}
+            />
+          )}
 
           {errors.answers?.root?.message && (
             <Text className="text-red-400 mb-2">{errors.answers.root.message}</Text>
@@ -392,6 +406,7 @@ export default function QuestionForm({
                 <Text className="text-gray-300 text-sm text-center font-semibold">Add answer</Text>
               </Pressable>
             </View>
+
           ) : (
             <Controller
               name="answers.0.answer"
@@ -410,7 +425,7 @@ export default function QuestionForm({
                       text-gray-600 text-lg
                       bg-gray-100 rounded-xl px-2 py-4
                       dark:text-neutral-300
-                      dark:bg-neutral-700 dark:placeholder:text-neutral-300
+                      dark:bg-neutral-700
                     "
                   />
 
@@ -438,109 +453,145 @@ export default function QuestionForm({
           <Pressable
             disabled={isSubmitting}
             onPress={handleSubmit(handleFormSubmit)}
-            className="bg-gray-600 rounded-full px-4 py-4 w-full active:bg-gray-500 dark:bg-neutral-700 dark:active:bg-neutral-600"
+            className="
+              rounded-full px-4 py-4 w-full
+              bg-gray-600  active:bg-gray-500 
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
           >
-            <Text className="text-white text-center text-lg font-semibold">Save Changes</Text>
+            <Text className="text-white text-center text-lg font-semibold">
+              Save Changes
+            </Text>
           </Pressable>
         </View>
       </KeyboardStickyView>
 
-      <Modal transparent animationType="none" visible={bottomSheetVisible} onRequestClose={() => closeBottomSheet()}>
-        <View className="flex-1 justify-end">
-          <Animated.View className="absolute inset-0 bg-black/40" style={{ opacity: backdropOpacity }}>
-            <Pressable className="flex-1" onPress={() => closeBottomSheet()} />
-          </Animated.View>
+      <BottomSheet
+        sheet={questionSheet}
+        className="px-4 py-8"
+        onRequestClose={() => questionSheet.close()} 
+      >
+        <View className="rounded-3xl bg-white dark:bg-neutral-700">
+          <Pressable
+            onPress={() => {
+              questionSheet.close(() => {
+                handleToggleCode();
+              });
+            }}
+            className="
+              flex-row items-center gap-2 
+              rounded-t-3xl p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
+          >
+            {codeVisible ? (
+              <View className='flex-row items-center gap-2'>
+                <CodeXml size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                <Text className="text-xl dark:text-neutral-300">
+                  Remove code
+                </Text>
+              </View>
+              
+            ) : (
+              <View className='flex-row items-center gap-2'>
+                <Code size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                <Text className="text-xl dark:text-neutral-300">
+                  Add code
+                </Text>
+              </View>
+            )}
+          </Pressable>
 
-          <Animated.View style={{ transform: [{ translateY: bottomSheetTranslateY }] }} className="rounded-t-3xl bg-gray-50 px-4 py-8">
-            <View className="rounded-3xl bg-white">
-              <Pressable
-                onPress={() => {
-                  closeBottomSheet(() => {
-                    handleToggleCode();
-                  });
-                }}
-                className="flex-row items-center gap-2 rounded-3xl p-4 active:bg-gray-100"
-              >
-                {codeVisible ? (
-                  <View className='flex-row items-center gap-2'>
-                    <CodeXml size={16} />
-                    <Text className="text-xl">Remove code</Text>
-                  </View>
-                ) : (
-                  <View className='flex-row items-center gap-2'>
-                    <Code size={16} />
-                    <Text className="text-xl">Add code</Text>
-                  </View>
-                )}
-              </Pressable>
+          <Pressable
+            onPress={() => {
+              questionSheet.close(() => {
+                if (imageVisible) {
+                  handleRemoveImage();
+                } else {
+                  void handleSelectImage();
+                } 
+              });
+            }}
+            className="
+              flex-row items-center gap-2 
+              p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
+          >
+            {imageVisible ? (
+              <View className='flex-row items-center gap-2'>
+                <ImageOff size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                <Text className="text-xl">
+                  Remove image
+                </Text>
+              </View>
 
-              <Pressable
-                onPress={() => {
-                  closeBottomSheet(() => {
-                    if (imageVisible) {
-                      handleRemoveImage();
-                    } else {
-                      void handleSelectImage();
-                    } 
-                  });
-                }}
-                className="rounded-3xl p-4 active:bg-gray-100"
-              >
-                {imageVisible ? (
-                  <View className='flex-row items-center gap-2'>
-                    <ImageOff size={16} />
-                    <Text className="text-xl">Remove image</Text>
-                  </View>
-                ) : (
-                  <View className='flex-row items-center gap-2'>
-                    <ImagePlus size={16} />
-                    <Text className="text-xl">Add image</Text>
-                  </View>
-                )}
-              </Pressable>
+            ) : (
+              <View className='flex-row items-center gap-2'>
+                <ImagePlus size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                <Text className="text-xl dark:text-neutral-300">
+                  Add image
+                </Text>
+              </View>
+            )}
+          </Pressable>
 
-              <Pressable
-                onPress={() => {
-                  closeBottomSheet(() => {
-                    setExplanationVisible((visible) => !visible);
-                  });
-                }}
-                className="rounded-3xl p-4 active:bg-gray-100"
-              >
-                {explanationVisible ? (
-                  <View className='flex-row items-center gap-2'>
-                    <ListMinus size={16} />
-                    <Text className="text-xl">Remove Explanation</Text>
-                  </View>
-                ) : (
-                  <View className='flex-row items-center gap-2'>
-                    <ListPlus size={16} />
-                    <Text className="text-xl">Add Explanation</Text>
-                  </View>
-                )}
-              </Pressable>
+          <Pressable
+            onPress={() => {
+              questionSheet.close(() => {
+                setExplanationVisible((visible) => !visible);
+              });
+            }}
+            className={`
+              flex-row items-center gap-2 
+              ${onDelete ? "" : "rounded-b-3xl"} p-4 
+              bg-white active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            `}
+          >
+            {explanationVisible ? (
+              <View className='flex-row items-center gap-2'>
+                <ListMinus size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                <Text className="text-xl dark:text-neutral-300">
+                  Remove Explanation
+                </Text>
+              </View>
+              
+            ) : (
+              <View className='flex-row items-center gap-2'>
+                <ListPlus size={16} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+                <Text className="text-xl dark:text-neutral-300">
+                  Add Explanation
+                </Text>
+              </View>
+            )}
+          </Pressable>
 
-              {onDelete && (
-                <Pressable
-                  onPress={() => {
-                    closeBottomSheet(() => {
-                      void onDelete();
-                    });
-                  }}
-                  className="flex-row items-center gap-2 rounded-3xl p-4 active:bg-gray-100"
-                >
-                  <Trash2 size={16} color="#ef4444" />
-                  <Text className="text-xl text-red-500">
-                    Delete question
-                  </Text>
-                </Pressable>
-              )}
-            </View>
-
-            <View style={{ height: insets.bottom }} />
-          </Animated.View>
+          {onDelete && (
+            <Pressable
+              onPress={() => {
+                questionSheet.close(() => {
+                  void onDelete();
+                });
+              }}
+              className="
+                flex-row items-center gap-2 
+                rounded-t-3xl p-4 
+                rounded-b-3xl
+                bg-white active:bg-gray-100
+                dark:bg-neutral-700 dark:active:bg-neutral-600
+              "
+            >
+              <Trash2 size={16} color="#ef4444" />
+              <Text className="text-xl text-red-500">
+                Delete question
+              </Text>
+            </Pressable>
+          )}
         </View>
-      </Modal>
+      </BottomSheet>
     </View>
   );
 }

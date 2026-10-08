@@ -1,7 +1,7 @@
-import { Plus } from "lucide-react-native";
-import { useColorScheme } from "nativewind";
-import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Pressable, View } from "react-native";
+import { useColorScheme } from "nativewind";
+import { Plus } from "lucide-react-native";
 
 type FabPressableProps = {
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -28,7 +28,10 @@ export default function Fab({
           dark:bg-neutral-800 dark:active:bg-neutral-700
         "
       >
-        <Plus size={24} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} />
+        <Plus 
+          size={24} 
+          color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"}
+        />
       </Pressable>
     </View>
   )

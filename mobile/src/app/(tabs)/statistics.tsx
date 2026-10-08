@@ -1,19 +1,19 @@
-import { ActivityIndicator, Pressable, Text, View, FlatList, LayoutChangeEvent } from 'react-native';
 import { getDailyStatistics, getHeatmapData } from '@/repositories/statistics.repository';
+import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from 'date-fns';
+import { Pressable, Text, View, FlatList, LayoutChangeEvent } from 'react-native';
 import { getLatestHistory } from '@/repositories/history.repository';
-import { ChevronRight, RotateCcwClock } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useCallback, useMemo, useState } from 'react';
+import { ChevronRight } from 'lucide-react-native';
+import { useTodayKey } from '@/hooks/useTodayKey';
 import { router } from 'expo-router';
 
 import HistoryItem from '@/components/history/HistoryItem';
 import Heatmap from '@/components/statistics/Heatmap';
 import Stats from '@/components/statistics/Stats';
 import Header from '@/components/shared/Header';
-import { useTodayKey } from '@/hooks/useTodayKey';
-import { useCallback, useMemo, useState } from 'react';
-import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from 'date-fns';
-import EmptyList from '@/components/EmptyList';
+import EmptyList from '@/components/shared/EmptyList';
 
 export default function StatisticsScreen() {
   const insets = useSafeAreaInsets();
@@ -48,7 +48,6 @@ export default function StatisticsScreen() {
     queryFn: getLatestHistory
   })
   
-
   return (
     <View className='flex-1 bg-white dark:bg-neutral-900'>
       <Header title="Stats" />
@@ -91,9 +90,7 @@ export default function StatisticsScreen() {
                   History
                 </Text>
                 <Pressable
-                  onPress={() => {
-                    router.push("/history")
-                  }}
+                  onPress={() => router.push("/history")}
                   className='
                     flex flex-row items-center gap-1 
                     py-2 px-2 rounded-xl active:bg-gray-50 dark:active:bg-neutral-800
@@ -110,11 +107,11 @@ export default function StatisticsScreen() {
           renderItem={({ item }) => (
             <HistoryItem
               id={item.id}
-              question={item.question.question}
-              questionId={item.questionId}
-              responseTime={item.responseTime}
-              attemptedAt={item.attemptedAt}
               status={item.status}
+              questionId={item.questionId}
+              attemptedAt={item.attemptedAt}
+              responseTime={item.responseTime}
+              question={item.question.question}
             />
           )}
           ListEmptyComponent={

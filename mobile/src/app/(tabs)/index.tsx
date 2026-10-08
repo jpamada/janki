@@ -1,14 +1,15 @@
-import { createSubject, deleteSubject, getSubjectsByCategory, hasDefaultSubjects, updateSubject } from "@/repositories/subject.repository";
 import { createLesson, deleteLesson, swapLessonPosition, toggleLessonFavorite, updateLesson } from "@/repositories/lesson.repository";
+import { createSubject, deleteSubject, getSubjectsByCategory, updateSubject } from "@/repositories/subject.repository";
 import { FolderClosed, Lightbulb, ListOrdered, PenLine, Plus, SearchX, StarMinus, StarPlus, Trash2 } from "lucide-react-native";
-import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCategories } from "@/repositories/category.repository";
 import { SubjectFormData } from "@/schemas/subject.schema";
 import { useSnackbar } from "@/contexts/SnackbarContext";
 import { LessonFormData } from "@/schemas/lesson.schema";
+import { useCategoryTab } from "@/hooks/useCategoryTab";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
+import { useCallback, useMemo, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { useColorScheme } from "nativewind";
 
@@ -16,18 +17,17 @@ import DebouncedPressable from "@/components/shared/pressables/DebouncedPressabl
 import CollapsibleFab from "@/components/shared/fabs/CollapsibleFab";
 import CustomModal from "@/components/shared/modals/CustomModal";
 import DeleteModal from "@/components/shared/modals/DeleteModal";
+import CategoryTab from "@/components/categories/CategoryTab";
 import SubjectItem from "@/components/subjects/SubjectItem";
 import SubjectForm from "@/components/subjects/SubjectForm";
 import BottomSheet from "@/components/shared/BottomSheet";
 import LessonForm from "@/components/lessons/LessonForm";
 import Header from "@/components/shared/Header";
-import EmptyList from "@/components/EmptyList";
+import EmptyList from "@/components/shared/EmptyList";
 
 export default function HomeScreen() {
   const { showSnackbar } = useSnackbar();
   const { colorScheme } = useColorScheme();
-
-  const categoryScrollRef = useRef<ScrollView>(null);
 
   const subjectSheet = useBottomSheet();
   const lessonSheet = useBottomSheet();
@@ -47,22 +47,27 @@ export default function HomeScreen() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-  const { data: subjects = [], isPending: subjectsPending, error } = useQuery({
-    queryKey: ["subjects", selectedCategoryId],
-    queryFn: () => getSubjectsByCategory(selectedCategoryId)
-  });
-
   const { data: categories = [], isPending: categoriesPending } = useQuery({
     queryKey: ['categories'],
     queryFn: getCategories,
   });
 
-  const { data: defaultHasSubjects = true } = useQuery({
-    queryKey: ['hasDefaultSubjects'],
-    queryFn: hasDefaultSubjects,
+  const { data: defaultSubjects = [], isPending: defaultPending } = useQuery({
+    queryKey: ["defaultSubjects", null],
+    queryFn: () => getSubjectsByCategory(null),
   });
 
-  const showDefaultTab = defaultHasSubjects || categories.length === 0;
+  const { categoryScrollRef, showDefault, activeCategoryId } = useCategoryTab({
+    categories: categories,
+    defaultSubjects: defaultSubjects,
+    selectedCategoryId: selectedCategoryId,
+  });
+
+  const { data: subjects = [], isPending: subjectsPending, error } = useQuery({
+    queryKey: ["subjects", activeCategoryId],
+    queryFn: () => getSubjectsByCategory(activeCategoryId),
+    enabled: !categoriesPending && !defaultPending,
+  });
 
   const selectedSubject = useMemo(() => {
     return subjects.find(
@@ -95,10 +100,10 @@ export default function HomeScreen() {
         queryKey: ["subjects"] 
       });
       await queryClient.invalidateQueries({ 
-        queryKey: ["subjects", selectedCategoryId] 
+        queryKey: ["subjects"] 
       });
       await queryClient.invalidateQueries({ 
-        queryKey: ["hasDefaultSubjects"] 
+        queryKey: ["defaultSubjects", null] 
       });
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
@@ -139,10 +144,10 @@ export default function HomeScreen() {
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ 
-        queryKey: ["subjects", selectedCategoryId] 
+        queryKey: ["subjects"] 
       });
       await queryClient.invalidateQueries({ 
-        queryKey: ["hasDefaultSubjects"] 
+        queryKey: ["defaultSubjects", null] 
       });
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
@@ -165,10 +170,10 @@ export default function HomeScreen() {
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ 
-        queryKey: ["subjects", selectedCategoryId] 
+        queryKey: ["subjects"] 
       });
       await queryClient.invalidateQueries({ 
-        queryKey: ["hasDefaultSubjects"] 
+        queryKey: ["defaultSubjects", null] 
       });
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
@@ -206,7 +211,7 @@ export default function HomeScreen() {
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ 
-        queryKey: ["subjects", selectedCategoryId] 
+        queryKey: ["subjects"] 
       });
       await queryClient.invalidateQueries({
         queryKey: ["statistics"]
@@ -235,7 +240,7 @@ export default function HomeScreen() {
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ 
-        queryKey: ["subjects", selectedCategoryId] 
+        queryKey: ["subjects"] 
       });
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
@@ -252,19 +257,18 @@ export default function HomeScreen() {
   });
 
   const swapLessonPositionMutation = useMutation({
-    mutationFn: ({
-      lessonId,
-      targetLessonId,
-    }: {
+    mutationFn: ({ lessonId, targetLessonId }: {
       lessonId: string;
       targetLessonId: string;
     }) => swapLessonPosition(lessonId, targetLessonId),
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ["subjects", selectedCategoryId],
+        queryKey: ["subjects"],
       });
-
+      await queryClient.invalidateQueries({ 
+        queryKey: ["defaultSubjects", null] 
+      });
       showSnackbar({
         message: "Lesson position changed",
       });
@@ -279,24 +283,20 @@ export default function HomeScreen() {
   });
 
   const toggleFavoriteMutation = useMutation({
-    mutationFn: ({ id, favorite }: { 
-      id: string; 
-      favorite: boolean 
-    }) => toggleLessonFavorite(id, favorite),
+    mutationFn: ({ id, favorite }: { id: string; favorite: boolean }) => 
+      toggleLessonFavorite(id, favorite),
 
     onSuccess: async (_, variables) => {
       await queryClient.invalidateQueries({ 
-        queryKey: ["subjects", selectedCategoryId] 
+        queryKey: ["subjects"] 
       });
       await queryClient.invalidateQueries({ 
         queryKey: ["favorites"] 
       });
-
       if (variables.favorite) {
         showSnackbar({ 
           message: "Added to favorites" 
         });
-
       } else {
         showSnackbar({ 
           message: "Removed from favorites" 
@@ -311,7 +311,7 @@ export default function HomeScreen() {
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ 
-        queryKey: ["subjects", selectedCategoryId] 
+        queryKey: ["subjects"] 
       });
       await queryClient.invalidateQueries({
         queryKey: ["favorites"]
@@ -409,31 +409,26 @@ export default function HomeScreen() {
     
     setSelectedLessonId(null);
     setSelectedSubjectId(null);
-
+    
     setSubjectFormModalVisible(false);
     setSubjectDeleteModalVisible(false);
-    setLessonPositionModalVisible(false);
 
     setLessonFormModalVisible(false);
     setLessonDeleteModalVisible(false);
+    setLessonPositionModalVisible(false);
   }
-
-  useEffect(() => {
-    categoryScrollRef.current?.scrollTo({
-      x: 0,
-      animated: false,
-    });
-  }, [categories]);
-
-  useEffect(() => {
-    if (!showDefaultTab && selectedCategoryId === null && categories.length > 0) {
-      setSelectedCategoryId(categories[0].id);
-    }
-  }, [showDefaultTab, selectedCategoryId, categories]);
 
   useFocusEffect(
     useCallback(() => {
-      queryClient.invalidateQueries({ queryKey: ["subjects"] });
+      queryClient.invalidateQueries({ 
+        queryKey: ["subjects"] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ["categories"] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ["defaultSubjects", null] 
+      });
     }, [queryClient])
   );
 
@@ -441,75 +436,61 @@ export default function HomeScreen() {
     <View className="flex-1 bg-white dark:bg-neutral-900">
       <Header title="Quiz" />
 
-      <ScrollView
+      <FlatList
         horizontal
-        className="max-h-12"
+        data={categories}
         ref={categoryScrollRef}
+        className="flex-none"
+        keyExtractor={(item) => item.id}
         showsHorizontalScrollIndicator={false}
-        contentContainerClassName="flex-row items-center gap-2 px-6"
-      >
-        {showDefaultTab && (
+        contentContainerClassName="flex-row items-center gap-2 px-6 py-4"
+        ListHeaderComponent={
+        showDefault ? (
           <Pressable
             onPress={() => setSelectedCategoryId(null)}
             className={`rounded-full px-4 py-2 ${
-              selectedCategoryId == null ? "bg-gray-600" : "bg-gray-50 active:bg-gray-100"
+              activeCategoryId === null
+                ? "bg-gray-600 dark:bg-neutral-800"
+                : "bg-gray-50 active:bg-gray-100 dark:bg-neutral-700 dark:active:bg-neutral-600"
             }`}
           >
             <Text
-              className={`text-gray-600 text-sm ${
-                selectedCategoryId == null ? 'text-white font-bold' : 'font-semibold'
+              className={`text-sm ${
+                activeCategoryId === null
+                  ? "font-bold text-white dark:text-neutral-200"
+                  : "font-semibold text-gray-600 dark:text-neutral-300"
               }`}
             >
               Default
             </Text>
           </Pressable>
-        )}
-
-        {categories.map((category) => (
-          <Pressable
-            key={category.id}
-            className={`
-              rounded-full px-4 py-2 ${
-              selectedCategoryId === category.id 
-                ? "bg-gray-600 dark:bg-neutral-800" 
-                : "bg-gray-50 active:bg-gray-100 dark:bg-neutral-700 dark:active:bg-neutral-600"
-            }`}
-            onPress={() => setSelectedCategoryId(category.id)}
+        ) : null
+      }
+      renderItem={({ item }) => (
+        <CategoryTab
+          name={item.name}
+          selected={activeCategoryId === item.id}
+          onPress={() => setSelectedCategoryId(item.id)}
+        />
+      )}
+        ListFooterComponent={
+          <DebouncedPressable
+            className="
+              flex flex-row items-center gap-1
+              rounded-full px-4 py-2
+              bg-gray-50 active:bg-gray-100
+              dark:bg-neutral-700 dark:active:bg-neutral-600
+            "
+            onPress={() => router.push('/settings/categories')}
           >
-            <Text
-              className={`text-gray-600 text-sm ${
-                selectedCategoryId === category.id 
-                  ? 'text-white font-bold dark:text-neutral-200' 
-                  : 'font-semibold dark:text-neutral-300'
-              }`}
-            >
-              {category.name}
-            </Text>
-          </Pressable>
-        ))}
-
-        <DebouncedPressable
-          className="
-            flex flex-row items-center gap-1 
-            rounded-full px-4 py-2
-            bg-gray-50 active:bg-gray-100 
-            dark:bg-neutral-700 dark:active:bg-neutral-600
-          "
-          onPress={() => router.push('/settings/categories')}
-        >
-          <Plus 
-            size={16} 
-            strokeWidth={2} 
-            color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} 
-          />
-
-          {showDefaultTab && (
-            <Text className='text-gray-600 text-sm font-semibold dark:text-neutral-400'>
-              New Category
-            </Text>
-          )}
-        </DebouncedPressable>
-      </ScrollView>
+            <Plus
+              size={16}
+              strokeWidth={2}
+              color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"}
+            />
+          </DebouncedPressable>
+        }
+      />
 
       <View className="flex-1">
         {subjectsPending || categoriesPending ? (

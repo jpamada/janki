@@ -5,8 +5,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { CELL_GAP, COLUMNS } from '@/constants/heatmapConsts';
 import { addMonths, subMonths, format } from 'date-fns';
-import { useMemo, Fragment } from 'react';
 import { useColorScheme } from 'nativewind';
+import { useMemo, Fragment } from 'react';
 
 const SKELETON_ROWS = 5;
 

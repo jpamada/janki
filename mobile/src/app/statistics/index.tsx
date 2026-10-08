@@ -1,12 +1,12 @@
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { getDailyStatistics, getStatistics } from "@/repositories/statistics.repository";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BookCheck, BookText, BookX } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
-
-import { BookCheck, BookText, BookX, Lightbulb } from "lucide-react-native";
-import Header from "@/components/shared/Header";
-import EmptyList from "@/components/EmptyList";
 import { useColorScheme } from "nativewind";
+
+import Header from "@/components/shared/Header";
+import EmptyList from "@/components/shared/EmptyList";
 
 export default function BrowseStatistics() {
   const { colorScheme } = useColorScheme();
@@ -201,9 +201,7 @@ export default function BrowseStatistics() {
                   </View>
                 </>
 
-              ) : (
-                <EmptyList message="No subjects yet" />
-              )}
+              ) : (<EmptyList message="No subjects yet" />)}
             </View>
           </View>
         )}

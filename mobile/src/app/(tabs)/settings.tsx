@@ -1,5 +1,5 @@
 import { LayoutGrid, CloudUpload, CloudDownload, Trash2, Palette, Star } from 'lucide-react-native';
-import { View, ScrollView, Pressable, Text, Modal } from 'react-native';
+import { View, ScrollView, Pressable, Text } from 'react-native';
 import { deleteProgress } from '@/repositories/progress.repository';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from '@/contexts/SnackbarContext';
@@ -8,8 +8,8 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 
 import DebouncedPressable from '@/components/shared/pressables/DebouncedPressable';
-import Header from '../../components/shared/Header';
 import DeleteModal from '@/components/shared/modals/DeleteModal';
+import Header from '../../components/shared/Header';
 
 export default function SettingsScreen() {
   const { showSnackbar } = useSnackbar();
@@ -40,6 +40,9 @@ export default function SettingsScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["subjects"],
       });
+      await queryClient.invalidateQueries({ 
+        queryKey: ["defaultSubjects"] 
+      });
       showSnackbar({
         message: "Review data successfully reset",
       });
@@ -50,7 +53,6 @@ export default function SettingsScreen() {
       showSnackbar({
         message: "Something went wrong. Please try again.",
       });
-      console.error(error);
     },
   });
 
@@ -58,9 +60,10 @@ export default function SettingsScreen() {
     try {
       await exportData();
 
-    } catch (error) {
-      console.error(error);
-      showSnackbar({ message: "There is an error trying to backup data" });
+    } catch {
+      showSnackbar({ 
+        message: "There is an error trying to backup data" 
+      });
     }
   };
 
@@ -69,12 +72,15 @@ export default function SettingsScreen() {
       const result = await importData();
       if (result.imported) {
         await queryClient.invalidateQueries();
-        showSnackbar({ message: "Data restored sucessfully" });
+        showSnackbar({ 
+          message: "Data restored sucessfully" 
+        });
       }
 
-    } catch (error) {
-      console.error(error);
-      showSnackbar({ message: "There is an error restoring backup" });
+    } catch {
+      showSnackbar({ 
+        message: "There is an error restoring backup" 
+      });
     }
   };
 

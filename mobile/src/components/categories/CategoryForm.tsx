@@ -16,13 +16,12 @@ export default function CategoryForm({
     name: ""
   }
 }: CategoryProps) {
-
   const { control, handleSubmit, formState: { errors, isSubmitting }} = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues,
   });
 
-  const handleFormSubmit = async (data: CategoryFormData) => {
+  const handleCategorySubmit = async (data: CategoryFormData) => {
     await onSubmit(data);
   }
 
@@ -33,7 +32,9 @@ export default function CategoryForm({
         control={control}
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
-            <Text className="text-gray-400 font-semibold mb-1">Name</Text>
+            <Text className="text-gray-400 font-semibold mb-1">
+              Name
+            </Text>
 
             <TextInput
               multiline
@@ -58,7 +59,7 @@ export default function CategoryForm({
 
       <Pressable
         disabled={isSubmitting}
-        onPress={handleSubmit(handleFormSubmit)}
+        onPress={handleSubmit(handleCategorySubmit)}
         className="
           bg-gray-600 rounded-full px-4 py-4 mt-2 
           dark:bg-neutral-700 dark:active:bg-neutral-600

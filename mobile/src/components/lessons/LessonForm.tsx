@@ -28,7 +28,7 @@ export default function LessonForm({
     defaultValues,
   });
 
-    const { data: subjects = [] } = useQuery({
+  const { data: subjects = [] } = useQuery({
     queryKey: ['subjects'],
     queryFn: getSubjects,
   });
@@ -50,7 +50,9 @@ export default function LessonForm({
         control={control}
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
-            <Text className="text-gray-400 font-semibold mb-1">Name</Text>
+            <Text className="text-gray-400 font-semibold mb-1">
+              Name
+            </Text>
             
             <TextInput
               value={value}

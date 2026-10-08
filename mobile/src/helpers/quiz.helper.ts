@@ -1,15 +1,3 @@
-export function getResponseTime(questionStartTime: { 
-  current: number | null
-}) {
-  if (questionStartTime.current === null) {
-    return 0;
-  }
-  
-  const responseTime = Date.now() - questionStartTime.current;
-  return responseTime;
-};
-
-
 export function shuffle<T>(arr: T[]): T[] {
   const copy = [...arr];
 

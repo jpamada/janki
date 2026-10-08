@@ -1,4 +1,4 @@
-import { sql, desc, eq, asc } from 'drizzle-orm';
+import { sql, desc, eq } from 'drizzle-orm';
 import {  history } from "@/db/schema";
 import { db } from "@/db/client";
 

@@ -6,14 +6,14 @@ const config: ExpoConfig = {
   version: "1.0.0",
   orientation: "portrait",
 
-  icon: "./assets/images/icon.png",
+  icon: "./assets/images/janki-icon-dark.png",
 
   scheme: "mobile",
 
   userInterfaceStyle: "automatic",
 
   ios: {
-    icon: "./assets/images/icon.png",
+    icon: "./assets/images/janki-icon-dark.png",
   },
 
   android: {
@@ -23,7 +23,7 @@ const config: ExpoConfig = {
 
   web: {
     output: "static",
-    favicon: "./assets/images/icon.png",
+    favicon: "./assets/images/janki-icon-dark.png",
     bundler: "metro",
   },
 
@@ -32,9 +32,9 @@ const config: ExpoConfig = {
       "expo-splash-screen",
       {
         backgroundColor: "#FFFFFF",
-        image: "./assets/images/splash-icon.png",
+        image: "./assets/images/janki-icon-dark.png",
         "dark": {
-          "image": "./assets/splash-icon-dark.png",
+          "image": "./assets/images/janki-icon-light.png",
           "backgroundColor": "#171717"
         },
         imageWidth: 200,

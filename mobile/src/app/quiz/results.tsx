@@ -1,11 +1,11 @@
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CircleCheck, CircleX } from 'lucide-react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import { useColorScheme } from 'nativewind';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
 
 import DebouncedPressable from '@/components/shared/pressables/DebouncedPressable';
-import { useColorScheme } from 'nativewind';
 
 export type QuizResults = {
   questionId: string;
@@ -142,6 +142,7 @@ export default function QuizResultsScreen({
                     );
                   })}
                 </View>
+                
               ) : (
                 <View className="gap-2">
                   <View className="rounded-lg bg-white p-3 dark:bg-neutral-700">

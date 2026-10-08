@@ -1,20 +1,19 @@
-import { ActivityIndicator, Animated, FlatList, Modal, Pressable, Text, View } from "react-native";
 import { getFavoriteLessons, toggleLessonFavorite } from "@/repositories/lesson.repository";
+import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Lightbulb, Star, StarMinus, StarPlus, Trash2 } from "lucide-react-native";
+import { Lightbulb, StarMinus, StarPlus } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSnackbar } from "@/contexts/SnackbarContext";
 import { useBottomSheet } from "@/hooks/UseBottomSheet";
+import { useColorScheme } from "nativewind";
 import { useMemo, useState } from "react";
 import { router } from "expo-router";
 
-import FavoriteItem from "@/components/lessons/FavoriteItem";
-import Header from "@/components/shared/Header";
-import EmptyList from "@/components/EmptyList";
-import BottomSheet from "@/components/shared/BottomSheet";
-import { useColorScheme } from "nativewind";
-import CustomModal from "@/components/shared/modals/CustomModal";
 import DeleteModal from "@/components/shared/modals/DeleteModal";
+import FavoriteItem from "@/components/lessons/FavoriteItem";
+import BottomSheet from "@/components/shared/BottomSheet";
+import Header from "@/components/shared/Header";
+import EmptyList from "@/components/shared/EmptyList";
 
 export default function FavoritesScreen() {
   const { showSnackbar } = useSnackbar();
@@ -51,21 +50,23 @@ export default function FavoritesScreen() {
       await queryClient.invalidateQueries({
         queryKey: ["favorites"],
       });
-
       setModalVisible(false);
       setSelectedLessonId(null);
-
       if (variables.favorite) {
-        showSnackbar({ message: "Added to favorites" });
-
+        showSnackbar({ 
+          message: "Added to favorites" 
+        });
       } else {
-        showSnackbar({ message: "Removed from favorites" });
+        showSnackbar({ 
+          message: "Removed from favorites" 
+        });
       }
     },
 
     onError: (error) => {
-      console.error(error);
-      showSnackbar({ message: "Something went wrong. Please try again." });
+      showSnackbar({ 
+        message: "Something went wrong. Please try again." 
+      });
     }
   });
 
