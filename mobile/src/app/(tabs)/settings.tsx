@@ -1,8 +1,8 @@
 import { LayoutGrid, CloudUpload, CloudDownload, Trash2, Palette, Star } from 'lucide-react-native';
-import { View, ScrollView, Pressable, Text } from 'react-native';
 import { deleteProgress } from '@/repositories/progress.repository';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from '@/contexts/SnackbarContext';
+import { View, ScrollView, Text } from 'react-native';
 import { exportData, importData } from '@/db/backup';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -102,7 +102,7 @@ export default function SettingsScreen() {
             Interface
           </Text>
 
-          <Pressable
+          <DebouncedPressable
             onPress={() => router.push(`/settings/appearance`)}
             className='
               flex flex-row items-center gap-4 
@@ -117,7 +117,7 @@ export default function SettingsScreen() {
             <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
               User Interface
             </Text>
-          </Pressable>
+          </DebouncedPressable>
 
           <Text className="text-gray-400 text-sm font-semibold mb-2">
             Filter
@@ -161,7 +161,7 @@ export default function SettingsScreen() {
             Data
           </Text>
 
-          <Pressable
+          <DebouncedPressable
             onPress={handleBackup}
             className='
               flex flex-row items-center gap-4 
@@ -176,9 +176,9 @@ export default function SettingsScreen() {
             <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
               Backup
             </Text>
-          </Pressable>
+          </DebouncedPressable>
 
-          <Pressable
+          <DebouncedPressable
             onPress={handleRestore}
             className='
               flex flex-row items-center gap-4 
@@ -193,9 +193,9 @@ export default function SettingsScreen() {
             <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
               Restore
             </Text>
-          </Pressable>
+          </DebouncedPressable>
 
-          <Pressable
+          <DebouncedPressable
             onPress={() => setResetModalVisible(true)}
             className='
               flex flex-row items-center gap-4 
@@ -210,7 +210,7 @@ export default function SettingsScreen() {
             <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
               Delete Progress
             </Text>
-          </Pressable>
+          </DebouncedPressable>
         </View>
       </ScrollView>
 

@@ -5,8 +5,8 @@ import { BookCheck, BookText, BookX } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { useColorScheme } from "nativewind";
 
-import Header from "@/components/shared/Header";
 import EmptyList from "@/components/shared/EmptyList";
+import Header from "@/components/shared/Header";
 
 export default function BrowseStatistics() {
   const { colorScheme } = useColorScheme();

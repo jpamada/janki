@@ -1,6 +1,8 @@
-import { Pressable, Text, View } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
+import { Text, View } from 'react-native';
 import { router } from 'expo-router';
+
+import DebouncedPressable from '../shared/pressables/DebouncedPressable';
 
 type LogsStatsProps = {
   accuracy: number;
@@ -20,7 +22,7 @@ export default function Stats({
           Daily Progress
         </Text>
 
-        <Pressable
+        <DebouncedPressable
           onPress={() => router.push("/statistics")}
           className='
             flex flex-row items-center gap-1 
@@ -36,7 +38,7 @@ export default function Stats({
             size={16} 
             color="#9ca3af" 
           />
-        </Pressable>
+        </DebouncedPressable>
       </View>
 
       <View className="flex-row gap-2">

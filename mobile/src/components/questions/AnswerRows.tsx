@@ -87,6 +87,9 @@ function AnswerRow({
               onBlur={onBlur}
               onChangeText={onChange}
               placeholder="Enter answer"
+              placeholderTextColor={
+                colorScheme === "dark" ? "#a3a3a3" : "#9ca3af"
+              }
               className='
                 text-gray-600 text-lg
                 bg-gray-100 rounded-xl px-2 py-4

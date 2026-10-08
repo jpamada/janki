@@ -2,6 +2,7 @@ import { CategoryFormData, categorySchema } from "@/schemas/category.schema"
 import { Pressable, Text, TextInput, View } from "react-native";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import { useColorScheme } from "nativewind";
 
 type CategoryProps = {
   onSubmit: (data: CategoryFormData) => Promise<void>;
@@ -16,6 +17,8 @@ export default function CategoryForm({
     name: ""
   }
 }: CategoryProps) {
+  const { colorScheme } = useColorScheme();
+  
   const { control, handleSubmit, formState: { errors, isSubmitting }} = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues,
@@ -42,6 +45,9 @@ export default function CategoryForm({
               onBlur={onBlur}
               onChangeText={onChange}
               placeholder="Enter name"
+              placeholderTextColor={
+                colorScheme === "dark" ? "#a3a3a3" : "#9ca3af"
+              }
               className='
                 text-gray-600 text-lg
                 bg-gray-100 rounded-xl px-2 py-4

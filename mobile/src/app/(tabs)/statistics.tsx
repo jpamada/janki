@@ -1,6 +1,6 @@
 import { getDailyStatistics, getHeatmapData } from '@/repositories/statistics.repository';
 import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from 'date-fns';
-import { Pressable, Text, View, FlatList, LayoutChangeEvent } from 'react-native';
+import { Text, View, FlatList, LayoutChangeEvent } from 'react-native';
 import { getLatestHistory } from '@/repositories/history.repository';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -9,11 +9,12 @@ import { ChevronRight } from 'lucide-react-native';
 import { useTodayKey } from '@/hooks/useTodayKey';
 import { router } from 'expo-router';
 
+import DebouncedPressable from '@/components/shared/pressables/DebouncedPressable';
 import HistoryItem from '@/components/history/HistoryItem';
 import Heatmap from '@/components/statistics/Heatmap';
+import EmptyList from '@/components/shared/EmptyList';
 import Stats from '@/components/statistics/Stats';
 import Header from '@/components/shared/Header';
-import EmptyList from '@/components/shared/EmptyList';
 
 export default function StatisticsScreen() {
   const insets = useSafeAreaInsets();
@@ -89,7 +90,8 @@ export default function StatisticsScreen() {
                 <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
                   History
                 </Text>
-                <Pressable
+
+                <DebouncedPressable
                   onPress={() => router.push("/history")}
                   className='
                     flex flex-row items-center gap-1 
@@ -100,7 +102,7 @@ export default function StatisticsScreen() {
                     Show More
                   </Text>
                   <ChevronRight size={16} color="#9ca3af" />
-                </Pressable>
+                </DebouncedPressable>
               </View>
             </>
           }

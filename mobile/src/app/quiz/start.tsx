@@ -670,7 +670,7 @@ export default function QuizStartScreen() {
                   <CustomPicker
                     title="Font Size"
                     variant='modal'
-                    className="dark:bg-neutral-600"
+                    className="dark:bg-neutral-600 dark:active:bg-neutral-500"
                     selectedValue={settings.questionFontSize}
                     onValueChange={(value) => updateSettings({ questionFontSize: value })}
                     options={[
@@ -698,7 +698,7 @@ export default function QuizStartScreen() {
                   <CustomPicker
                     title='Text Alignment'
                     variant='modal'
-                    className="dark:bg-neutral-600"
+                    className="dark:bg-neutral-600 dark:active:bg-neutral-500"
                     selectedValue={settings.questionTextAlign}
                     onValueChange={(value) => updateSettings({ questionTextAlign: value })}
                     options={[
@@ -827,7 +827,6 @@ export default function QuizStartScreen() {
               <DebouncedPressable
                 onPress={() => {
                   settingSheet.close();
-                  handleExitQuiz();
                   router.back();
                 }}
                 className="
@@ -898,6 +897,9 @@ export default function QuizStartScreen() {
                   onChangeText={setIdentificationInput}
                   editable={!resultSheet.visible}
                   placeholder="Type your answer"
+                  placeholderTextColor={
+                    colorScheme === "dark" ? "#a3a3a3" : "#9ca3af"
+                  }
                   autoCapitalize="none"
                   className="
                     rounded-xl px-4 py-4

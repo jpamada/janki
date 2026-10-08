@@ -5,6 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
 import CustomPicker from '../shared/CustomPicker';
+import { useColorScheme } from 'nativewind';
 
 type SubjectFormProps = {
   isEditing: boolean;
@@ -20,6 +21,7 @@ export default function SubjectForm({
     categoryId: null,
   },
 }: SubjectFormProps) {
+  const { colorScheme } = useColorScheme();
   
   const { control, handleSubmit, reset, formState: { errors, isSubmitting }} = useForm<SubjectFormData>({
     resolver: zodResolver(subjectSchema),
@@ -57,6 +59,9 @@ export default function SubjectForm({
               onBlur={onBlur}
               onChangeText={onChange}
               placeholder="Enter subject title"
+              placeholderTextColor={
+                colorScheme === "dark" ? "#a3a3a3" : "#9ca3af"
+              }
               className='
                 text-gray-600 text-lg
                 bg-gray-100 rounded-xl px-2 py-4

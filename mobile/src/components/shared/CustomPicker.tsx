@@ -203,6 +203,8 @@ function CenteredModalPicker<T extends string | number | null>({
   selectedValue,
   onValueChange,
 }: VariantProps<T>) {
+  const { colorScheme } = useColorScheme();
+  
   const [visible, setVisible] = useState(false);
 
   return (
@@ -217,7 +219,11 @@ function CenteredModalPicker<T extends string | number | null>({
         `}
       >
         {trigger}
-        <ChevronDown size={16} color="#6b7280" />
+
+        <ChevronDown 
+          size={16} 
+          color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} 
+        />
       </Pressable>
 
       <Modal

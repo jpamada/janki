@@ -150,7 +150,7 @@ export default function QuizResultsScreen({
                       Your answer
                     </Text>
 
-                    <Text className={`font-semibold ${userAnswer?.isCorrect ? 'text-gray-800' : 'text-red-400'}`}>
+                    <Text className={`font-semibold ${userAnswer?.isCorrect ? 'text-gray-800 dark:text-neutral-300' : 'text-red-400'}`}>
                       {userAnswer?.answerText || '—'}
                     </Text>
                   </View>

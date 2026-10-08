@@ -224,6 +224,9 @@ export default function QuestionForm({
                   onBlur={onBlur}
                   onChangeText={onChange}
                   placeholder="Enter question"
+                  placeholderTextColor={
+                    colorScheme === "dark" ? "#a3a3a3" : "#9ca3af"
+                  }
                   className="
                     text-gray-600 text-lg
                     bg-gray-100 rounded-xl px-2 py-4
@@ -344,6 +347,9 @@ export default function QuestionForm({
                     onChangeText={onChange}
                     textAlignVertical="top"
                     placeholder="Enter explanation"
+                    placeholderTextColor={
+                      colorScheme === "dark" ? "#a3a3a3" : "#9ca3af"
+                    }
                     className="
                       text-gray-600 text-lg
                       bg-gray-100 rounded-xl px-2 py-4
@@ -422,6 +428,9 @@ export default function QuestionForm({
                     onBlur={onBlur}
                     onChangeText={onChange}
                     placeholder="Enter the correct answer"
+                    placeholderTextColor={
+                      colorScheme === "dark" ? "#a3a3a3" : "#9ca3af"
+                    }
                     className="
                       text-gray-600 text-lg
                       bg-gray-100 rounded-xl px-2 py-4

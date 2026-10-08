@@ -14,7 +14,7 @@ export default function AppearanceScreen() {
 
   return (
     <View 
-      className='flex-1 bg-white dark:bg-zinc-900' 
+      className='flex-1 bg-white dark:bg-neutral-900' 
       style={{ paddingBottom: insets.bottom }}
     >
       <Header title="Visuals and Sound" back />

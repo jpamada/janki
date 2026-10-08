@@ -32,17 +32,21 @@ export default function RootLayout() {
   const { settings, error: settingsError } = useInitializeSettings();
   const { colorScheme } = useColorScheme();
 
+  const backgroundColor = colorScheme === "dark" ? "#171717" : "#ffffff";
+
+  const isReady = Boolean(
+    (success && settings) || databaseError || settingsError,
+  )
+  
   useEffect(() => {
-    SystemUI.setBackgroundColorAsync(
-      colorScheme === 'light' ? '#ffffff' : '#171717',
-    );
-  }, [colorScheme]);
+    SystemUI.setBackgroundColorAsync(backgroundColor);
+  }, [backgroundColor]);;
 
   useEffect(() => {
-    if (success && settings) {
+    if (isReady) {
       SplashScreen.hide();
     }
-  }, [success, settings]);
+  }, [isReady]);
 
   if (databaseError) {
     return <AppErrorScreen errorMessage={databaseError.message} />;
@@ -60,10 +64,16 @@ export default function RootLayout() {
     <>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'}/>
 
-      <SafeAreaProvider>
+      <SafeAreaProvider 
+        style={{ 
+          backgroundColor: backgroundColor 
+        }}>
         <KeyboardProvider>
           <GestureHandlerRootView 
-            style={{ flex: 1 }}>
+            style={{ 
+              flex: 1, 
+              backgroundColor: backgroundColor 
+            }}>
             <SnackbarProvider>
               <QueryClientProvider 
                 client={queryClient}>
