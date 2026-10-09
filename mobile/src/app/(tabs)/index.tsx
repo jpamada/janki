@@ -588,7 +588,7 @@ export default function HomeScreen() {
       
       <BottomSheet 
         sheet={subjectSheet} 
-        className="px-4 py-8"
+        className="px-4 pb-8"
         onRequestClose={resetState} 
         onBackdropPress={resetState}
       >
@@ -649,7 +649,7 @@ export default function HomeScreen() {
 
       <BottomSheet 
         sheet={lessonSheet} 
-        className="px-4 py-8"
+        className="px-4 pb-8"
         onRequestClose={resetState} 
         onBackdropPress={resetState} 
       >

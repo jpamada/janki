@@ -1,5 +1,7 @@
-import { Animated, useAnimatedValue, useWindowDimensions } from "react-native";
-import { useCallback, useState } from "react";
+import { cancelAnimation, useSharedValue, withTiming } from "react-native-reanimated";
+import { useCallback, useRef, useState } from "react";
+import { scheduleOnRN } from "react-native-worklets";
+import { useWindowDimensions } from "react-native";
 
 type UseBottomSheetOptions = {
   openDuration?: number;
@@ -10,64 +12,76 @@ export function useBottomSheet({
   openDuration = 300,
   closeDuration = 300,
 }: UseBottomSheetOptions = {}) {
+  
   const { height } = useWindowDimensions();
 
   const [visible, setVisible] = useState(false);
 
-  const translateY = useAnimatedValue(height);
-  const backdropOpacity = useAnimatedValue(0);
+  const translateY = useSharedValue(height);
+  const backdropOpacity = useSharedValue(0);
+
+  const isClosingRef = useRef(false);
+  const closeCallbackRef = useRef<(() => void) | undefined>(undefined);
+  const animationFrameRef = useRef<number | null>(null);
+
+  const finishClose = useCallback(() => {
+    isClosingRef.current = false;
+    setVisible(false);
+
+    const callback = closeCallbackRef.current;
+    closeCallbackRef.current = undefined;
+
+    callback?.();
+  }, []);
 
   const open = useCallback(() => {
-    translateY.stopAnimation();
-    backdropOpacity.stopAnimation();
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
 
-    translateY.setValue(height);
-    backdropOpacity.setValue(0);
+    cancelAnimation(translateY);
+    cancelAnimation(backdropOpacity);
+
+    isClosingRef.current = false;
+    closeCallbackRef.current = undefined;
+
+    translateY.set(height);
+    backdropOpacity.set(0);
 
     setVisible(true);
 
-    requestAnimationFrame(() => {
-      Animated.parallel([
-        Animated.timing(translateY, {
-          toValue: 0,
-          duration: openDuration,
-          useNativeDriver: true,
-        }),
+    animationFrameRef.current = requestAnimationFrame(() => {
+      animationFrameRef.current = null;
 
-        Animated.timing(backdropOpacity, {
-          toValue: 1,
-          duration: openDuration,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      translateY.set(withTiming(0, { duration: openDuration }));
+      backdropOpacity.set(withTiming(1, { duration: openDuration }));
     });
   }, [height, openDuration, translateY, backdropOpacity]);
 
   const close = useCallback(
     (callback?: () => void) => {
-      translateY.stopAnimation();
-      backdropOpacity.stopAnimation();
+      if (isClosingRef.current) return;
 
-      Animated.parallel([
-        Animated.timing(translateY, {
-          toValue: height,
-          duration: closeDuration,
-          useNativeDriver: true,
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+
+      isClosingRef.current = true;
+      closeCallbackRef.current = callback;
+
+      translateY.set(
+        withTiming(height, { duration: closeDuration }, (finished) => {
+          if (finished) {
+            scheduleOnRN(finishClose);
+          }
         }),
+      );
 
-        Animated.timing(backdropOpacity, {
-          toValue: 0,
-          duration: closeDuration,
-          useNativeDriver: true,
-        }),
-      ]).start(({ finished }) => {
-        if (!finished) return;
-
-        setVisible(false);
-        callback?.();
-      });
+      backdropOpacity.set(withTiming(0, { duration: closeDuration }));
     },
-    [height, closeDuration, translateY, backdropOpacity],
+    [height, closeDuration, translateY, backdropOpacity, finishClose],
   );
 
   return {

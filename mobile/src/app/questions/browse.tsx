@@ -129,7 +129,7 @@ export default function BrowseQuestionScreen() {
 
         <BottomSheet
           sheet={questionSheet}
-          className="px-4 py-8"
+          className="px-4 pb-8"
           onBackdropPress={resetState}
           onRequestClose={resetState}
         >
