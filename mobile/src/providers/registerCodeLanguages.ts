@@ -2,7 +2,6 @@ import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import { LANGUAGES } from "@/constants/languages";
 
 import javascript from "react-syntax-highlighter/dist/esm/languages/hljs/javascript";
-import typescript from "react-syntax-highlighter/dist/esm/languages/hljs/typescript";
 import python from "react-syntax-highlighter/dist/esm/languages/hljs/python";
 import csharp from "react-syntax-highlighter/dist/esm/languages/hljs/csharp";
 import java from "react-syntax-highlighter/dist/esm/languages/hljs/java";
@@ -14,7 +13,6 @@ import css from "react-syntax-highlighter/dist/esm/languages/hljs/css";
 
 const languageDefs: Record<string, unknown> = {
   javascript,
-  typescript,
   python,
   php,
   java,

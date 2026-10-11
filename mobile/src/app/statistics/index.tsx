@@ -180,22 +180,25 @@ export default function BrowseStatistics() {
               {((statistic?.subjectsAccuracy?.length ?? 0) > 0) ? (
                 <>
                   {statistic?.subjectsAccuracy?.map((subject) => (
-                    <View key={subject.subjectId} className="flex-row items-center justify-between">
-                      <Text className="text-gray-600 font-semibold dark:text-neutral-300">
+                    <View 
+                      key={subject.subjectId} 
+                      className="flex-row items-start justify-between gap-2"
+                    >
+                      <Text className="flex-1 min-w-0  text-gray-600 font-semibold dark:text-neutral-300">
                         {subject.subjectName}
                       </Text>
-                      <Text className="font-semibold dark:text-neutral-300">
+                      <Text className="font-semibold dark:text-neutral-300 shrink-0">
                         {subject.accuracy}%
                       </Text>
                     </View>
                   ))}
 
-                  <View className="flex-row items-center justify-between border-t pt-4 border-gray-200">
-                    <Text className="text-gray-600 font-semibold dark:text-neutral-300">
+                  <View className="flex-row items-start justify-between gap-2 border-t pt-4 border-gray-200">
+                    <Text className="flex-1 min-w-0  text-gray-600 font-semibold dark:text-neutral-300">
                       Overall
                     </Text>
 
-                    <Text className="font-semibold dark:text-neutral-300">
+                    <Text className="font-semibold dark:text-neutral-300 shrink-0">
                       {statistic?.accuracy}%
                     </Text>
                   </View>

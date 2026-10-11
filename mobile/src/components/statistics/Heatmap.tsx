@@ -1,14 +1,22 @@
-import { bucketColor, computeHeatmapWeeks, type HeatmapDay } from '@/helpers/logsHeatmap.helper';
-import { useMinimumLoadingDuration } from '@/hooks/useMinimumLoadingDuration';
-import { Text, View, Pressable, LayoutChangeEvent } from 'react-native';
+import {
+  bucketColor,
+  computeHeatmapWeeks,
+  type HeatmapDay,
+} from '@/helpers/logsHeatmap.helper';
+
+import {
+  Text,
+  View,
+  Pressable,
+  type LayoutChangeEvent,
+} from 'react-native';
+
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { CELL_GAP, COLUMNS } from '@/constants/heatmapConsts';
 import { addMonths, subMonths, format } from 'date-fns';
 import { useColorScheme } from 'nativewind';
-import { useMemo, Fragment } from 'react';
-
-const SKELETON_ROWS = 5;
+import { useMemo, Fragment, useState } from 'react';
 
 type HeatmapGridProps = {
   weeks: HeatmapDay[][];
@@ -16,6 +24,7 @@ type HeatmapGridProps = {
   width: number;
   height: number;
   onLayout: (event: LayoutChangeEvent) => void;
+  onRendered: () => void;
 };
 
 function HeatmapGrid({
@@ -24,77 +33,52 @@ function HeatmapGrid({
   height,
   cellSize,
   onLayout,
+  onRendered,
 }: HeatmapGridProps) {
   const { colorScheme } = useColorScheme();
-  const isLight = colorScheme === "light";
+  const isLight = colorScheme === 'light';
 
   return (
-    <View onLayout={onLayout}>
-      {cellSize > 0 && (
-        <Svg width={width} height={height}>
-          {weeks.map((week, weekIndex) =>
-            week.map((day, dayIndex) => (
-              <Fragment key={day.date || `${weekIndex}-${dayIndex}`}>
-                <Rect
-                  x={dayIndex * (cellSize + CELL_GAP)}
-                  y={weekIndex * (cellSize + CELL_GAP)}
-                  width={cellSize}
-                  height={cellSize}
-                  rx={6}
-                  fill={bucketColor(day.count, day.inMonth, isLight)}
-                />
-
-                {day.inMonth && (
-                  <SvgText
-                    x={dayIndex * (cellSize + CELL_GAP) + cellSize / 2}
-                    y={weekIndex * (cellSize + CELL_GAP) + cellSize / 2 + 4}
-                    fontSize={Math.max(cellSize * 0.32, 9)}
-                    fill={day.count > 0 ? '#fff' : '#9ca3af'}
-                    textAnchor="middle"
-                  >
-                    {day.dayNumber}
-                  </SvgText>
-                )}
-              </Fragment>
-            ))
-          )}
-        </Svg>
-      )}
-    </View>
-  );
-}
-
-type HeatmapSkeletonProps = {
-  width: number;
-  cellSize: number;
-  onLayout: (event: LayoutChangeEvent) => void;
-};
-
-function HeatmapSkeleton({ width, cellSize, onLayout }: HeatmapSkeletonProps) {
-  const { colorScheme } = useColorScheme();
-
-  return (
-    <View onLayout={onLayout}>
-      {cellSize > 0 ? (
-        <Svg width={width} height={SKELETON_ROWS * (cellSize + CELL_GAP) - CELL_GAP}>
-          {Array.from({ length: SKELETON_ROWS }).map((_, weekIndex) =>
-            Array.from({ length: COLUMNS }).map((_, dayIndex) => (
+    <View
+      onLayout={onLayout}
+      style={{
+        width,
+        height,
+        overflow: 'hidden',
+      }}
+    >
+      <Svg
+        width={width}
+        height={height}
+        onLayout={onRendered}
+      >
+        {weeks.map((week, weekIndex) =>
+          week.map((day, dayIndex) => (
+            <Fragment key={day.date || `${weekIndex}-${dayIndex}`}>
               <Rect
-                key={`${weekIndex}-${dayIndex}`}
                 x={dayIndex * (cellSize + CELL_GAP)}
                 y={weekIndex * (cellSize + CELL_GAP)}
                 width={cellSize}
                 height={cellSize}
                 rx={6}
-                fill={colorScheme === "light" ? "#f3f4f6" : "#262626"}
+                fill={bucketColor(day.count, day.inMonth, isLight)}
               />
-            ))
-          )}
-        </Svg>
-      ) : (
 
-        <View style={{ height: 240 }} className="bg-gray-50 rounded-xl dark:bg-neutral-800" />
-      )}
+              {day.inMonth && (
+                <SvgText
+                  x={dayIndex * (cellSize + CELL_GAP) + cellSize / 2}
+                  y={weekIndex * (cellSize + CELL_GAP) + cellSize / 2 + 4}
+                  fontSize={Math.max(cellSize * 0.32, 9)}
+                  fill={day.count > 0 ? '#fff' : '#9ca3af'}
+                  textAnchor="middle"
+                >
+                  {day.dayNumber}
+                </SvgText>
+              )}
+            </Fragment>
+          ))
+        )}
+      </Svg>
     </View>
   );
 }
@@ -127,33 +111,45 @@ export default function Heatmap({
   containerWidth,
   onLayout,
 }: HeatmapProps) {
-  const showSkeleton = useMinimumLoadingDuration(isPending, 400);
+  const [isHeatMapRendered, setIsHeatMapRendered] = useState(false);
 
   const weeks = useMemo(
     () => computeHeatmapWeeks(rows, gridStart, gridEnd, monthStart),
     [rows, gridStart, gridEnd, monthStart],
   );
 
-  const cellSize = containerWidth > 0
-    ? (containerWidth - CELL_GAP * (COLUMNS - 1)) / COLUMNS
-    : 0;
+  const cellSize =
+    containerWidth > 0
+      ? (containerWidth - CELL_GAP * (COLUMNS - 1)) / COLUMNS
+      : 0;
 
   const width = containerWidth;
-  const height = weeks.length * (cellSize + CELL_GAP) - CELL_GAP;
+  const height =
+    cellSize > 0
+      ? weeks.length * (cellSize + CELL_GAP) - CELL_GAP
+      : 0;
+
+  const hasValidDimensions =
+    containerWidth > 0 &&
+    cellSize > 0 &&
+    width > 0 &&
+    height > 0 &&
+    weeks.length > 0;
+
 
   return (
-    <View className="gap-3 rounded-xl">
-      <View className='flex flex-row items-center justify-between'>
-        <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
+    <View className="gap-3 rounded-xl" onLayout={onLayout}>
+      <View className="flex flex-row items-center justify-between">
+        <Text className="text-gray-600 text-lg font-bold dark:text-neutral-300">
           Summary
         </Text>
 
         <View className="flex-row items-center justify-end gap-2">
           <Pressable
-            onPress={() => onViewDateChange((d) => subMonths(d, 1))}
+            onPress={() => onViewDateChange((date) => subMonths(date, 1))}
             className="
-              rounded-full p-2 
-              bg-gray-50 active:bg-gray-100 
+              rounded-full p-2
+              bg-gray-50 active:bg-gray-100
               dark:bg-neutral-800 dark:active:bg-neutral-700
             "
           >
@@ -165,10 +161,10 @@ export default function Heatmap({
           </Text>
 
           <Pressable
-            onPress={() => onViewDateChange((d) => addMonths(d, 1))}
+            onPress={() => onViewDateChange((date) => addMonths(date, 1))}
             className="
-              rounded-full p-2 
-              bg-gray-50 active:bg-gray-100 
+              rounded-full p-2
+              bg-gray-50 active:bg-gray-100
               dark:bg-neutral-800 dark:active:bg-neutral-700
             "
           >
@@ -177,21 +173,40 @@ export default function Heatmap({
         </View>
       </View>
 
-      {showSkeleton ? (
-        <HeatmapSkeleton
-          width={width}
-          cellSize={cellSize}
-          onLayout={onLayout}
-        />
-      ) : (
-        <HeatmapGrid
-          weeks={weeks}
-          cellSize={cellSize}
-          width={width}
-          height={height}
-          onLayout={onLayout}
-        />
-      )}
+      <View
+        style={{
+          width: containerWidth > 0 ? width : '100%',
+          height: hasValidDimensions ? height : 240,
+          overflow: 'hidden',
+        }}
+        className="rounded-xl"
+      >
+        {hasValidDimensions && (
+          <HeatmapGrid
+            weeks={weeks}
+            cellSize={cellSize}
+            width={width}
+            height={height}
+            onLayout={onLayout}
+            onRendered={() => setIsHeatMapRendered(true)}
+          />
+        )}
+
+        {!isHeatMapRendered && (
+          <View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 1,
+            }}
+            className="bg-gray-50 dark:bg-neutral-800"
+          />
+        )}
+      </View>
     </View>
   );
 }

@@ -23,7 +23,7 @@ export default function EmptyStateScreen({
       )}
 
       {title && (
-        <Text className="text-center text-xl font-semibold text-gray-700">
+        <Text className="text-center text-xl font-semibold text-gray-700 dark:text-neutral-300">
           {title}
         </Text>
       )}

@@ -17,23 +17,40 @@ export async function getSubjectsByCategory(
 ) {
   const now = new Date();
 
-  const subjectsData = await db.query.subjects
-  .findMany({
+  const subjectsData = await db.query.subjects.findMany({
+    columns: {
+      id: true,
+      name: true,
+      categoryId: true,
+    },
     where: categoryId?.trim()
       ? eq(subjects.categoryId, categoryId)
       : isNull(subjects.categoryId),
     with: {
       lessons: {
-        with: {
-          questions: {
-            with: {
-              progress: true,
-            },
-          },
+        columns: {
+          id: true,
+          name: true,
+          favorite: true,
+          subjectId: true,
         },
         orderBy: (lessonsTable, { asc }) => [
           asc(lessonsTable.position),
         ],
+        with: {
+          questions: {
+            columns: {
+              id: true,
+            },
+            with: {
+              progress: {
+                columns: {
+                  nextattemptedAt: true,
+                },
+              },
+            },
+          },
+        },
       },
     },
   });

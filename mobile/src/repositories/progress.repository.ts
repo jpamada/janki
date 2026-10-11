@@ -46,7 +46,7 @@ export async function getDueQuestionIds(
   return dueQuestionIds;
 }
 
-export async function recordCorrectAnswer(
+export async function recordCorrectAnswerProgress(
   questionId: string, 
   interval: ReviewInterval
 ) {
@@ -79,7 +79,7 @@ export async function recordCorrectAnswer(
   }
 }
 
-export async function recordIncorrectAnswer(
+export async function recordIncorrectAnswerProgress(
   questionId: string
 ) {
   const now = new Date();
@@ -135,4 +135,90 @@ export async function deleteProgress() {
 
   await db
   .delete(history);
+}
+
+type FinalizeQuizAnswerInput = {
+  submissionId: string;
+  questionId: string;
+  answer: string;
+  isCorrect: boolean;
+  interval?: ReviewInterval;
+  responseTime?: number;
+};
+
+export async function finalizeQuizAnswer(
+  input: FinalizeQuizAnswerInput,
+) {
+  if (input.isCorrect && !input.interval) {
+    throw new Error("A review interval is required for a correct answer.");
+  }
+
+  return db.transaction(async (tx) => {
+    const existingHistory = await tx
+      .select({ id: history.id })
+      .from(history)
+      .where(eq(history.id, input.submissionId))
+      .limit(1);
+
+
+    if (existingHistory.length > 0) {
+      return { alreadyFinalized: true };
+    }
+
+    const now = new Date();
+
+    await tx.insert(history).values({
+      id: input.submissionId,
+      questionId: input.questionId,
+      answer: input.answer,
+      responseTime: input.responseTime ?? null,
+      attemptedAt: now,
+      status: input.isCorrect ? "correct" : "incorrect",
+    });
+
+    const existingProgress = await tx
+      .select({ id: progress.id })
+      .from(progress)
+      .where(eq(progress.questionId, input.questionId))
+      .limit(1);
+
+    if (input.isCorrect) {
+      const interval = input.interval!;
+      const nextattemptedAt = computeNextattemptedAt(interval, now);
+
+      if (existingProgress.length === 0) {
+        await tx.insert(progress).values({
+          id: Crypto.randomUUID(),
+          questionId: input.questionId,
+          reviewInterval: interval,
+          lastattemptedAt: now,
+          nextattemptedAt,
+        });
+      } else {
+        await tx
+          .update(progress)
+          .set({
+            reviewInterval: interval,
+            lastattemptedAt: now,
+            nextattemptedAt,
+          })
+          .where(eq(progress.questionId, input.questionId));
+      }
+    } else if (existingProgress.length === 0) {
+      await tx.insert(progress).values({
+        id: Crypto.randomUUID(),
+        questionId: input.questionId,
+        reviewInterval: null,
+        lastattemptedAt: now,
+        nextattemptedAt: now,
+      });
+    } else {
+      await tx
+        .update(progress)
+        .set({ lastattemptedAt: now })
+        .where(eq(progress.questionId, input.questionId));
+    }
+
+    return { alreadyFinalized: false };
+  });
 }

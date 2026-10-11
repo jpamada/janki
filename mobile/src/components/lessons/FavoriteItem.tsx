@@ -39,9 +39,9 @@ export default function FavoriteItem({
         params: { lessonId: id }
       })}
       className="
-        flex-row items-center gap-2
+        flex-row items-start gap-2
         bg-gray-100 rounded-lg p-4
-        active:bg-gray-100 dark:bg-neutral-800 dark:active:bg-neutral-700
+        active:bg-gray-200 dark:bg-neutral-800 dark:active:bg-neutral-700
       "
     >
       <Pressable 
@@ -49,7 +49,7 @@ export default function FavoriteItem({
           event.stopPropagation();
           onRemoveFavorite(id);
         }}
-        className="rounded-xl p-2 active:bg-gray-100 dark:active:bg-neutral-600"
+        className="rounded-xl p-2 active:bg-gray-200 dark:active:bg-neutral-600"
       >
         {favorite === true ? (
           <Star size={20} color="#9ca3af" fill="#9ca3af"/>
@@ -62,7 +62,7 @@ export default function FavoriteItem({
         <Text
           className="
             flex-1 
-            text-gray-700 text-lg font-semibold 
+            text-gray-700 text-sm font-semibold 
             dark:text-neutral-300
           "
           numberOfLines={1}
@@ -70,7 +70,7 @@ export default function FavoriteItem({
           {subject?.name}
         </Text>
 
-        <Text className="text-gray-600 text-lg font-medium">
+        <Text className="text-gray-600 text-lg font-medium dark:text-neutral-300">
           {title}
         </Text>
       </View>

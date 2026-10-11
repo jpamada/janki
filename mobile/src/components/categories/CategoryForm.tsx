@@ -40,7 +40,6 @@ export default function CategoryForm({
             </Text>
 
             <TextInput
-              multiline
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}

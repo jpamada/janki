@@ -1,3 +1,4 @@
+
 import type { ExpoConfig } from "expo/config";
 
 const config: ExpoConfig = {
@@ -6,19 +7,23 @@ const config: ExpoConfig = {
   version: "1.0.0",
   orientation: "portrait",
 
-  icon: "./assets/images/janki-icon-dark.png",
-
+  icon: "./assets/images/janki-app-icon.png",
   scheme: "mobile",
-
   userInterfaceStyle: "automatic",
 
   ios: {
-    icon: "./assets/images/janki-icon-dark.png",
+    icon: "./assets/images/janki-app-icon.png",
   },
 
   android: {
     package: "com.jpamada.mobile",
     predictiveBackGestureEnabled: false,
+    blockedPermissions: [
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+      "android.permission.MANAGE_EXTERNAL_STORAGE",
+      "android.permission.RECORD_AUDIO",
+    ],
   },
 
   web: {
@@ -33,18 +38,26 @@ const config: ExpoConfig = {
       {
         backgroundColor: "#FFFFFF",
         image: "./assets/images/janki-icon-dark.png",
-        "dark": {
-          "image": "./assets/images/janki-icon-light.png",
-          "backgroundColor": "#171717"
+        dark: {
+          image: "./assets/images/janki-icon-light.png",
+          backgroundColor: "#171717",
         },
         imageWidth: 200,
+      },
+    ],
+    [
+      "expo-audio",
+      {
+        recordAudioAndroid: false,
+        microphonePermission: false,
+        enableBackgroundPlayback: false,
+        enableBackgroundRecording: false,
       },
     ],
 
     "expo-router",
     "expo-sqlite",
     "expo-image",
-    "expo-audio",
     "expo-asset",
     "expo-sharing",
     "expo-web-browser",

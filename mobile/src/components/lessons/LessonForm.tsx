@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
 
 import CustomPicker from '../shared/CustomPicker';
+import { useColorScheme } from 'nativewind';
 
 type LessonFormProps = {
   isEditing: boolean;
@@ -22,6 +23,7 @@ export default function LessonForm({
     favorite: false
   },
 }: LessonFormProps) {
+  const { colorScheme } = useColorScheme();
 
   const { control, handleSubmit, reset, formState: { errors, isSubmitting }} = useForm<LessonFormData>({
     resolver: zodResolver(lessonSchema),
@@ -59,6 +61,9 @@ export default function LessonForm({
               onBlur={onBlur}
               onChangeText={onChange}
               placeholder="Enter lesson title"
+              placeholderTextColor={
+                colorScheme === 'dark' ? '#a3a3a3' : '#9ca3af'
+              }
               className='
                 text-gray-600 text-lg
                 bg-gray-100 rounded-xl px-2 py-4

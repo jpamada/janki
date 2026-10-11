@@ -29,7 +29,7 @@ export default function CategoryItem({
       className="
         flex-row items-center gap-2
         bg-gray-100 rounded-lg p-4
-        active:bg-gray-100 dark:bg-neutral-800 dark:active:bg-neutral-700
+        active:bg-gray-200 dark:bg-neutral-800 dark:active:bg-neutral-700
       "
     >
       <Text className="

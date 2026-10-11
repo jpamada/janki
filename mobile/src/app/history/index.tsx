@@ -7,8 +7,8 @@ import { useMemo } from "react";
 
 import HistoryItem from "@/components/history/HistoryItem";
 import Header from "@/components/shared/Header";
-
-const PAGE_SIZE = 20;
+import { PAGE_SIZE } from "@/constants/pagination";
+import EmptyList from "@/components/shared/EmptyList";
 
 export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
@@ -26,7 +26,7 @@ export default function HistoryScreen() {
     initialPageParam: 0,
     queryFn: ({ pageParam }) => getHistory(PAGE_SIZE, pageParam),
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {
-      if (lastPage.length < PAGE_SIZE) return undefined;
+      if (lastPage?.length < PAGE_SIZE) return undefined;
       return lastPageParam + PAGE_SIZE;
     },
   });
@@ -80,12 +80,7 @@ export default function HistoryScreen() {
             }
           }}
           ListEmptyComponent={
-            <View className="flex-1 justify-center items-center py-16">
-              <RotateCcwClock size={32} color="#d1d5db" />
-              <Text className='text-gray-300 font-semibold'>
-                No history yet
-              </Text>
-            </View>
+            <EmptyList message="No history yet" />
           }
           ListFooterComponent={
             isFetchingNextPage ? (

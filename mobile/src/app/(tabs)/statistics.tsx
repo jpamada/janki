@@ -1,6 +1,6 @@
 import { getDailyStatistics, getHeatmapData } from '@/repositories/statistics.repository';
 import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from 'date-fns';
-import { Text, View, FlatList, LayoutChangeEvent } from 'react-native';
+import { Text, View, FlatList, LayoutChangeEvent, ActivityIndicator } from 'react-native';
 import { getLatestHistory } from '@/repositories/history.repository';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -33,18 +33,18 @@ export default function StatisticsScreen() {
     setContainerWidth(event.nativeEvent.layout.width);
   }, []);
 
-  const { data: statistic } = useQuery({
+  const { data: statistic, isPending: dailyStatsPending } = useQuery({
     queryKey: ["dailyStatistics", todayKey],
     queryFn: getDailyStatistics,
   });
 
-  const { data: heatmapData = [], isPending } = useQuery({
+  const { data: heatmapData = [], isPending: heatmapPending } = useQuery({
     queryKey: ['heatmap', todayKey, format(monthStart, 'yyyy-MM')],
     queryFn: () => getHeatmapData(gridStart, gridEnd),
     placeholderData: keepPreviousData,
   });
 
-  const { data: history } = useQuery({
+  const { data: history, isPending: historyPending } = useQuery({
     queryKey: ['latestHistory'],
     queryFn: getLatestHistory
   })
@@ -53,74 +53,81 @@ export default function StatisticsScreen() {
     <View className='flex-1 bg-white dark:bg-neutral-900'>
       <Header title="Stats" />
 
-      <View className="flex-1">
-        <FlatList
-          data={history}
-          className='px-6 py-4'
-          keyExtractor={(item) => item.id}
-          contentContainerClassName="gap-2"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingBottom: insets.bottom
-          }}
-          ListHeaderComponent={
-            <>
-              <View className='flex flex-col gap-8'>
-                <Stats
-                  accuracy={statistic?.accuracy ?? 0}
-                  totalReviews={statistic?.totalReviews ?? 0}
-                  correctReviews={statistic?.correctReviews ?? 0}
-                />
-                
-                <Heatmap
-                  rows={heatmapData}
-                  isPending={isPending}
-                  viewDate={viewDate}
-                  gridStart={gridStart}
-                  gridEnd={gridEnd}
-                  monthStart={monthStart}
-                  onLayout={handleLayout}
-                  onViewDateChange={setViewDate}
-                  containerWidth={containerWidth}
-                />
-              </View>
+      {dailyStatsPending || heatmapPending || historyPending ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="small" color="#4b5563" />
+        </View>
 
-              <View className='flex flex-row items-center justify-between mt-8'>
-                <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
-                  History
-                </Text>
+      ) : (
+        <View className="flex-1">
+          <FlatList
+            data={history}
+            className='px-6 py-4'
+            keyExtractor={(item) => item.id}
+            contentContainerClassName="gap-2"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingBottom: insets.bottom
+            }}
+            ListHeaderComponent={
+              <>
+                <View className='flex flex-col gap-8'>
+                  <Stats
+                    accuracy={statistic?.accuracy ?? 0}
+                    totalReviews={statistic?.totalReviews ?? 0}
+                    correctReviews={statistic?.correctReviews ?? 0}
+                  />
+                  
+                  <Heatmap
+                    rows={heatmapData}
+                    isPending={heatmapPending}
+                    viewDate={viewDate}
+                    gridStart={gridStart}
+                    gridEnd={gridEnd}
+                    monthStart={monthStart}
+                    onLayout={handleLayout}
+                    onViewDateChange={setViewDate}
+                    containerWidth={containerWidth}
+                  />
+                </View>
 
-                <DebouncedPressable
-                  onPress={() => router.push("/history")}
-                  className='
-                    flex flex-row items-center gap-1 
-                    py-2 px-2 rounded-xl active:bg-gray-50 dark:active:bg-neutral-800
-                  '
-                >
-                  <Text className='text-gray-400 font-semibold dark:text-neutral-300'>
-                    Show More
+                <View className='flex flex-row items-center justify-between mt-8'>
+                  <Text className='text-gray-600 text-lg font-bold dark:text-neutral-300'>
+                    History
                   </Text>
-                  <ChevronRight size={16} color="#9ca3af" />
-                </DebouncedPressable>
-              </View>
-            </>
-          }
-          renderItem={({ item }) => (
-            <HistoryItem
-              id={item.id}
-              status={item.status}
-              questionId={item.questionId}
-              attemptedAt={item.attemptedAt}
-              responseTime={item.responseTime}
-              question={item.question.question}
-            />
-          )}
-          ListEmptyComponent={
-            <EmptyList message='No history yet' />
-          }
-        />
-      </View>
+
+                  <DebouncedPressable
+                    onPress={() => router.push("/history")}
+                    className='
+                      flex flex-row items-center gap-1 
+                      py-2 px-2 rounded-xl active:bg-gray-50 dark:active:bg-neutral-800
+                    '
+                  >
+                    <Text className='text-gray-400 font-semibold dark:text-neutral-300'>
+                      Show More
+                    </Text>
+                    <ChevronRight size={16} color="#9ca3af" />
+                  </DebouncedPressable>
+                </View>
+              </>
+            }
+            renderItem={({ item }) => (
+              <HistoryItem
+                id={item.id}
+                status={item.status}
+                questionId={item.questionId}
+                attemptedAt={item.attemptedAt}
+                responseTime={item.responseTime}
+                question={item.question.question}
+              />
+            )}
+            ListEmptyComponent={
+              <EmptyList message='No history yet' />
+            }
+          />
+        </View>
+      )}
     </View>
   );
 }

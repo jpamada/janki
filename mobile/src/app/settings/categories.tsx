@@ -205,7 +205,7 @@ export default function CategoryScreen() {
             showsVerticalScrollIndicator={false}
             contentContainerClassName="gap-2 p-4"
             contentContainerStyle={{
-              paddingBottom: insets.bottom,
+              paddingBottom: 120
             }}
             renderItem={({ item }) => (
               <CategoryItem
@@ -225,7 +225,7 @@ export default function CategoryScreen() {
           sheet={categorySheet} 
           onRequestClose={resetState}
           onBackdropPress={resetState}
-          className="px-4 py-8"
+          className="px-4 pb-8"
         >
           <View className="rounded-3xl bg-white dark:bg-neutral-700">
             <Pressable

@@ -56,11 +56,13 @@ export default function HistoryScreen() {
           </View>
 
           {history.question.image && (
-            <Image
-              source={{ uri: history.question.image }}
-              className="mt-4 h-72 w-full rounded-xl px-4"
-              resizeMode="contain"
-            />
+            <View className='w-auto bg-white dark:bg-neutral-900 pb-8'>
+              <Image
+                source={{ uri: history?.question?.image }}
+                className="h-72 w-full rounded-xl mt-4 px-4"
+                resizeMode="contain"
+              />
+            </View>
           )}
 
           {history.question.code && (
@@ -72,13 +74,10 @@ export default function HistoryScreen() {
                   hljsStyle={colorScheme === "light" ? atomOneLight : atomOneDark }
                   language={history.question.language ?? "text"}
                   scrollViewProps={{
-                    style: {
-                      flex: 1,
-                      minHeight: 420,
-                    },
                     contentContainerStyle: {
                       flexGrow: 1,
                       padding: 16,
+                      paddingBottom: 64
                     },
                   }}
                   textStyle={{

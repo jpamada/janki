@@ -1,9 +1,10 @@
-import { Animated, Modal, Pressable, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Modal, Pressable, Text, View } from 'react-native';
 import { Check, ChevronDown } from 'lucide-react-native';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { useColorScheme } from 'nativewind';
 import { useState } from 'react';
+
+import BottomSheet from '@/components/shared/BottomSheet';
 
 type PickerOption<T> = {
   label: string;
@@ -33,15 +34,16 @@ export default function CustomPicker<T extends string | number | null>({
   variant = 'sheet',
   contentContainerClassName,
 }: CustomPickerProps<T>) {
-  
+
   const selectedOption = options.find(
     (option) => option.value === selectedValue
   );
 
   const trigger = (
     <Text className={`
+      min-w-0 shrink
       ${selectedOption ? 'text-gray-700 dark:text-neutral-300' : 'text-gray-400 dark:text-neutral-400'}
-      ${contentContainerClassName}
+      ${contentContainerClassName ?? ''}
     `}>
       {triggerLabel ?? selectedOption?.label ?? placeholder ?? '—'}
     </Text>
@@ -79,7 +81,6 @@ type VariantProps<T> = {
   className?: string;
   trigger: React.ReactNode;
   onValueChange: (value: T) => void;
-  contentContainerClassname?: string;
 };
 
 function SheetPicker<T extends string | number | null>({
@@ -91,106 +92,64 @@ function SheetPicker<T extends string | number | null>({
   onValueChange,
 }: VariantProps<T>) {
   const { colorScheme } = useColorScheme();
-  const insets = useSafeAreaInsets();
   const sheet = useBottomSheet();
+
+  const iconColor = colorScheme === 'light' ? '#4b5563' : '#d4d4d4';
 
   return (
     <>
       <Pressable
         onPress={() => sheet.open()}
         className={`
-          flex-row items-center gap-1 
+          flex-row items-center gap-2
           rounded-xl px-3 py-2
           bg-gray-100 active:bg-gray-200
           dark:bg-neutral-600 dark:active:bg-neutral-700
-          ${className}
+          ${className ?? ''}
         `}
       >
         {trigger}
-        
-        <ChevronDown 
-          size={16} 
-          color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} 
-        />
+        <ChevronDown size={16} color={iconColor} />
       </Pressable>
 
-      <Modal
-        transparent
-        animationType="none"
-        visible={sheet.visible}
-        onRequestClose={() => sheet.close()}
-      >
-        <View className="flex-1 justify-end">
-          <Animated.View
-            className="absolute inset-0 bg-black/40"
-            style={{ opacity: sheet.backdropOpacity }}
-          >
-            <Pressable className="flex-1" onPress={() => sheet.close()} />
-          </Animated.View>
+      <BottomSheet sheet={sheet} title={title} className="px-4 pb-4">
+        <View>
+          {options.map((option, index) => {
+            const isSelected = option.value === selectedValue;
+            const isFirst = index === 0;
+            const isLast = index === options.length - 1;
 
-          <Animated.View
-            className="
-              rounded-t-3xl px-4 py-8
-              bg-gray-50 
-              dark:bg-neutral-900
-            "
-            style={{ transform: [{ translateY: sheet.translateY }] }}
-          >
-            {title && (
-              <Text className="
-                mb-4 px-2
-                text-gray-700 font-bold text-lg
-                dark:text-neutral-300
-              ">
-                {title}
-              </Text>
-            )}
+            return (
+              <Pressable
+                key={String(option.value)}
+                onPress={() => {
+                  onValueChange(option.value);
+                  sheet.close();
+                }}
+                className={`
+                  flex-row items-center justify-between gap-2 p-4 
+                  bg-white active:bg-gray-100 
+                  dark:bg-neutral-700 dark:active:bg-neutral-600
+                  ${isFirst ? 'rounded-t-xl' : ''}
+                  ${isLast ? 'rounded-b-xl' : ''}
+                `}
+              >
+                <Text className={`
+                  min-w-0 shrink
+                  ${isSelected 
+                    ? 'text-gray-900 font-semibold dark:text-neutral-200' 
+                    : 'text-gray-600 dark:text-neutral-400'
+                  }
+                `}>
+                  {option.label}
+                </Text>
 
-            <View>
-              {options.map((option, index) => {
-                const isSelected = option.value === selectedValue;
-                const isFirst = index === 0;
-                const isLast = index === options.length - 1;
-
-                return (
-                  <Pressable
-                    key={String(option.value)}
-                    onPress={() => {
-                      onValueChange(option.value);
-                      sheet.close();
-                    }}
-                    className={`
-                      flex-row items-center justify-between p-4 
-                      bg-white active:bg-gray-100 
-                      dark:bg-neutral-800 dark:active:bg-neutral-700
-                      ${isFirst ? 'rounded-t-xl' : ''}
-                      ${isLast ? 'rounded-b-xl' : ''}
-                    `}
-                  >
-                    <Text className={`
-                      ${isSelected 
-                        ? 'text-gray-900 font-semibold dark:text-neutral-200' 
-                        : 'text-gray-600 dark:text-neutral-400'
-                      }
-                    `}>
-                      {option.label}
-                    </Text>
-
-                    {isSelected && 
-                      <Check 
-                        size={20} 
-                        color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} 
-                      />
-                    }
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            <View style={{ height: insets.bottom }} />
-          </Animated.View>
+                {isSelected && <Check size={20} color={iconColor} />}
+              </Pressable>
+            );
+          })}
         </View>
-      </Modal>
+      </BottomSheet>
     </>
   );
 }
@@ -204,8 +163,10 @@ function CenteredModalPicker<T extends string | number | null>({
   onValueChange,
 }: VariantProps<T>) {
   const { colorScheme } = useColorScheme();
-  
+
   const [visible, setVisible] = useState(false);
+
+  const iconColor = colorScheme === 'light' ? '#4b5563' : '#d4d4d4';
 
   return (
     <>
@@ -213,17 +174,14 @@ function CenteredModalPicker<T extends string | number | null>({
         onPress={() => setVisible(true)}
         className={`
           flex-row items-center gap-1 
-          rounded-xl bg-gray-100 active:bg-gray-200
-          px-3 py-2
-          ${className}
+          rounded-xl px-3 py-2
+          bg-gray-100 active:bg-gray-200
+          dark:bg-neutral-600 dark:active:bg-neutral-700
+          ${className ?? ''}
         `}
       >
         {trigger}
-
-        <ChevronDown 
-          size={16} 
-          color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} 
-        />
+        <ChevronDown size={16} color={iconColor} />
       </Pressable>
 
       <Modal
@@ -266,11 +224,11 @@ function CenteredModalPicker<T extends string | number | null>({
                       dark:bg-neutral-800 dark:active:bg-neutral-700
                     "
                   >
-                    <Text className={`text-lg ${isSelected ? 'font-semibold text-gray-800 dark:text-neutral-300' : 'text-gray-600 dark:text-neutral-400'}`}>
+                    <Text className={`text-lg min-w-0 shrink ${isSelected ? 'font-semibold text-gray-800 dark:text-neutral-300' : 'text-gray-600 dark:text-neutral-400'}`}>
                       {option.label}
                     </Text>
 
-                    {isSelected && <Check size={20} color="#4b5563" />}
+                    {isSelected && <Check size={20} color={iconColor} />}
                   </Pressable>
                 );
               })}

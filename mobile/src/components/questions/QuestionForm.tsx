@@ -1,15 +1,15 @@
 import { EllipsisVertical, ImageOff, ImagePlus, CodeXml, Code, Trash2, ListMinus, ListPlus } from 'lucide-react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
-import { Image, Pressable, Text, TextInput, View, InteractionManager  } from 'react-native';
 import { type WebViewAPI, CodeEditor } from '@actualwave/react-native-codeditor';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { QuestionFormData, questionSchema } from '@/schemas/question.schema';
+import { Image, InteractionManager, Pressable, Text, TextInput, View  } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { setEditorLanguage } from '@/providers/setEditorLanguage';
-import { useCallback, useRef, useState, useEffect } from 'react';
 import { getEditorHeight } from '@/helpers/codeditor.helper';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { LANGUAGES } from '@/constants/languages';
 import { useColorScheme } from 'nativewind';
 
@@ -18,6 +18,12 @@ import CustomPicker from '../shared/CustomPicker';
 import BottomSheet from '../shared/BottomSheet';
 import Header from '../shared/Header';
 import AnswerRows from './AnswerRows';
+import { NativeStackNavigationProp, useFocusEffect, useNavigation } from 'expo-router';
+import { ParamListBase } from 'expo-router/build/react-navigation';
+
+// const CodeEditor = lazy(() => import (
+//   '@actualwave/react-native-codeditor'
+// ));
 
 type QuestionFormProps = {
   onCreateSuccess?: boolean;
@@ -45,13 +51,24 @@ export default function QuestionForm({
   },
 }: QuestionFormProps) {
   const editorApiRef = useRef<WebViewAPI | null>(null);
+  const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
+
   const { colorScheme } = useColorScheme();
 
-  const [editorReady, setEditorReady] = useState(false);
+  const isLight = colorScheme === "light";
+
+  const editorBackgroundColor = isLight
+    ? "#f3f4f6" 
+    : "#2B2B2B";
+
+  const editorTheme = isLight 
+    ? "basic" 
+    : "darcula";
 
   const questionSheet = useBottomSheet();
   const insets = useSafeAreaInsets();
 
+  const [editorReady, setEditorReady] = useState(false);
   const [codeVisible, setCodeVisible] = useState(!!defaultValues?.code?.trim());
   const [imageVisible, setImageVisible] = useState(!!defaultValues?.image?.trim());
   const [explanationVisible, setExplanationVisible] = useState(!!defaultValues?.explanation?.trim());
@@ -159,17 +176,26 @@ export default function QuestionForm({
     });
   };
 
-  useEffect(() => {
-    if (!codeVisible) return;
+  useFocusEffect(
+    useCallback(() => {
+      setEditorReady(false);
 
-    const task = InteractionManager.runAfterInteractions(() => {
-      setEditorReady(true);
-    });
+      const unsubscribe = navigation.addListener(
+        'transitionEnd',
+        (event) => {
+          if (!event.data?.closing) {
+            setEditorReady(true);
+          }
+        }
+      );
 
-    return () => {
-      task.cancel();
-    };
-  }, [codeVisible]);
+      return () => {
+        unsubscribe();
+        setEditorReady(false);
+        editorApiRef.current = null;
+      };
+    }, [navigation])
+  );
   
   return (
     <View className="flex-1">
@@ -250,11 +276,18 @@ export default function QuestionForm({
                 Image
               </Text>
 
-              <Image
-                source={{ uri: image }}
-                className="h-56 w-full rounded-xl"
-                resizeMode="contain"
-              />
+              <Pressable
+                onPress={() => void handleSelectImage()}
+                accessibilityRole="button"
+                accessibilityLabel="Change question image"
+                className="p-4 rounded-xl bg-gray-100 dark:bg-neutral-700 active:opacity-70"
+              >
+                <Image
+                  source={{ uri: image }}
+                  className="h-56 w-full rounded-xl"
+                  resizeMode="contain"
+                />
+              </Pressable>
             </View>
           )}
 
@@ -298,13 +331,16 @@ export default function QuestionForm({
                       borderRadius: 12,
                       overflow: 'hidden' 
                     }}
-                    className='bg-white dark:bg-neutral-800'
+                    className='bg-gray-100 dark:bg-neutral-800'
                   >
                     {editorReady ? (
                       <CodeEditor
                         content={value ?? ""}
                         language="javascript"
-                        theme={colorScheme === "dark" ? "darcula" : "basic"}
+                        theme={editorTheme}
+                        backgroundColor={
+                          editorBackgroundColor
+                        }
                         onInitialized={async (api) => {
                           editorApiRef.current = api;
                           if (defaultValues.language) {
@@ -317,11 +353,10 @@ export default function QuestionForm({
                         onLog={(...args) => console.log("[editor]", ...args)}
                       />
                     ) : (
-                      <View className="flex-1 bg-gray-100 dark:bg-neutral-800 p-4">
-                        <View className="mb-3 h-3 w-24 rounded-full bg-gray-200 dark:bg-neutral-700" />
-                        <View className="mb-3 h-3 w-40 rounded-full bg-gray-200 dark:bg-neutral-700" />
-                        <View className="mb-3 h-3 w-32 rounded-full bg-gray-200 dark:bg-neutral-700" />
-                        <View className="h-3 w-48 rounded-full bg-gray-200 dark:bg-neutral-700" />
+                      <View className="absolute inset-0 justify-center items-center bg-gray-100 rounded-xl dark:bg-[#2B2B2B]">
+                        <Text className="text-[12px] text-neutral-900 dark:text-neutral-300">
+                          Initializing, please wait...
+                        </Text>
                       </View>
                     )}
                   </View>
@@ -451,7 +486,7 @@ export default function QuestionForm({
         </View>
       </KeyboardAwareScrollView>
 
-      <KeyboardStickyView offset={{ closed: 0, opened: 0 }}>
+      <KeyboardStickyView offset={{ closed: 0, opened: insets.top }}>
         {onCreateSuccess && (
           <View className="h-12 flex-row items-center bg-gray-600 rounded-xl px-4 mx-2 my-2">
             <Text className="flex-1 text-white font-medium">
@@ -464,7 +499,7 @@ export default function QuestionForm({
           className="
             flex-row items-center 
             border-gray-200 border-t
-            bg-white px-4 py-6
+            bg-white p-4
             dark:bg-neutral-800 dark:border-neutral-800" 
           style={{ paddingBottom: insets.bottom }}
         >
@@ -486,7 +521,7 @@ export default function QuestionForm({
 
       <BottomSheet
         sheet={questionSheet}
-        className="px-4 py-8"
+        className="px-4 pb-8"
         onRequestClose={() => questionSheet.close()} 
       >
         <View className="rounded-3xl bg-white dark:bg-neutral-700">

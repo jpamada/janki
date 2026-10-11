@@ -42,7 +42,7 @@ export default function Stats({
       </View>
 
       <View className="flex-row gap-2">
-        <View className="flex-1 items-center gap-1 p-4 bg-gray-50 rounded-xl dark:bg-neutral-800">
+        <View className="flex-1 items-center gap-1 p-4 bg-gray-50 rounded-xl min-w-0 dark:bg-neutral-800">
           <Text className="text-gray-800 text-xl font-bold dark:text-neutral-300">
             {correctReviews}
           </Text>
@@ -52,7 +52,7 @@ export default function Stats({
           </Text>
         </View>
 
-        <View className="flex-1 items-center gap-1 p-4 bg-gray-50 rounded-xl dark:bg-neutral-800">
+        <View className="flex-1 items-center gap-1 p-4 bg-gray-50 rounded-xl min-w-0 dark:bg-neutral-800">
           <Text className="text-gray-800 text-xl font-bold dark:text-neutral-300">
             {totalReviews}
           </Text>
@@ -62,7 +62,7 @@ export default function Stats({
           </Text>
         </View>
 
-        <View className="flex-1 items-center gap-1 p-4 bg-gray-50 rounded-xl dark:bg-neutral-800">
+        <View className="flex-1 items-center gap-1 p-4 bg-gray-50 rounded-xl min-w-0 dark:bg-neutral-800">
           <Text className="text-gray-800 text-xl font-bold dark:text-neutral-300">
             {accuracy}%
           </Text>

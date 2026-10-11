@@ -138,7 +138,7 @@ export default function FavoritesScreen() {
         sheet={lessonSheet}
         onRequestClose={resetState}
         onBackdropPress={resetState}
-        className="px-4 py-8"
+        className="px-4 pb-8"
       >
         <View className="bg-white rounded-3xl dark:bg-neutral-700">
           <Pressable

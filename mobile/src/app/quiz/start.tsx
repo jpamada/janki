@@ -1,12 +1,11 @@
-import { AArrowUp, BookCheck, CaseSensitive, FileQuestionMark, Lightbulb, LogOut, Settings, TextAlignStart, Trophy, Volume2 } from 'lucide-react-native';
-import { getDueQuestionIds, recordCorrectAnswer, recordIncorrectAnswer, resetProgressForQuestions } from '@/repositories/progress.repository';
+import { AArrowUp, BookCheck, CaseSensitive, Circle, CircleCheck, FileQuestionMark, Lightbulb, LogOut, Settings, TextAlignStart, Trophy, Volume2 } from 'lucide-react-native';
+import { finalizeQuizAnswer, getDueQuestionIds, resetProgressForQuestions } from '@/repositories/progress.repository';
 import { ActivityIndicator, Pressable, Text, TextInput, View, Image, Switch } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { atomOneLight, atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { createHistory } from '@/repositories/history.repository';
 import { type ReviewInterval } from '@/helpers/progress.helper';
 import { getQuizData } from '@/repositories/quiz.repository';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -18,15 +17,28 @@ import { shuffle } from '@/helpers/quiz.helper';
 import { useSfx } from '@/contexts/SfxContext';
 import { useColorScheme } from 'nativewind';
 
+import * as Crypto from "expo-crypto";
 import DebouncedPressable from '@/components/shared/pressables/DebouncedPressable';
 import EmptyStateScreen from '@/components/shared/EmptyState';
 import CustomPicker from '@/components/shared/CustomPicker';
 import BottomSheet from '@/components/shared/BottomSheet';
 import QuizContinueScreen from './continue';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 const CodeHighlighter = lazy(
   () => import("react-native-code-highlighter"),
 );
+
+type PendingAnswer = {
+  submissionId: string;
+  correct: boolean;
+  answerId: string | null;
+  answerText: string;
+  correctAnswer: {
+    id: string;
+    answer: string;
+  };
+};
 
 export default function QuizStartScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
@@ -51,6 +63,12 @@ export default function QuizStartScreen() {
   const [identificationInput, setIdentificationInput] = useState('');
 
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+
+  const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
+  const [pendingAnswer, setPendingAnswer] = useState<PendingAnswer | null>(null);
+  const [isSavingAnswer, setIsSavingAnswer] = useState(false);
+
+  const isFinalizingAnswerRef = useRef(false);
 
   const [completedQuestionIds, setCompletedQuestionIds] = useState<Set<string>>(new Set());
   const [quizResults, setQuizResults] = useState<QuizResults[]>([]);
@@ -86,79 +104,17 @@ export default function QuizStartScreen() {
     ? ((queuedQuestionIndex + 1) / questions.length) * 100
     : 0;
 
-  const createHistoryMutation = useMutation({
-    mutationFn: createHistory,
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['heatmap'] 
-      });
-      queryClient.invalidateQueries({ 
-        queryKey: ['statistics'] 
-      });
-      queryClient.invalidateQueries({ 
-        queryKey: ['dailyStatistics'] 
-      });
-       queryClient.invalidateQueries({ 
-        queryKey: ['history'] 
-      });
-      queryClient.invalidateQueries({ 
-        queryKey: ['latestHistory'] 
-      });
-    },
-
-    onError: (err) => {
-      showSnackbar({ 
-        message: 'Something went wrong. Please try again.' 
-      });
-    },
-  });
-
-  const recordCorrectMutation = useMutation({
-    mutationFn: ({ questionId, interval }: { 
-      questionId: string; 
-      interval: ReviewInterval 
-    }) => recordCorrectAnswer(questionId, interval),
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['subjects'] 
-      });
-      queryClient.invalidateQueries({ 
-        queryKey: ['statistics'] 
-      });
-      queryClient.invalidateQueries({ 
-        queryKey: ['dailyStatistics'] 
-      });
-    },
-
-    onError: (err) => {
-      showSnackbar({ 
-        message: 'Something went wrong. Please try again.' 
-      });
-    },
-  });
-
-  const recordIncorrectMutation = useMutation({
-    mutationFn: (questionId: string) => 
-      recordIncorrectAnswer(questionId),
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['subjects'] 
-      });
-      queryClient.invalidateQueries({ 
-        queryKey: ['statistics'] 
-      });
-      queryClient.invalidateQueries({ 
-        queryKey: ['dailyStatistics'] 
-      });
-    },
-
-    onError: (err) => {
-      showSnackbar({ 
-        message: 'Something went wrong. Please try again.' 
-      });
+  const finalizeQuizAnswerMutation = useMutation({
+    mutationFn: finalizeQuizAnswer,
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["heatmap"] }),
+        queryClient.invalidateQueries({ queryKey: ["statistics"] }),
+        queryClient.invalidateQueries({ queryKey: ["dailyStatistics"] }),
+        queryClient.invalidateQueries({ queryKey: ["history"] }),
+        queryClient.invalidateQueries({ queryKey: ["latestHistory"] }),
+        queryClient.invalidateQueries({ queryKey: ["subjects"] }),
+      ]);
     },
   });
 
@@ -175,6 +131,8 @@ export default function QuizStartScreen() {
     if (queuedQuestionIndex < questions.length - 1) {
       setIsCorrect(null);
       setIdentificationInput('');
+      setSelectedAnswerId(null);
+      setPendingAnswer(null);
       setQueuedQuestionIndex((previous) => previous + 1);
       return;
     }
@@ -192,69 +150,8 @@ export default function QuizStartScreen() {
     }
   };
 
-  const handleAnswerResult = (input: {
-    correct: boolean;
-    answerId: string | null;
-    answerText: string;
-    correctAnswer: { id: string; answer: string };
-  }) => {
-    if (!currentQuestion) return;
-
-    playAnswerSfx(input.correct);
-    setIsCorrect(input.correct);
-
-    setQuizResults((previous) => [
-      ...previous, {
-        isCorrect: input.correct,
-        questionId: currentQuestion.id,
-        answerId: input.answerId,
-        answerText: input.answerText,
-        correctAnswerId: input.correctAnswer.id,
-        correctAnswerText: input.correctAnswer.answer,
-      },
-    ]);
-  };
-
-  const handleSubmitMultipleChoice = async (answerId: string) => {
-    if (!currentQuestion || resultSheet.visible) {
-      return;
-    }
-
-    const selectedAnswer = currentQuestion.questionAnswers.find(
-      (item) => item.answer.id === answerId,
-    );
-    const correctAnswer = currentQuestion.questionAnswers.find(
-      (item) => item.isCorrect,
-    );
-
-    if (!selectedAnswer || !correctAnswer) {
-      return;
-    }
-
-    const correct = selectedAnswer.answer.id === correctAnswer.answer.id;
-
-    handleAnswerResult({
-      correct,
-      answerId: selectedAnswer.answer.id,
-      answerText: selectedAnswer.answer.answer,
-      correctAnswer: correctAnswer.answer,
-    });
-
-    createHistoryMutation.mutateAsync({ 
-      questionId: currentQuestion.id, 
-      answer: selectedAnswer.answer.answer,
-      isCorrect: correct,
-    });
-
-    if (!correct) {
-      recordIncorrectMutation.mutateAsync(currentQuestion.id);
-    }
-
-    resultSheet.open();
-  };
-
-  const handleSubmitIdentification = async () => {
-    if (!currentQuestion || resultSheet.visible || !identificationInput.trim()) {
+  const handleSubmitAnswer = () => {
+    if (!currentQuestion || isCorrect !== null) {
       return;
     }
 
@@ -266,61 +163,124 @@ export default function QuizStartScreen() {
       return;
     }
 
-    const trimmedInput = identificationInput.trim();
+    let answerId: string | null = null;
+    let answerText = '';
+
+    if (currentQuestion.type === 'multiple_choice') {
+      if (!selectedAnswerId) {
+        return;
+      }
+
+      const selectedAnswer = currentQuestion.questionAnswers.find(
+        (item) => item.answer.id === selectedAnswerId,
+      );
+
+      if (!selectedAnswer) {
+        return;
+      }
+
+      answerId = selectedAnswer.answer.id;
+      answerText = selectedAnswer.answer.answer;
+    } else {
+      answerText = identificationInput.trim();
+
+      if (!answerText) {
+        return;
+      }
+    }
+
     const correctAnswerText = correctAnswer.answer.answer.trim();
 
-    const correct = settings?.caseSensitive
-      ? trimmedInput === correctAnswerText
-      : trimmedInput.toLowerCase() === correctAnswerText.toLowerCase();
+    const correct =
+      currentQuestion.type === 'multiple_choice'
+        ? answerId === correctAnswer.answer.id
+        : settings?.caseSensitive
+          ? answerText === correctAnswerText
+          : answerText.toLowerCase() === correctAnswerText.toLowerCase();
 
-    handleAnswerResult({
+    setPendingAnswer({
+      submissionId: Crypto.randomUUID(),
       correct,
-      answerId: null,
-      answerText: trimmedInput,
+      answerId,
+      answerText,
       correctAnswer: correctAnswer.answer,
     });
 
-    createHistoryMutation.mutateAsync({ 
-      questionId: currentQuestion.id, 
-      answer: trimmedInput,
-      isCorrect: correct,
-    });
-
-    if (!correct) {
-        recordIncorrectMutation.mutateAsync(
-        currentQuestion.id
-      );
-    }
-
+    setIsCorrect(correct);
+    playAnswerSfx(correct);
     resultSheet.open();
   };
 
-  const handleSubmitInterval = async (interval: ReviewInterval) => {
-    if (!currentQuestion) {
+  const handleFinalizeAnswer = async (interval?: ReviewInterval) => {
+  if (
+    !currentQuestion ||
+    !pendingAnswer ||
+    isFinalizingAnswerRef.current
+  ) {
+    return;
+  }
+
+  if (pendingAnswer.correct && !interval) {
+    return;
+  }
+
+  isFinalizingAnswerRef.current = true;
+  setIsSavingAnswer(true);
+
+  try {
+    await finalizeQuizAnswerMutation.mutateAsync({
+      submissionId: pendingAnswer.submissionId,
+      questionId: currentQuestion.id,
+      answer: pendingAnswer.answerText,
+      isCorrect: pendingAnswer.correct,
+      ...(pendingAnswer.correct && interval ? { interval } : {}),
+    });
+
+    setQuizResults((previous) => [
+      ...previous,
+      {
+        isCorrect: pendingAnswer.correct,
+        questionId: currentQuestion.id,
+        answerId: pendingAnswer.answerId,
+        answerText: pendingAnswer.answerText,
+        correctAnswerId: pendingAnswer.correctAnswer.id,
+        correctAnswerText: pendingAnswer.correctAnswer.answer,
+      },
+    ]);
+
+    resultSheet.close(() => {
+      handleQuizProgress(pendingAnswer.correct);
+      isFinalizingAnswerRef.current = false;
+      setIsSavingAnswer(false);
+    });
+    } catch {
+    isFinalizingAnswerRef.current = false;
+    setIsSavingAnswer(false);
+
+    showSnackbar({
+      message: "Something went wrong. Please try again.",
+    });
+  }
+};
+
+const handleSubmitInterval = (interval: ReviewInterval) => {
+  void handleFinalizeAnswer(interval);
+};
+
+const handleContinueIncorrect = () => {
+  if (pendingAnswer?.correct) {
+    return;
+  }
+
+  void handleFinalizeAnswer();
+};
+
+  const handleSelectMultipleChoice = (answerId: string) => {
+    if (isCorrect !== null || resultSheet.visible) {
       return;
     }
 
-    try {
-      recordCorrectMutation.mutateAsync({
-        questionId: currentQuestion.id,
-        interval: interval,
-      });
-
-      resultSheet.close(() => {
-        handleQuizProgress(true);
-      });
-
-    } catch {
-      showSnackbar({ 
-        message: 'Something went wrong. Please try again.' 
-      });
-    }
-  };
-
-  const handleContinueIncorrect = () => {
-    resultSheet.close(() => {
-      handleQuizProgress(false);
-    });
+    setSelectedAnswerId(answerId);
   };
 
   const handleQuizReset = async () => {
@@ -334,6 +294,8 @@ export default function QuizStartScreen() {
       setCompletedQuestionIds(new Set());
       setQuizResults([]);
       setIsQuizIncomplete(false);
+      setSelectedAnswerId(null);
+      setPendingAnswer(null);
       setIsQuizComplete(false);
       setIsCorrect(null);
       setIdentificationInput('');
@@ -357,7 +319,10 @@ export default function QuizStartScreen() {
     setQueuedQuestions(shuffle(remainingQuestions));
     setQueuedQuestionIndex(0);
     setIsQuizIncomplete(false);
+    setIsCorrect(null);
     setIdentificationInput('');
+    setSelectedAnswerId(null);
+    setPendingAnswer(null);
   };
 
   const handleExitQuiz = () => {
@@ -369,10 +334,12 @@ export default function QuizStartScreen() {
     setQueuedQuestionIndex(0);
     setIsQuizIncomplete(false);
     setIdentificationInput('');
+    setSelectedAnswerId(null);
+    setPendingAnswer(null);
     setQuizSessionInitialized(false);
     setCompletedQuestionIds(new Set());
     syncedQuestionIdsRef.current = new Set();
-    router.push("/(tabs)");
+    router.back();
   };
 
   useEffect(() => {
@@ -448,6 +415,18 @@ export default function QuizStartScreen() {
     }
   }, [lessonId, isLoading, quizSessionInitialized, quizData , showSnackbar]);
 
+  const animatedProgress = useSharedValue(progress);
+
+  useEffect(() => {
+    animatedProgress.value = withTiming(progress, {
+      duration: 400,
+    });
+  }, [progress, animatedProgress]);
+
+  const progressStyle = useAnimatedStyle(() => ({
+    width: `${animatedProgress.value}%`,
+  }));
+
   if (isQuizComplete) {
     return (
       <QuizResultsScreen
@@ -486,21 +465,31 @@ export default function QuizStartScreen() {
           <View className="mt-8 flex-row items-center gap-1 p-1">
             <Pressable
               onPress={() => settingSheet.open()}
-              className="rounded-xl p-3 active:bg-gray-100 dark:active:bg-neutral-800"
+              className="rounded-xl p-3 active:bg-gray-200 dark:active:bg-neutral-800"
             >
               <Settings strokeWidth={2} color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"}  />
             </Pressable>
 
             <View className="me-3 h-3 flex-1 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-400">
-              <View className="h-full bg-gray-600" style={{ width: `${progress}%` }} />
+              <Animated.View
+                className="h-full rounded-full bg-gray-600"
+                style={progressStyle}
+              />
             </View>
           </View>
 
           <KeyboardAwareScrollView
+            mode="layout"
             bottomOffset={20}
+            extraKeyboardSpace={12}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
-            className="bg-white dark:bg-neutral-900"
+            className={`
+              ${currentQuestion?.code ? "" : "bg-white"}
+              ${currentQuestion?.type === "identification" && currentQuestion?.code
+                  ? "bg-[#FAFAFA] dark:bg-[#282c34]" 
+                  : "dark:bg-neutral-900"}
+            `}
             contentContainerStyle={{ 
               flexGrow: 1,
             }}
@@ -520,15 +509,22 @@ export default function QuizStartScreen() {
             </View>
 
             {currentQuestion?.image && (
-              <Image
-                source={{ uri: currentQuestion?.image }}
-                className="h-72 w-full rounded-xl mt-4 px-4"
-                resizeMode="contain"
-              />
+              <View className='w-auto bg-white dark:bg-neutral-900 pb-8'>
+                <Image
+                  source={{ uri: currentQuestion?.image }}
+                  className="h-72 w-full rounded-xl mt-4 px-4"
+                  resizeMode="contain"
+                />
+              </View>
             )}
 
             {currentQuestion?.code && (
-              <View className="flex-1 bg-white w-auto dark:bg-neutral-900">
+              <View className={`
+                bg-white w-auto 
+                ${currentQuestion?.type === "identification" 
+                  ? "dark:bg-[#262a31]" 
+                  : "dark:bg-neutral-900"}
+              `}>
                 <Suspense 
                   fallback={
                     <View 
@@ -540,13 +536,10 @@ export default function QuizStartScreen() {
                     hljsStyle={colorScheme === "light" ? atomOneLight : atomOneDark }
                     language={currentQuestion.language ?? "text"}
                     scrollViewProps={{
-                      style: {
-                        flex: 1,
-                        minHeight: 450,
-                      },
                       contentContainerStyle: {
                         flexGrow: 1,
                         padding: 16,
+                        paddingBottom: 64
                       },
                     }}
                     textStyle={{
@@ -560,12 +553,47 @@ export default function QuizStartScreen() {
               </View>
             )}  
 
+            {currentQuestion && (
+              currentQuestion?.type === "multiple_choice" && (
+                <View className='flex flex-col items-stretch gap-2 p-4 dark:bg-neutral-900'>
+                  {currentQuestion.questionAnswers.map((item) => {
+                    const selected = selectedAnswerId === item.answer.id;
+
+                    return (
+                      <Pressable
+                        key={item.answer.id}
+                        disabled={isCorrect !== null}
+                        onPress={() => handleSelectMultipleChoice(item.answer.id)}
+                        className={`
+                          flex-row items-start rounded-xl p-4
+                          ${selected 
+                            ? 'bg-gray-600 dark:bg-neutral-700' 
+                            : 'bg-gray-200 active:bg-gray-300 dark:bg-neutral-800 dark:active:bg-neutral-700'}
+                        `}
+                      >
+                        {selected ? (
+                          <CircleCheck color="white" size={20} />
+                        ) : (
+                          <Circle color={colorScheme === "light" ? "black" : "white"} size={20} />
+                        )}
+
+                        <Text className={`
+                          ${selected ? "text-white" : "text-black"}
+                          ml-3 flex-1 dark:text-neutral-300
+                        `}>
+                          {item.answer.answer}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              )
+            )}
+
             <BottomSheet
               sheet={resultSheet}
-              onRequestClose={isCorrect ? undefined : handleContinueIncorrect}
-              onBackdropPress={isCorrect ? undefined : handleContinueIncorrect}
             >
-              <View className="p-6">
+              <View className="px-6 pb-6">
                 <Text className="text-3xl font-bold text-gray-800 dark:text-white">
                   {isCorrect ? 'Correct!' : 'Incorrect'}
                 </Text>
@@ -606,7 +634,7 @@ export default function QuizStartScreen() {
 
                     <View className="flex-row items-center gap-2">
                       <DebouncedPressable
-                        disabled={recordCorrectMutation.isPending}
+                        disabled={isSavingAnswer}
                         onPress={() => handleSubmitInterval('1_day')}
                         className="flex-1 rounded-lg bg-gray-600 px-4 py-2 active:bg-gray-700 disabled:bg-gray-400"
                       >
@@ -616,7 +644,7 @@ export default function QuizStartScreen() {
                       </DebouncedPressable>
 
                       <DebouncedPressable
-                        disabled={recordCorrectMutation.isPending}
+                        disabled={isSavingAnswer}
                         onPress={() => handleSubmitInterval('3_days')}
                         className="flex-1 rounded-lg bg-gray-600 px-4 py-2 active:bg-gray-700 disabled:bg-gray-400"
                       >
@@ -626,7 +654,7 @@ export default function QuizStartScreen() {
                       </DebouncedPressable>
 
                       <DebouncedPressable
-                        disabled={recordCorrectMutation.isPending}
+                        disabled={isSavingAnswer}
                         onPress={() => handleSubmitInterval('7_days')}
                         className="flex-1 rounded-lg bg-gray-600 px-4 py-2 active:bg-gray-700 disabled:bg-gray-400"
                       >
@@ -638,11 +666,12 @@ export default function QuizStartScreen() {
                   </View>
                 ) : (
                   <Pressable
+                    disabled={isSavingAnswer}
                     onPress={handleContinueIncorrect}
                     className="mt-8 rounded-lg bg-gray-600 p-4 active:bg-gray-700"
                   >
                     <Text className="text-center text-lg font-semibold text-white">
-                      Continue
+                       {isSavingAnswer ? 'Saving...' : 'Continue'}
                     </Text>
                   </Pressable>
                 )}
@@ -651,7 +680,7 @@ export default function QuizStartScreen() {
             
             <BottomSheet
               sheet={settingSheet}
-              className="px-4 py-8"
+              className="px-4 pb-8"
               onRequestClose={() => settingSheet.close()}
             >
               <View className="
@@ -854,7 +883,10 @@ export default function QuizStartScreen() {
 
           <DebouncedPressable
             onPress={handleQuizReset}
-            className="rounded-xl bg-gray-600 px-8 py-4 active:bg-gray-700 dark:bg-neutral-700 dark:active:bg-neutral-600"
+            className="
+              rounded-xl px-8 py-4
+              bg-gray-600 active:bg-gray-700 
+              dark:bg-neutral-700 dark:active:bg-neutral-600"
           >
             <Text className="text-center text-lg font-semibold text-white">
               Answer Again
@@ -865,64 +897,60 @@ export default function QuizStartScreen() {
       ) : (
         <EmptyStateScreen
           title="No Questions Available"
-          icon={<FileQuestionMark color="#4b5563" size={72} />}
+          icon={<FileQuestionMark color={colorScheme === "light" ? "#4b5563" : "#d4d4d4"} size={72} />}
           navigate={{ pathname: '/questions/create', params: { lessonId } }}
         />
       )}
 
       {currentQuestion && (
         <KeyboardStickyView offset={{ closed: 0, opened: insets.top }}>
-          <View className="gap-4 bg-gray-100 p-4 dark:bg-neutral-900" style={{ paddingBottom: insets.bottom }}>
-            {currentQuestion.type === 'multiple_choice' ? (
-              currentQuestion.questionAnswers.map((item) => (
-                <Pressable
-                  key={item.answer.id}
-                  disabled={resultSheet.visible}
-                  onPress={() => handleSubmitMultipleChoice(item.answer.id)}
-                  className="
-                    rounded-xl 
-                    bg-gray-600 p-4 active:bg-gray-700 
-                    dark:bg-neutral-800 dark:active:bg-neutral-700
-                  "
-                >
-                  <Text className="text-white text-center text-lg font-semibold">
-                    {item.answer.answer}
-                  </Text>
-                </Pressable>
-              ))
-            ) : (
-              <>
-                <TextInput
-                  value={identificationInput}
-                  onChangeText={setIdentificationInput}
-                  editable={!resultSheet.visible}
-                  placeholder="Type your answer"
-                  placeholderTextColor={
-                    colorScheme === "dark" ? "#a3a3a3" : "#9ca3af"
-                  }
-                  autoCapitalize="none"
-                  className="
-                    rounded-xl px-4 py-4
-                    bg-gray-200 text-lg font-semibold 
-                    dark:bg-neutral-700 dark:text-neutral-300
-                  "
-                />
-
-                <Pressable
-                  disabled={resultSheet.visible || !identificationInput.trim()}
-                  onPress={handleSubmitIdentification}
-                  className="
-                    rounded-xl p-4
-                    bg-gray-600 active:bg-gray-500 disabled:bg-gray-400 
-                    dark:disabled:bg-gray-500
-                  "
-                >
-                  <Text className="text-center text-lg font-semibold text-white">
-                    Submit
-                  </Text>
-                </Pressable>
-              </>
+          <View
+            className="gap-4 bg-gray-100 p-4 dark:bg-neutral-900"
+            style={{ paddingBottom: insets.bottom }}
+          >
+            {currentQuestion.type === 'identification' && (
+              <TextInput
+                value={identificationInput}
+                onChangeText={setIdentificationInput}
+                editable={isCorrect === null}
+                placeholder="Type your answer"
+                placeholderTextColor={
+                  colorScheme === 'dark' ? '#a3a3a3' : '#9ca3af'
+                }
+                autoCapitalize="none"
+                className="
+                  rounded-xl px-4 py-4
+                  bg-gray-200 text-lg font-semibold
+                  dark:bg-neutral-700 dark:text-neutral-300
+                "
+              />
             )}
+
+            <Pressable
+              disabled={
+                isSavingAnswer ||
+                (isCorrect === null &&
+                  (currentQuestion.type === 'multiple_choice'
+                    ? selectedAnswerId === null
+                    : !identificationInput.trim()))
+              }
+              onPress={() => {
+                if (isCorrect !== null) {
+                  resultSheet.open();
+                } else {
+                  handleSubmitAnswer();
+                }
+              }}
+              className="
+                rounded-xl p-4
+                bg-gray-600 active:bg-gray-500 disabled:bg-gray-400
+                dark:disabled:bg-gray-500 
+              "
+            >
+              <Text className="text-center text-lg font-semibold text-white">
+                {isCorrect !== null ? 'Continue' : 'Submit'}
+              </Text>
+            </Pressable>
           </View>
         </KeyboardStickyView>
       )}

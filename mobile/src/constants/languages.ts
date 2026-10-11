@@ -1,6 +1,5 @@
 export const LANGUAGES = [
   'javascript',
-  'typescript',
   'python',
   'php',
   'java',

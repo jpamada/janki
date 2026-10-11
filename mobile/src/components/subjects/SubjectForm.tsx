@@ -90,7 +90,7 @@ export default function SubjectForm({
               <CustomPicker
                 title="Categories"
                 placeholder='Select Category'
-                className='py-4 justify-between font-normal dark:bg-neutral-800'
+                className='py-4 justify-between gap-2 font-normal dark:bg-neutral-800'
                 contentContainerClassName='text-lg'
                 selectedValue={value}
                 onValueChange={onChange}

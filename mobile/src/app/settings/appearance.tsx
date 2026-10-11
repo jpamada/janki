@@ -43,7 +43,7 @@ export default function AppearanceScreen() {
                 Theme
               </Text>
               <Text className="text-gray-400 text-sm">
-                Change the theme of the app.
+                Customize the app&apos;s appearance.
               </Text>
             </View>
           </View>
@@ -152,7 +152,7 @@ export default function AppearanceScreen() {
                   Case Sensitive
                 </Text>
                 <Text className="text-gray-400 text-sm">
-                  Enable to make answers more accurate.
+                  Match uppercase and lowercase letters.
                 </Text>
               </View>
             </View>

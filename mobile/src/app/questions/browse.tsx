@@ -1,6 +1,6 @@
 import { deleteQuestion, getQuestionsByLessonId } from "@/repositories/question.repository";
 import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSnackbar } from "@/contexts/SnackbarContext";
@@ -15,6 +15,7 @@ import BottomSheet from "@/components/shared/BottomSheet";
 import Header from "@/components/shared/Header";
 import EmptyList from "@/components/shared/EmptyList";
 import Fab from "@/components/shared/fabs/Fab";
+import { PAGE_SIZE } from "@/constants/pagination";
 
 export default function BrowseQuestionScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
@@ -28,11 +29,29 @@ export default function BrowseQuestionScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
 
-  const { data: questions = [], isLoading, error } = useQuery({
+  const {
+    data,
+    error,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["questions", lessonId],
-    queryFn: () => getQuestionsByLessonId(lessonId),
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) =>
+      getQuestionsByLessonId(lessonId, PAGE_SIZE, pageParam),
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      if (lastPage?.length < PAGE_SIZE) return undefined;
+      return lastPageParam + PAGE_SIZE;
+    },
     enabled: !!lessonId,
   });
+
+  const questions = useMemo(
+    () => data?.pages.flat() ?? [],
+    [data],
+  );
 
   const selectedQuestion = useMemo(() => {
     return questions.find(
@@ -92,13 +111,13 @@ export default function BrowseQuestionScreen() {
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="small" color="#4b5563" />
           </View>
+          
+        ) : error ? (
+        <View className="flex-1 justify-center items-center">
+          <Text>Failed to load questions</Text>
+        </View>
 
-        ): error ? (
-          <View className="flex-1 justify-center items-center">
-            <Text>Failed to load questions</Text>
-          </View>
-
-        ): questions.length > 0 ? (
+        ): (
           <FlatList
             data={questions}
             className="px-6 py-2"
@@ -106,21 +125,35 @@ export default function BrowseQuestionScreen() {
             contentContainerClassName="gap-2 pb-6"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
-              paddingBottom: 120
+              paddingBottom: 120,
+            }}
+            onEndReachedThreshold={0.5}
+            onEndReached={() => {
+              if (hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
+              }
             }}
             renderItem={({ item }) => (
               <QuestionItem
                 id={item.id}
-                key={item.id}
                 type={item.type}
                 lessonId={item.lessonId}
                 question={item.question}
                 onLongPress={handleQuestionLongPress}
               />
             )}
+            ListEmptyComponent={
+              <EmptyList message="No questions yet" />
+            }
+            ListFooterComponent={
+              isFetchingNextPage ? (
+                <View className="py-4">
+                  <ActivityIndicator size="small" color="#4b5563" />
+                </View>
+              ) : null
+            }
           />
-
-        ): (<EmptyList message="No questions yet" />)}
+        )}
 
         <Fab setVisible={() => router.push({
           pathname: `/questions/create`,

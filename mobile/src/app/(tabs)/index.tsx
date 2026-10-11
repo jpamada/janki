@@ -2,7 +2,7 @@ import { createLesson, deleteLesson, swapLessonPosition, toggleLessonFavorite, u
 import { createSubject, deleteSubject, getSubjectsByCategory, updateSubject } from "@/repositories/subject.repository";
 import { FolderClosed, Lightbulb, ListOrdered, PenLine, Plus, SearchX, StarMinus, StarPlus, Trash2 } from "lucide-react-native";
 import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCategories } from "@/repositories/category.repository";
 import { SubjectFormData } from "@/schemas/subject.schema";
 import { useSnackbar } from "@/contexts/SnackbarContext";
@@ -66,6 +66,7 @@ export default function HomeScreen() {
   const { data: subjects = [], isPending: subjectsPending, error } = useQuery({
     queryKey: ["subjects", activeCategoryId],
     queryFn: () => getSubjectsByCategory(activeCategoryId),
+    placeholderData: keepPreviousData,
     enabled: !categoriesPending && !defaultPending,
   });
 
