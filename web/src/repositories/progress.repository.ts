@@ -46,7 +46,7 @@ export async function getDueQuestionIds(
   return dueQuestionIds;
 }
 
-export async function recordCorrectAnswer(
+export async function recordCorrectAnswerProgress(
   questionId: string, 
   interval: ReviewInterval
 ) {
@@ -79,7 +79,7 @@ export async function recordCorrectAnswer(
   }
 }
 
-export async function recordIncorrectAnswer(
+export async function recordIncorrectAnswerProgress(
   questionId: string
 ) {
   const now = new Date();

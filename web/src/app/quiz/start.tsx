@@ -1,6 +1,6 @@
 import { updateCaseSensitivity, updateFontSize, updateShowCorrectAnswer, updateShowExplanation, updateSoundEnabled, updateTextAlign } from '@/repositories/settings.repository';
 import { AArrowUp, BookCheck, CaseSensitive, FileQuestionMark, Lightbulb, LogOut, Settings, TextAlignStart, Trophy, Volume2 } from 'lucide-react-native';
-import { getDueQuestionIds, recordCorrectAnswer, recordIncorrectAnswer, resetProgressForQuestions } from '@/repositories/progress.repository';
+import { getDueQuestionIds, recordCorrectAnswerProgress, recordIncorrectAnswerProgress, resetProgressForQuestions } from '@/repositories/progress.repository';
 import { Animated, ActivityIndicator, Modal, Pressable, Text, TextInput, View, Image, Switch } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -109,7 +109,7 @@ export default function QuizStartScreen() {
     mutationFn: ({ questionId, interval }: { 
       questionId: string; 
       interval: ReviewInterval 
-    }) => recordCorrectAnswer(questionId, interval),
+    }) => recordCorrectAnswerProgress(questionId, interval),
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ 
@@ -132,7 +132,7 @@ export default function QuizStartScreen() {
   });
 
   const recordIncorrectMutation = useMutation({
-    mutationFn: (questionId: string) => recordIncorrectAnswer(questionId),
+    mutationFn: (questionId: string) => recordIncorrectAnswerProgress(questionId),
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ 

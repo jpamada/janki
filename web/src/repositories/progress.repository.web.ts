@@ -43,7 +43,7 @@ export async function getDueQuestionIds() {
     .map((question) => question.id);
 }
 
-export async function recordCorrectAnswer(
+export async function recordCorrectAnswerProgress(
   questionId: string,
 ) {
   const progress =
@@ -59,7 +59,7 @@ export async function recordCorrectAnswer(
   progress.nextAttemptDate = now;
 }
 
-export async function recordIncorrectAnswer(
+export async function recordIncorrectAnswerProgress(
   questionId: string,
 ) {
   const progress =

@@ -1,15 +1,16 @@
 import { EllipsisVertical, ImageOff, ImagePlus, CodeXml, Code, Trash2, ListMinus, ListPlus } from 'lucide-react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
+import { NativeStackNavigationProp, useFocusEffect, useNavigation } from 'expo-router';
 import { type WebViewAPI, CodeEditor } from '@actualwave/react-native-codeditor';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { QuestionFormData, questionSchema } from '@/schemas/question.schema';
-import { Image, InteractionManager, Pressable, Text, TextInput, View  } from 'react-native';
+import { Image, Pressable, Text, TextInput, View  } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ParamListBase } from 'expo-router/build/react-navigation';
 import { setEditorLanguage } from '@/providers/setEditorLanguage';
-import { getEditorHeight } from '@/helpers/codeditor.helper';
 import { useBottomSheet } from '@/hooks/UseBottomSheet';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { lazy, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { LANGUAGES } from '@/constants/languages';
 import { useColorScheme } from 'nativewind';
 
@@ -18,12 +19,6 @@ import CustomPicker from '../shared/CustomPicker';
 import BottomSheet from '../shared/BottomSheet';
 import Header from '../shared/Header';
 import AnswerRows from './AnswerRows';
-import { NativeStackNavigationProp, useFocusEffect, useNavigation } from 'expo-router';
-import { ParamListBase } from 'expo-router/build/react-navigation';
-
-// const CodeEditor = lazy(() => import (
-//   '@actualwave/react-native-codeditor'
-// ));
 
 type QuestionFormProps = {
   onCreateSuccess?: boolean;
@@ -68,6 +63,7 @@ export default function QuestionForm({
   const questionSheet = useBottomSheet();
   const insets = useSafeAreaInsets();
 
+  const codeRef = useRef(defaultValues.code ?? "");
   const [editorReady, setEditorReady] = useState(false);
   const [codeVisible, setCodeVisible] = useState(!!defaultValues?.code?.trim());
   const [imageVisible, setImageVisible] = useState(!!defaultValues?.image?.trim());
@@ -154,6 +150,7 @@ export default function QuestionForm({
 
   const handleFormSubmit = async (data: QuestionFormData) => {
     await onSubmit(data);
+    codeRef.current = "";
     setImageVisible(false);
     setCodeVisible(!!data.code);
 
@@ -175,7 +172,7 @@ export default function QuestionForm({
         ],
     });
   };
-
+  
   useFocusEffect(
     useCallback(() => {
       setEditorReady(false);
@@ -196,6 +193,8 @@ export default function QuestionForm({
       };
     }, [navigation])
   );
+
+  const initialCode = "\n".repeat(13);
   
   return (
     <View className="flex-1">
@@ -218,6 +217,7 @@ export default function QuestionForm({
         extraKeyboardSpace={12}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        nestedScrollEnabled={true}
         className="flex-1"
       >
         <View className='gap-4 bg-white rounded-xl shadow-lg p-4 m-4 pb-8 dark:bg-neutral-800'>
@@ -321,47 +321,46 @@ export default function QuestionForm({
                 />
               </View>
 
-              <Controller
-                name="code"
-                control={control}
-                render={({ field: { onChange, value } }) => (
-                  <View 
-                    style={{ 
-                      height: getEditorHeight(value ?? ''), 
-                      borderRadius: 12,
-                      overflow: 'hidden' 
+              <View
+                style={{
+                  height: 200,
+                  borderRadius: 12,
+                  overflow: "hidden",
+                }}
+                className="bg-gray-100 dark:bg-neutral-800"
+              >
+                {editorReady ? (
+                  <CodeEditor
+                    content={codeRef.current || initialCode}
+                    language="javascript"
+                    theme={editorTheme}
+                    backgroundColor={editorBackgroundColor}
+                    onInitialized={async (api) => {
+                      editorApiRef.current = api;
+                      if (defaultValues.language) {
+                        await setEditorLanguage(api, defaultValues.language);
+                      }
                     }}
-                    className='bg-gray-100 dark:bg-neutral-800'
-                  >
-                    {editorReady ? (
-                      <CodeEditor
-                        content={value ?? ""}
-                        language="javascript"
-                        theme={editorTheme}
-                        backgroundColor={
-                          editorBackgroundColor
-                        }
-                        onInitialized={async (api) => {
-                          editorApiRef.current = api;
-                          if (defaultValues.language) {
-                            await setEditorLanguage(api, defaultValues.language);
-                          }
-                        }}
-                        onContentUpdate={onChange}
-                        onHistorySizeUpdate={() => {}}
-                        onError={(err) => console.error("[editor]", err)}
-                        onLog={(...args) => console.log("[editor]", ...args)}
-                      />
-                    ) : (
-                      <View className="absolute inset-0 justify-center items-center bg-gray-100 rounded-xl dark:bg-[#2B2B2B]">
-                        <Text className="text-[12px] text-neutral-900 dark:text-neutral-300">
-                          Initializing, please wait...
-                        </Text>
-                      </View>
-                    )}
+                    onContentUpdate={(updatedContent: string) => {
+                      codeRef.current = updatedContent;
+                      setValue("code", updatedContent, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                    }}
+                    onHistorySizeUpdate={() => {}}
+                    onError={(err) => console.error("[editor]", err)}
+                    onLog={(...args) => console.log("[editor]", ...args)}
+                  />
+                  
+                ) : (
+                  <View className="absolute inset-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-[#2B2B2B]">
+                    <Text className="text-[12px] text-neutral-900 dark:text-neutral-300">
+                      Initializing, please wait...
+                    </Text>
                   </View>
                 )}
-              />
+              </View>
             </View>
           )}
 

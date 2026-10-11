@@ -80,7 +80,7 @@ export default function SubjectItem({
                 className="flex-row items-center justify-between gap-2 px-2 py-2 active:bg-gray-100"
               >
                 <View className="flex flex-col gap-1">
-                  <View className="flex flex-row items-center gap-2">
+                  <View className="flex flex-row items-center ">
                     <Pressable
                       onPress={(event) => {
                         event.stopPropagation();

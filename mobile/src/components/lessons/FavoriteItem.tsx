@@ -62,7 +62,7 @@ export default function FavoriteItem({
         <Text
           className="
             flex-1 
-            text-gray-700 text-sm font-semibold 
+            text-gray-400 text-sm font-semibold 
             dark:text-neutral-300
           "
           numberOfLines={1}

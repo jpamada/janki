@@ -89,7 +89,7 @@ export default function CreateQuestionScreen() {
           language: null,
           lessonId: lessonId,
           type: "multiple_choice",
-          explanation: "",
+          explanation: null,
           answers: [
             { answer: "", isCorrect: false },
             { answer: "", isCorrect: false },
