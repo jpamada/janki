@@ -619,7 +619,7 @@ const handleContinueIncorrect = () => {
                       Explanation
                     </Text>
 
-                    <Text className="mt-2 text-lg font-semibold text-gray-200 dark:text-neutral-300">
+                    <Text className="mt-2 text-lg font-semibold text-gray-800 dark:text-neutral-300">
                       {currentQuestion.explanation}
                     </Text>
                   </View>

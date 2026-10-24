@@ -5,6 +5,7 @@ const config: ExpoConfig = {
   name: "Janki",
   slug: "janki",
   version: "1.0.0",
+  owner: "jpamada.me",
   orientation: "portrait",
 
   icon: "./assets/images/janki-app-icon.png",
@@ -72,7 +73,7 @@ const config: ExpoConfig = {
   extra: {
     router: {},
     eas: {
-      projectId: "75aec871-0f6f-4482-b9f1-5f318cf4fa7a",
+      projectId: "ce4fde39-4df1-46bc-a3f4-ebc889c53765"
     },
   },
 };
