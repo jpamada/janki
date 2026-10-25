@@ -1,56 +1,22 @@
-# Welcome to your Expo app 👋
+# Janki Learning App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Inspired by Anki and Duolingo. Janki is a learning app that allows users to create their own questions that can handle multiple choices, identifications, images, and code snippets with spaced-repetition.
 
-## Get started
+## Screenshots
 
-1. Install dependencies
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/8fa971b9-1c86-44a2-a256-002982d51de9" width="220" alt="Janki Learning App screenshot 1" />
+  <img src="https://github.com/user-attachments/assets/779b0f9c-1013-438c-81e6-528c40477dc9" width="220" alt="Janki Learning App screenshot 2" />
+  <img src="https://github.com/user-attachments/assets/4bd612c4-fb3b-4604-a16e-c2a26952cbe3" width="220" alt="Janki Learning App screenshot 3" />
+</p>
 
-   ```bash
-   npm install
-   ```
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/50bc2cf8-3cbb-4f76-a110-c418d2e1d239" width="220" alt="Janki Learning App screenshot 4" />
+  <img src="https://github.com/user-attachments/assets/56464843-94c8-4c2e-9bb1-9f32b5b605c9" width="220" alt="Janki Learning App screenshot 5" />
+  <img src="https://github.com/user-attachments/assets/251b60d0-7dce-4450-a070-417d31bbdb0d" width="220" alt="Janki Learning App screenshot 6" />
+</p>
 
-2. Start the app
+## Download and Install
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Get the latest version of Janki Learning App. </br>
+[**Download the Latest Release**](https://github.com/YOUR-USERNAME/YOUR-REPOSITORY/releases/latest)
